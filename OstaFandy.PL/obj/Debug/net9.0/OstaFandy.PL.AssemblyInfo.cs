@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("OstaFandy.PL")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a42a6c53824a5661c2052bfeb705fe357f7ee106")]
 [assembly: System.Reflection.AssemblyProductAttribute("OstaFandy.PL")]
 [assembly: System.Reflection.AssemblyTitleAttribute("OstaFandy.PL")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
