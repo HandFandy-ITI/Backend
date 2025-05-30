@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35707.178
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OstaFandy.DAL", "OstaFandy.DAL\OstaFandy.DAL.csproj", "{ED4E712F-9B82-481F-AF0A-B16846611CF3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OstaFandy.PL", "OstaFandy.PL\OstaFandy.PL.csproj", "{03ADBA38-900B-4FA8-8CEE-2C2DD9E371CC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ED4E712F-9B82-481F-AF0A-B16846611CF3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ED4E712F-9B82-481F-AF0A-B16846611CF3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ED4E712F-9B82-481F-AF0A-B16846611CF3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ED4E712F-9B82-481F-AF0A-B16846611CF3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{03ADBA38-900B-4FA8-8CEE-2C2DD9E371CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{03ADBA38-900B-4FA8-8CEE-2C2DD9E371CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{03ADBA38-900B-4FA8-8CEE-2C2DD9E371CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{03ADBA38-900B-4FA8-8CEE-2C2DD9E371CC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

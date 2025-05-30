@@ -1,0 +1,12 @@
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\bin\Debug\net9.0\OstaFandy.DAL.deps.json
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\bin\Debug\net9.0\OstaFandy.DAL.dll
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\bin\Debug\net9.0\OstaFandy.DAL.pdb
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\obj\Debug\net9.0\OstaFandy.DAL.csproj.AssemblyReference.cache
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\obj\Debug\net9.0\OstaFandy.DAL.GeneratedMSBuildEditorConfig.editorconfig
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\obj\Debug\net9.0\OstaFandy.DAL.AssemblyInfoInputs.cache
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\obj\Debug\net9.0\OstaFandy.DAL.AssemblyInfo.cs
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\obj\Debug\net9.0\OstaFandy.DAL.csproj.CoreCompileInputs.cache
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\obj\Debug\net9.0\OstaFandy.DAL.dll
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\obj\Debug\net9.0\refint\OstaFandy.DAL.dll
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\obj\Debug\net9.0\OstaFandy.DAL.pdb
+E:\Projects\Graduation\Code\Backend\OstaFandy.DAL\obj\Debug\net9.0\ref\OstaFandy.DAL.dll
