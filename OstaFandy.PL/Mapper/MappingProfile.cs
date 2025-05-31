@@ -10,6 +10,7 @@ namespace OstaFandy.PL.Mapper
         {
             CreateMap<User,UserDto>().ReverseMap();
             CreateMap<UserType, UserTypeDto>().ReverseMap();
+            CreateMap<User, UserRegesterDto>().ReverseMap();
         }
 
     }

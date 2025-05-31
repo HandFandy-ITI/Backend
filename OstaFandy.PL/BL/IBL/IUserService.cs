@@ -6,5 +6,9 @@ namespace OstaFandy.PL.BL.IBL
     {
         public UserDto? GetUserByEmail(string Email);
 
+        public int RegisterUser(UserRegesterDto userDto);
+
+        public UserDto? GetById(int id);
+
     }
 }

@@ -10,6 +10,7 @@ namespace OstaFandy.DAL.Repos.IRepos
     public interface IUnitOfWork
     {
         public IUserRepo UserRepo { get; }
+        IUserTypeRepo UserTypeRepo { get; }
 
 
 

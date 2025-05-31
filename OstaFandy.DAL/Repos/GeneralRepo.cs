@@ -80,7 +80,7 @@ namespace OstaFandy.DAL.Repos
                     query = query.Include(prop);
                 }
             }
-            return query.FirstOrDefault() ?? throw new InvalidOperationException($"No matching entity of type {typeof(T).Name} found.");
+            return query.FirstOrDefault();
         }
         public void Update(T entity)
         {
