@@ -1,5 +1,7 @@
 
+using System.Text;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
@@ -12,6 +14,7 @@ namespace OstaFandy.PL
     {
         public static void Main(string[] args)
         {
+            string ForCore = "";
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.  
@@ -32,7 +35,22 @@ namespace OstaFandy.PL
             #region RegisterServices
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService,UserService>();
+            builder.Services.AddScoped<IJWTService, JWTService>();
 
+            #endregion
+
+            //JWT Authentication
+            #region JWTAuthentication
+            builder.Services.AddAuthentication(op => op.DefaultAuthenticateScheme = "myschema")
+                .AddJwtBearer("myschema", option => { 
+                    var key = builder.Configuration.GetSection("Jwt");
+                    option.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key["Key"])),
+                        ValidateIssuer = false,
+                        ValidateAudience = false,
+                    };
+                });
             #endregion
 
             var app = builder.Build();
@@ -48,6 +66,8 @@ namespace OstaFandy.PL
             app.UseHttpsRedirection();
 
             app.UseAuthorization();
+
+            app.UseCors(ForCore);
 
             app.MapControllers();
 
