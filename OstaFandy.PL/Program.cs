@@ -7,6 +7,7 @@ using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
+using OstaFandy.PL.General;
 
 namespace OstaFandy.PL
 {
@@ -40,7 +41,7 @@ namespace OstaFandy.PL
             #endregion
 
             //JWT Authentication
-            #region JWTAuthentication
+            #region JWTAuth
             builder.Services.AddAuthentication(op => op.DefaultAuthenticateScheme = "myschema")
                 .AddJwtBearer("myschema", option => { 
                     var key = builder.Configuration.GetSection("Jwt");
@@ -51,6 +52,14 @@ namespace OstaFandy.PL
                         ValidateAudience = false,
                     };
                 });
+            builder.Services.AddAuthorization();
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("Admin", policy => policy.RequireClaim("UserType", General.UserType.Admin));
+                options.AddPolicy("Customer", policy => policy.RequireClaim("UserType", General.UserType.Customer));
+                options.AddPolicy("HandyMan", policy => policy.RequireClaim("UserType", General.UserType.Handyman));
+            });
             #endregion
 
             var app = builder.Build();
@@ -65,6 +74,7 @@ namespace OstaFandy.PL
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseCors(ForCore);

@@ -59,7 +59,7 @@ namespace OstaFandy.PL.Controllers
             else if (res > 0)
             {
                 var user = _userService.GetById(res);
-                
+
                 var token = _jwtService.GeneratedToken(user);
                 return Ok(new ResponseDto<string>
                 {
@@ -83,6 +83,41 @@ namespace OstaFandy.PL.Controllers
             }
         }
 
+        [HttpPost("login")]
+        public IActionResult Login([FromBody] UserLoginDto userLoginDto)
+        {
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "Invalid input",
+                    Data = string.Join(", ", errors),
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            var user = _userService.GetUserByEmail(userLoginDto.Email);
+            if (user == null || !BCrypt.Net.BCrypt.Verify(userLoginDto.Password, user.PasswordHash))
+            {
+                return Unauthorized(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "Invalid email or password",
+                    Data = null,
+                    StatusCode = StatusCodes.Status401Unauthorized
+                });
+            }
+            var token = _jwtService.GeneratedToken(user);
+            return Ok(new ResponseDto<string>
+            {
+                IsSuccess = true,
+                Message = "Login successful",
+                Data = token,
+                StatusCode = StatusCodes.Status200OK
+            });
 
+
+        }
     }
 }

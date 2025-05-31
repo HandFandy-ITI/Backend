@@ -8,9 +8,12 @@ namespace OstaFandy.PL.Mapper
     {
         public MappingProfile()
         {
+            #region User
             CreateMap<User,UserDto>().ReverseMap();
             CreateMap<UserType, UserTypeDto>().ReverseMap();
             CreateMap<User, UserRegesterDto>().ReverseMap();
+            CreateMap<User, UserLoginDto>().ReverseMap();
+            #endregion
         }
 
     }
