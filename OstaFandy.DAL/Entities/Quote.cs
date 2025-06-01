@@ -18,6 +18,8 @@ public partial class Quote
     [Column(TypeName = "decimal(10, 2)")]
     public decimal Price { get; set; }
 
+    public int? EstimatedMinutes { get; set; }
+
     [Required]
     [StringLength(500)]
     public string Notes { get; set; }
