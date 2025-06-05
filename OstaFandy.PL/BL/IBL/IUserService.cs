@@ -1,4 +1,5 @@
-﻿using OstaFandy.PL.DTOs;
+﻿using OstaFandy.DAL.Entities;
+using OstaFandy.PL.DTOs;
 
 namespace OstaFandy.PL.BL.IBL
 {
@@ -10,5 +11,6 @@ namespace OstaFandy.PL.BL.IBL
 
         public UserDto? GetById(int id);
 
+        public List<User> GetAlluser();
     }
 }

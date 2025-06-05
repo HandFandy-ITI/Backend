@@ -20,13 +20,17 @@ namespace OstaFandy.DAL.Repos
         }
         //add repos here
         private IUserRepo _userRepo;
+
         private IUserTypeRepo _userTypeRepo;
+        private IHandyManRepo _handymanRepo;
+
 
 
         // This propertyes initializes the repos if it hasn't been initialized yet
         public IUserRepo UserRepo => _userRepo??=new UserRepo(_db);
         public IUserTypeRepo UserTypeRepo => _userTypeRepo ??= new UserTypeRepo(_db);
 
+        public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
 
         public int Save()
         {

@@ -37,6 +37,8 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJWTService, JWTService>();
+            builder.Services.AddScoped<IUserService,UserService>();
+            builder.Services.AddScoped<IHandyManService,HandyManService>();
 
             #endregion
 
