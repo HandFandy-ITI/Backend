@@ -32,6 +32,7 @@ namespace OstaFandy.PL
             #region RegisterServices
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService,UserService>();
+            builder.Services.AddScoped<IHandyManService,HandyManService>();
 
             #endregion
 

@@ -18,6 +18,28 @@ namespace OstaFandy.PL.BL
             _logger = logger;
             _mapper = mapper;
         }
+
+        public List<User> GetAlluser()
+        {
+            try
+            {
+                var data = _unitOfWork.UserRepo.GetAll().ToList();
+                if (data == null)
+                {
+                    return null;
+                }
+                return data;
+
+            }
+            catch (Exception ex)
+            {
+
+                _logger.LogError(ex, "error occured while retreiving all users");
+                return null;
+
+            }
+        }
+
         public UserDto? GetUserByEmail(string Email)
         {
             try
