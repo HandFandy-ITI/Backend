@@ -1,13 +1,9 @@
-
-using System.Text;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
-using OstaFandy.PL.General;
 
 namespace OstaFandy.PL
 {
@@ -15,7 +11,6 @@ namespace OstaFandy.PL
     {
         public static void Main(string[] args)
         {
-            string ForCore = "";
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.  
@@ -35,32 +30,16 @@ namespace OstaFandy.PL
             // Register your services here
             #region RegisterServices
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-            builder.Services.AddScoped<IUserService,UserService>();
-            builder.Services.AddScoped<IJWTService, JWTService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
             #endregion
 
-            //JWT Authentication
-            #region JWTAuth
-            builder.Services.AddAuthentication(op => op.DefaultAuthenticateScheme = "myschema")
-                .AddJwtBearer("myschema", option => { 
-                    var key = builder.Configuration.GetSection("Jwt");
-                    option.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key["Key"])),
-                        ValidateIssuer = false,
-                        ValidateAudience = false,
-                    };
-                });
-            builder.Services.AddAuthorization();
+            #region PaymentServices
+            builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
+            builder.Services.AddScoped<IPaymentService, PaymentService>();
 
-            builder.Services.AddAuthorization(options =>
-            {
-                options.AddPolicy("Admin", policy => policy.RequireClaim("UserType", General.UserType.Admin));
-                options.AddPolicy("Customer", policy => policy.RequireClaim("UserType", General.UserType.Customer));
-                options.AddPolicy("HandyMan", policy => policy.RequireClaim("UserType", General.UserType.Handyman));
-            });
             #endregion
+
 
             var app = builder.Build();
 
@@ -74,10 +53,7 @@ namespace OstaFandy.PL
 
             app.UseHttpsRedirection();
 
-            app.UseAuthentication();
             app.UseAuthorization();
-
-            app.UseCors(ForCore);
 
             app.MapControllers();
 

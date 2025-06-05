@@ -32,4 +32,20 @@
         Used = 1,
         NotUsed = 0
     }
+
+    public enum PaymentStatus
+    {
+        Pending,
+        Paid,
+        Failed,
+        Refunded
+    }
+
+    public enum PaymentMethod
+    {
+        Cash,
+        Stripe
+    }
+
+
 }
