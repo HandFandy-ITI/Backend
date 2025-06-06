@@ -23,7 +23,13 @@ namespace OstaFandy.PL.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return BadRequest(ModelState);
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "Invalid input",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
             }
             var res = _userService.RegisterUser(registerCustomerDto);
             if (res == 0)
@@ -112,7 +118,7 @@ namespace OstaFandy.PL.Controllers
             return Ok(new ResponseDto<string>
             {
                 IsSuccess = true,
-                Message = "Login successful",
+                Message = "Login Successful",
                 Data = token,
                 StatusCode = StatusCodes.Status200OK
             });

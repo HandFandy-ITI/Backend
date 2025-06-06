@@ -15,7 +15,7 @@ namespace OstaFandy.PL
     {
         public static void Main(string[] args)
         {
-            string ForCore = "";
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.  
@@ -70,6 +70,18 @@ namespace OstaFandy.PL
             });
             #endregion
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:4200")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.  
@@ -82,10 +94,12 @@ namespace OstaFandy.PL
 
             app.UseHttpsRedirection();
 
+            app.UseCors(MyAllowSpecificOrigins);
+
+
             app.UseAuthentication();
             app.UseAuthorization();
 
-            app.UseCors(ForCore);
 
             app.MapControllers();
 
