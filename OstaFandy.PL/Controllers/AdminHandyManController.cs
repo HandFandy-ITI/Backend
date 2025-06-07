@@ -16,6 +16,7 @@ namespace OstaFandy.PL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    ///
     public class AdminHandyManController : ControllerBase
     {
         private readonly IMapper _map;
