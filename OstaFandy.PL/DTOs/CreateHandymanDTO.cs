@@ -2,6 +2,7 @@
 {
     public class CreateHandymanDTO
     {
+
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public string Email { get; set; }
@@ -22,5 +23,6 @@
         public string? DefaultAddressCity { get; set; }
         public decimal? DefaultAddressLatitude { get; set; }
         public decimal? DefaultAddressLongitude { get; set; }
+
     }
 }

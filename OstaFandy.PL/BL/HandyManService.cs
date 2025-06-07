@@ -248,7 +248,6 @@ namespace OstaFandy.PL.BL
                 throw;
             }
         }
-
     }
 }
 

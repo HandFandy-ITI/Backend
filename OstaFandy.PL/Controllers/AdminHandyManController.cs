@@ -6,6 +6,9 @@ using Microsoft.EntityFrameworkCore;
 using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 
@@ -18,17 +21,22 @@ namespace OstaFandy.PL.Controllers
         private readonly IMapper _map;
         private readonly IHandyManService _handymanService;
         private readonly IUserService _userservice;
+
         private readonly ILogger<HandyManService> _logger;
 
+ 
+
         public AdminHandyManController(IHandyManService HandyManService, IUserService userService, IMapper map, ILogger<HandyManService> logger)
+
         {
             _map = map;
             _handymanService = HandyManService;
             _userservice = userService;
+
             _logger = logger;
         }
         [HttpGet]
-        [EndpointDescription("api/AdminHandyMan/getall")]
+        [EndpointDescription("AdminHandyMan/getall")]
         [EndpointSummary("return all handymen")]
         public IActionResult GetAll(string searchString = "", int pageNumber = 1, int pageSize = 5)
         {
@@ -91,6 +99,8 @@ namespace OstaFandy.PL.Controllers
         }
 
         [HttpGet("{id}")]
+        [EndpointDescription("api/AdminHandyMan/GetHandymanById")]
+        [EndpointSummary("get handyman by id")]
         public IActionResult GetHandymanById(int id)
         {
             try
@@ -172,7 +182,6 @@ namespace OstaFandy.PL.Controllers
                 return StatusCode(500, "An unexpected error occurred while updating the handyman.");
             }
         }
-
 
     }
 }
