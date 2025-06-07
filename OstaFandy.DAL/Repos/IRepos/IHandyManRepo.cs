@@ -9,5 +9,6 @@ namespace OstaFandy.DAL.Repos.IRepos
 {
     public interface IHandyManRepo : IGeneralRepo<Handyman>
     {
+        public bool checkUniqueNationalId(string nationalid);
     }
 }

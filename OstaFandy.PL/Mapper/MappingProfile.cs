@@ -81,6 +81,35 @@ namespace OstaFandy.PL.Mapper
                     });
             }
 
+
+            //CreateMap<EditHandymanDTO, Handyman>()
+            //    .ForMember(dest => dest.User, opt => opt.Ignore())
+            //    .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+            //    .AfterMap((src, dest) =>
+            //    {
+            //        // Update existing User properties
+            //        if (dest.User != null)
+            //        {
+            //            dest.User.FirstName = src.FirstName;
+            //            dest.User.LastName = src.LastName;
+            //            dest.User.Email = src.Email;
+            //            dest.User.Phone = src.Phone;
+            //        }
+            //    });
+            // createmap<src, dest>
+            CreateMap<EditHandymanDTO, Handyman>()
+                .AfterMap((src, dest) =>
+                {
+                    if(dest.User != null)
+                    {
+                        dest.User.FirstName = src.FirstName;
+                        dest.User.LastName = src.LastName;
+                        dest.User.Email = src.Email;
+                        dest.User.Phone = src.Phone;
+                        dest.User.UpdatedAt = DateTime.UtcNow;
+                    }
+                })
+                .ReverseMap();
         }
     }
 }
