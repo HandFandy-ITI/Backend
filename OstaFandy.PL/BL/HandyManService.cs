@@ -122,7 +122,7 @@ namespace OstaFandy.PL.BL
 
                 // Create Handyman entity
                 //var handyman = _mapper.Map<Handyman>(createHandymanDto);
-                //handyman.UserId = user.Id; // This is the primary key for Handyman
+                //handyman.UserId = user.Id; 
                 // Create default address if provided
                 if (!string.IsNullOrEmpty(createHandymanDto.DefaultAddressPlace))
                 {
@@ -140,23 +140,15 @@ namespace OstaFandy.PL.BL
                     };
 
                     _unitOfWork.AddressRepo.Insert(defaultAddress);
-                    _unitOfWork.Save(); // Save to get address.Id
-
-                    // Update handyman with address ID
+                    _unitOfWork.Save();  
                     handyman.DefaultAddressId = defaultAddress.Id;
                     _unitOfWork.HandyManRepo.Update(handyman);
                     _unitOfWork.Save();
-                }
-                // Add handyman to database
-                //_unitOfWork.HandyManRepo.Insert(handyman);
-                //  _unitOfWork.Save();
+                } 
 
-
-
-                // FIXED: Get the created handyman using the correct ID
-                var createdHandyman = _unitOfWork.HandyManRepo.GetById(user.Id); // user.Id is the UserId (PK) for Handyman
-
-                // Map to DTO and return
+ 
+                var createdHandyman = _unitOfWork.HandyManRepo.GetById(user.Id); 
+ 
                 return _mapper.Map<AdminHandyManDTO>(createdHandyman);
             }
             catch (Exception ex)
@@ -170,12 +162,11 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                // Get handyman by UserId (which is the primary key)
-                var handyman = _unitOfWork.HandyManRepo.GetById(id);
+                 var handyman = _unitOfWork.HandyManRepo.GetById(id);
 
                 if (handyman == null)
                 {
-                    return null; // Return null so controller can return NotFound
+                    return null; 
                 }
 
                 // Map to DTO and return
