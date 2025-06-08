@@ -19,5 +19,7 @@ namespace OstaFandy.DAL.Repos
         {
             return _db.Handymen.FirstOrDefault(a => a.NationalId == nationalid) == null;
         }
+
+
     }
 }
