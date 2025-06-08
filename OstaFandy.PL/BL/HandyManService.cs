@@ -65,6 +65,42 @@ namespace OstaFandy.PL.BL
                 };
             }
         }
+
+        public List<AdminHandyManDTO> GetAllPendingHandymen()
+        {
+            try
+            {
+                var pendingHandymen = _unitOfWork.HandyManRepo.GetAll(h => h.Status == "Pending", "User,Specialization,DefaultAddress,BlockDates,JobAssignments").ToList();
+                return _mapper.Map<List<AdminHandyManDTO>>(pendingHandymen);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while getting all pending handymen");
+                return new List<AdminHandyManDTO>();
+            }
+        }
+        public async Task<bool> UpdateHandymanStatusById(int userId, string status)
+        {
+            try
+            {
+                var handyman = _unitOfWork.HandyManRepo.GetById(userId);
+                if (handyman == null)
+                {
+                    _logger.LogWarning($"Handyman with ID {userId} not found");
+                    return false;
+                }
+                handyman.Status = status;
+                _unitOfWork.HandyManRepo.Update(handyman);
+                _unitOfWork.Save();
+                _logger.LogInformation($"Handyman {userId} status updated to {status}");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while updating handyman status for UserId: {userId}");
+                return false;
+            }
+        }
     }
 }
 
