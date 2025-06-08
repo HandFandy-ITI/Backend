@@ -9,6 +9,14 @@ namespace OstaFandy.PL.Mapper
         public MappingProfile()
         {
             //dd
+
+
+            #region service catalog
+            CreateMap<Category, CategoryDTO>().ReverseMap();
+            CreateMap<Service, ServiceDTO>().ReverseMap();
+            #endregion
+
+
             #region User
             CreateMap<User, UserDto>().ReverseMap();
             CreateMap<UserType, UserTypeDto>().ReverseMap();
@@ -32,6 +40,8 @@ namespace OstaFandy.PL.Mapper
             #endregion
 
             {
+              
+
                 CreateMap<User, UserDto>().ReverseMap();
                 CreateMap<UserType, UserTypeDto>().ReverseMap();
                 CreateMap<Address, AddressDTO>().ReverseMap();

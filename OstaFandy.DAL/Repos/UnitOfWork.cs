@@ -24,7 +24,8 @@ namespace OstaFandy.DAL.Repos
         private IUserTypeRepo _userTypeRepo;
         private IHandyManRepo _handymanRepo;
         private IAddressRepo _addressRepo;
-
+        private ICategoryRepo _categoryRepo;
+        private IServiceRepo _serviceRepo;
 
 
         // This propertyes initializes the repos if it hasn't been initialized yet
@@ -34,6 +35,9 @@ namespace OstaFandy.DAL.Repos
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
 
         public IAddressRepo AddressRepo => _addressRepo ?? new AddressRepo(_db);
+
+        public ICategoryRepo CategoryRepo => _categoryRepo ??= new CategoryRepo(_db);
+        public IServiceRepo ServiceRepo => _serviceRepo ??= new ServiceRepo(_db);
 
         public int Save()
         {

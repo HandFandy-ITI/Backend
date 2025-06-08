@@ -14,7 +14,8 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IHandyManRepo HandyManRepo { get; }
         public IAddressRepo AddressRepo { get; }
 
-
+        ICategoryRepo CategoryRepo { get; }
+        IServiceRepo ServiceRepo { get; }
 
         public int Save();
         public IDbContextTransaction BeginTransaction();

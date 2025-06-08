@@ -32,7 +32,11 @@ namespace OstaFandy.PL
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+
+            
             // Register your services here
+
+
             #region RegisterServices
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService, UserService>();
@@ -46,7 +50,17 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
 
+
+
             #endregion
+
+            #region service catalog
+            builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
+            builder.Services.AddScoped<IServiceRepo, ServiceRepo>();
+            builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<IServiceService, ServiceService>();
+            #endregion
+
 
             //JWT Authentication
             #region JWTAuth
