@@ -15,7 +15,7 @@ namespace OstaFandy.PL
     {
         public static void Main(string[] args)
         {
-            string ForCore = "";
+            var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
             var builder = WebApplication.CreateBuilder(args);
 
             // Add services to the container.  
@@ -37,8 +37,14 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJWTService, JWTService>();
+
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IHandyManService, HandyManService>();
+
+
+            builder.Services.AddScoped<IUserService,UserService>();
+            builder.Services.AddScoped<IHandyManService,HandyManService>();
+            builder.Services.AddScoped<IClientService, ClientService>();
 
             #endregion
 
@@ -71,6 +77,18 @@ namespace OstaFandy.PL
             });
             #endregion
 
+
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                    policy =>
+                    {
+                        policy.WithOrigins("http://localhost:4200")
+                              .AllowAnyHeader()
+                              .AllowAnyMethod();
+                    });
+            });
+
             var app = builder.Build();
 
             // Configure the HTTP request pipeline.  
@@ -83,11 +101,16 @@ namespace OstaFandy.PL
 
             app.UseHttpsRedirection();
 
+            app.UseCors(MyAllowSpecificOrigins);
+
+
             app.UseAuthentication();
             app.UseAuthorization();
 
+
             
-            app.UseCors(ForCore);
+            app.UseCors();
+
 
             app.MapControllers();
 
