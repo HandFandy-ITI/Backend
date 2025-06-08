@@ -39,7 +39,7 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IJWTService, JWTService>();
             builder.Services.AddScoped<IUserService,UserService>();
             builder.Services.AddScoped<IHandyManService,HandyManService>();
-
+            builder.Services.AddScoped<IClientService, ClientService>();
             #endregion
 
             #region PaymentServices

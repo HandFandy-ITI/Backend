@@ -94,6 +94,79 @@ namespace OstaFandy.PL.Mapper
                    }
                })
                .ReverseMap();
+
+            CreateMap<User, AdminDisplayClientDTO>()
+                    .AfterMap((src, dest) =>
+                    {
+                        if (src.Client != null)
+                        {
+                            dest.ClientUserId = src.Client.UserId;
+                            dest.DefaultAddressId = src.Client.DefaultAddressId;
+
+                            if (src.Client.DefaultAddress != null)
+                            {
+                                dest.DefaultAddress = new AddressDTO
+                                {
+                                    Id = src.Client.DefaultAddress.Id,
+                                    Address1 = src.Client.DefaultAddress.Address1,
+                                    City = src.Client.DefaultAddress.City,
+                                    Latitude = src.Client.DefaultAddress.Latitude,
+                                    Longitude = src.Client.DefaultAddress.Longitude,
+                                    AddressType = src.Client.DefaultAddress.AddressType,
+                                    IsDefault = src.Client.DefaultAddress.IsDefault,
+                                    IsActive = src.Client.DefaultAddress.IsActive,
+                                    CreatedAt = src.Client.DefaultAddress.CreatedAt
+                                };
+                            }
+
+                            dest.Addresses = src.Addresses?
+                                .Where(a => a.IsActive)
+                                .Select(address => new AddressDTO
+                                {
+                                    Id = address.Id,
+                                    Address1 = address.Address1,
+                                    City = address.City,
+                                    Latitude = address.Latitude,
+                                    Longitude = address.Longitude,
+                                    AddressType = address.AddressType,
+                                    IsDefault = address.IsDefault,
+                                    IsActive = address.IsActive,
+                                    CreatedAt = address.CreatedAt
+                                }).ToList() ?? new List<AddressDTO>();
+
+                            var bookings = src.Client.Bookings ?? new List<Booking>();
+                            dest.TotalBookings = bookings.Count;
+                            dest.ActiveBookings = bookings.Count(b => b.IsActive &&
+                                (b.Status == "Pending" || b.Status == "Confirmed" || b.Status == "InProgress"));
+                            dest.TotalSpent = bookings
+                                .Where(b => b.TotalPrice.HasValue)
+                                .Sum(b => b.TotalPrice ?? 0m);
+                        }
+                    });
+
+
+            CreateMap<AdminEditClientDTO, User>()
+                .AfterMap((src, dest) =>
+                {
+                    if (dest.Client != null)
+                    {
+                        dest.Client.DefaultAddressId = src.DefaultAddressId;
+                        dest.UpdatedAt = DateTime.UtcNow;
+                        //dest.Client.DefaultAddress = new Address
+                        //{
+                        //    Id = src.DefaultAddress.Id,
+                        //    Address1 = src.DefaultAddress.Address1,
+                        //    City = src.DefaultAddress.City,
+                        //    Latitude = src.DefaultAddress.Latitude,
+                        //    Longitude = src.DefaultAddress.Longitude,
+                        //    AddressType = src.DefaultAddress.AddressType,
+                        //    IsDefault = src.DefaultAddress.IsDefault,
+                        //    IsActive = src.DefaultAddress.IsActive,
+                        //    CreatedAt = DateTime.UtcNow
+                        //};
+                    }
+                })
+                .ReverseMap();
         }
     }
 }
