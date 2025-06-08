@@ -24,6 +24,7 @@ namespace OstaFandy.DAL.Repos
         private IUserTypeRepo _userTypeRepo;
         private IHandyManRepo _handymanRepo;
         private IAddressRepo _addressRepo;
+        private IBookingRepo _bookingRepo;
 
 
 
@@ -34,6 +35,8 @@ namespace OstaFandy.DAL.Repos
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
 
         public IAddressRepo AddressRepo => _addressRepo ?? new AddressRepo(_db);
+
+        public IBookingRepo BookingRepo => _bookingRepo ??= new BookingRepo(_db);
 
         public int Save()
         {

@@ -46,6 +46,9 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IHandyManService,HandyManService>();
             builder.Services.AddScoped<IClientService, ClientService>();
 
+            builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
+
+
             #endregion
 
             #region PaymentServices
@@ -106,11 +109,6 @@ namespace OstaFandy.PL
 
             app.UseAuthentication();
             app.UseAuthorization();
-
-
-            
-            app.UseCors();
-
 
             app.MapControllers();
 
