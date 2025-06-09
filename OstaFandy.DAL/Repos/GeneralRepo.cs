@@ -11,7 +11,7 @@ using OstaFandy.DAL.Repos.IRepos;
 
 namespace OstaFandy.DAL.Repos
 {
-    internal class GeneralRepo<T> : IGeneralRepo<T> where T : class
+    public class GeneralRepo<T> : IGeneralRepo<T> where T : class
     {
         private readonly AppDbContext _db;
         internal DbSet<T> dbSet;
