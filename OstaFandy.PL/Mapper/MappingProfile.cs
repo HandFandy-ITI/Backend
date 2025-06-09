@@ -106,7 +106,7 @@ namespace OstaFandy.PL.Mapper
                                 CreatedAt = src.Client.DefaultAddress.CreatedAt
                             };
                         }
-                        ///
+
                         dest.Addresses = src.Addresses?
                             .Where(a => a.IsActive)
                             .Select(address => new AddressDTO
@@ -170,11 +170,10 @@ namespace OstaFandy.PL.Mapper
                src.BookingServices.Select(bs => bs.Service.Name).ToList()));
             #endregion
 
-            #region service catalog
+            #region service catalogAdd commentMore actions
             CreateMap<Category, CategoryDTO>().ReverseMap();
             CreateMap<Service, ServiceDTO>().ReverseMap();
             #endregion
-
         }
     }
 }
