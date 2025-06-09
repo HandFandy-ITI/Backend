@@ -73,8 +73,7 @@ namespace OstaFandy.PL
             #endregion
 
             #region service catalog
-            builder.Services.AddScoped<ICategoryRepo, CategoryRepo>();
-            builder.Services.AddScoped<IServiceRepo, ServiceRepo>();
+           
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
             #endregion
