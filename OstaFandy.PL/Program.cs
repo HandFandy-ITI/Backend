@@ -40,6 +40,9 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IUserService,UserService>();
             builder.Services.AddScoped<IHandyManService,HandyManService>();
             builder.Services.AddScoped<IClientService, ClientService>();
+            builder.Services.AddScoped<IOrderFeedbackService, OrderFeedbackService>();
+            builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
+
             #endregion
 
             #region PaymentServices

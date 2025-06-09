@@ -40,6 +40,8 @@ namespace OstaFandy.PL.Mapper
                 CreateMap<BlockDate, AdminBlockDateDTO>()
                     .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
                     .ReverseMap();
+            
+            #region admin handyman 
 
                 CreateMap<Handyman, AdminHandyManDTO>()
                     .AfterMap((src, dest) =>
@@ -80,7 +82,6 @@ namespace OstaFandy.PL.Mapper
                         }).ToList();
                     });
             }
-           
             CreateMap<EditHandymanDTO, Handyman>()
                .AfterMap((src, dest) =>
                {
@@ -94,7 +95,9 @@ namespace OstaFandy.PL.Mapper
                    }
                })
                .ReverseMap();
+            #endregion
 
+            #region admin client
             CreateMap<User, AdminDisplayClientDTO>()
                     .AfterMap((src, dest) =>
                     {
@@ -167,6 +170,26 @@ namespace OstaFandy.PL.Mapper
                     }
                 })
                 .ReverseMap();
+
+            #endregion
+
+            #region feedback admin page
+            CreateMap<Review, OrderFeedbackDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.BookingId = src.BookingId;
+                    dest.HandymanName = $"{src.Booking.JobAssignment.Handyman.User.FirstName}  {src.Booking.JobAssignment.Handyman.User.LastName}";
+                    dest.HandymanSpecialty = src.Booking.JobAssignment.Handyman.Specialization?.Name;
+                    dest.ClientName = $"{src.Booking.Client.User.FirstName} {src.Booking.Client.User.LastName}";
+                    dest.ServiceName = src.Booking.JobAssignment.Handyman.Specialization.Name;
+                    dest.Rating = src.Rating;
+                    dest.Comment = src.Comment;
+                    dest.CompletedAt = src.Booking.JobAssignment.CompletedAt;
+                    dest.ReviewCreatedAt = src.CreatedAt;
+
+                })
+                .ReverseMap();
+            #endregion
         }
     }
 }
