@@ -46,10 +46,6 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IHandyManService,HandyManService>();
             builder.Services.AddScoped<IClientService, ClientService>();
 
-            builder.Services.AddScoped<IOrderFeedbackService, OrderFeedbackService>();
-            builder.Services.AddScoped<IReviewRepo, ReviewRepo>();
-
-
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
             builder.Services.AddScoped<IAnalyticsRepo, AnalyticsRepo>();
 
