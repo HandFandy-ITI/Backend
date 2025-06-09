@@ -26,6 +26,11 @@ namespace OstaFandy.DAL.Repos
         private IAddressRepo _addressRepo;
         private IBookingRepo _bookingRepo;
 
+        private IAnalyticsRepo _analyticsRepo;
+
+        private IBookingRepo _bookingRepo;
+
+
 
 
         // This propertyes initializes the repos if it hasn't been initialized yet
@@ -35,6 +40,9 @@ namespace OstaFandy.DAL.Repos
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
 
         public IAddressRepo AddressRepo => _addressRepo ?? new AddressRepo(_db);
+        public IAnalyticsRepo AnalyticsRepo => _analyticsRepo ??= new AnalyticsRepo(_db);
+
+        public IBookingRepo BookingRepo => _bookingRepo ??= new BookingRepo(_db);
 
         public IBookingRepo BookingRepo => _bookingRepo ??= new BookingRepo(_db);
 
