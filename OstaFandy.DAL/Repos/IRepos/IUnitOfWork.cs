@@ -17,7 +17,6 @@ namespace OstaFandy.DAL.Repos.IRepos
 
         public IBookingRepo BookingRepo { get; }
 
-        public IBookingRepo BookingRepo { get; }
 
         ICategoryRepo CategoryRepo { get; }
         IServiceRepo ServiceRepo { get; }
