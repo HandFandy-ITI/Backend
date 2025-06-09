@@ -53,6 +53,11 @@ namespace OstaFandy.PL
 
 
 
+
+            builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
+
+
+
             #endregion
 
             #region PaymentServices
