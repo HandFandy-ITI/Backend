@@ -23,19 +23,11 @@ namespace OstaFandy.PL.Mapper
             CreateMap<JobAssignment, JobAssignmentDTO>().ReverseMap();
             #endregion
 
-
-                CreateMap<BlockDate, AdminBlockDateDTO>()
-                    .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
-                    .ReverseMap();
-            
-            #region admin handyman 
-
             #region BlockDate
             CreateMap<BlockDate, AdminBlockDateDTO>()
                 .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
                 .ReverseMap();
             #endregion
-
 
             #region Handyman
             CreateMap<Handyman, AdminHandyManDTO>()
@@ -75,37 +67,6 @@ namespace OstaFandy.PL.Mapper
                     }).ToList();
                 });
 
-
-                        dest.AdminBlockDateDTO = src.BlockDates?.Select(bd => new AdminBlockDateDTO
-                        {
-                            Id = bd.Id,
-                            UserId = bd.UserId,
-                            Reason = bd.Reason,
-                            StartDate = bd.StartDate,
-                            EndDate = bd.EndDate,
-                            IsActive = bd.IsActive,
-                            CreatedAt = bd.CreatedAt,
-                            UpdatedAt = bd.UpdatedAt
-                        }).ToList();
-                    });
-            }
-            CreateMap<EditHandymanDTO, Handyman>()
-               .AfterMap((src, dest) =>
-               {
-                   if (dest.User != null)
-                   {
-                       dest.User.FirstName = src.FirstName;
-                       dest.User.LastName = src.LastName;
-                       dest.User.Email = src.Email;
-                       dest.User.Phone = src.Phone;
-                       dest.User.UpdatedAt = DateTime.UtcNow;
-                   }
-               })
-               .ReverseMap();
-            #endregion
-
-            #region admin client
-
             CreateMap<EditHandymanDTO, Handyman>()
                 .AfterMap((src, dest) =>
                 {
@@ -122,7 +83,6 @@ namespace OstaFandy.PL.Mapper
             #endregion
 
             #region Client
-
             CreateMap<User, AdminDisplayClientDTO>()
                 .AfterMap((src, dest) =>
                 {
@@ -182,27 +142,6 @@ namespace OstaFandy.PL.Mapper
                     }
                 })
                 .ReverseMap();
-
-
-            #endregion
-
-            #region feedback admin page
-            CreateMap<Review, OrderFeedbackDto>()
-                .AfterMap((src, dest) =>
-                {
-                    dest.BookingId = src.BookingId;
-                    dest.HandymanName = $"{src.Booking.JobAssignment.Handyman.User.FirstName}  {src.Booking.JobAssignment.Handyman.User.LastName}";
-                    dest.HandymanSpecialty = src.Booking.JobAssignment.Handyman.Specialization?.Name;
-                    dest.ClientName = $"{src.Booking.Client.User.FirstName} {src.Booking.Client.User.LastName}";
-                    dest.ServiceName = src.Booking.JobAssignment.Handyman.Specialization.Name;
-                    dest.Rating = src.Rating;
-                    dest.Comment = src.Comment;
-                    dest.CompletedAt = src.Booking.JobAssignment.CompletedAt;
-                    dest.ReviewCreatedAt = src.CreatedAt;
-
-                })
-                .ReverseMap();
-
             #endregion
 
             #region Payment
@@ -229,7 +168,6 @@ namespace OstaFandy.PL.Mapper
                src.BookingServices.FirstOrDefault().Service.Category.Name))
            .ForMember(dest => dest.ServiceNames, opt => opt.MapFrom(src =>
                src.BookingServices.Select(bs => bs.Service.Name).ToList()));
-
             #endregion
         }
     }
