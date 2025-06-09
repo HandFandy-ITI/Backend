@@ -29,7 +29,8 @@ namespace OstaFandy.DAL.Repos
         private IAnalyticsRepo _analyticsRepo;
 
 
-
+        private ICategoryRepo _categoryRepo;
+        private IServiceRepo _serviceRepo;
 
 
         // This propertyes initializes the repos if it hasn't been initialized yet
@@ -42,6 +43,10 @@ namespace OstaFandy.DAL.Repos
         public IAnalyticsRepo AnalyticsRepo => _analyticsRepo ??= new AnalyticsRepo(_db);
 
         public IBookingRepo BookingRepo => _bookingRepo ??= new BookingRepo(_db);
+
+
+        public ICategoryRepo CategoryRepo => _categoryRepo ??= new CategoryRepo(_db);
+        public IServiceRepo ServiceRepo => _serviceRepo ??= new ServiceRepo(_db);
 
         public int Save()
         {
