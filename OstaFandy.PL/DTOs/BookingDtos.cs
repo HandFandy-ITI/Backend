@@ -13,6 +13,10 @@
         public List<string>? ServiceNames { get; set; } 
         public string? Note { get; set; }
 
+        public DateTime PreferredDate { get; set; }
+
+        public int EstimatedMinutes { get; set; }
+
         public string? Status { get; set; }
     }
 }
