@@ -13,8 +13,6 @@ namespace OstaFandy.DAL.Repos.IRepos
         IUserTypeRepo UserTypeRepo { get; }
         public IHandyManRepo HandyManRepo { get; }
         public IAddressRepo AddressRepo { get; }
-        public IReviewRepo ReviewRepo { get; }
-
         public IAnalyticsRepo AnalyticsRepo { get; }
 
         public IBookingRepo BookingRepo { get; }
@@ -22,7 +20,6 @@ namespace OstaFandy.DAL.Repos.IRepos
 
         ICategoryRepo CategoryRepo { get; }
         IServiceRepo ServiceRepo { get; }
-
 
         public int Save();
         public IDbContextTransaction BeginTransaction();

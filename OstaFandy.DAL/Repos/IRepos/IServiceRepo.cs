@@ -9,8 +9,8 @@ namespace OstaFandy.DAL.Repos.IRepos
 {
     public interface IServiceRepo : IGeneralRepo<Service>
     {
-        Task<IEnumerable<Service>> GetByCategoryIdAsync(int categoryId);
-        Task<IEnumerable<Service>> GetActiveAsync();
-        Task<bool> SoftDeleteAsync(int id);
+        //Task<IEnumerable<Service>> GetByCategoryIdAsync(int categoryId);
+        //Task<IEnumerable<Service>> GetActiveAsync();
+        //Task<bool> SoftDeleteAsync(int id);
     }
 }

@@ -31,6 +31,12 @@ namespace OstaFandy.PL.Mapper
             #region JobAssignment
             CreateMap<JobAssignment, JobAssignmentDTO>().ReverseMap();
             #endregion
+
+            #region BlockDate
+            CreateMap<BlockDate, AdminBlockDateDTO>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+                .ReverseMap();
+            #endregion
             {
 
 
@@ -124,27 +130,27 @@ namespace OstaFandy.PL.Mapper
                             }
 
                             dest.Addresses = src.Addresses?
-                                .Where(a => a.IsActive)
-                                .Select(address => new AddressDTO
-                                {
-                                    Id = address.Id,
-                                    Address1 = address.Address1,
-                                    City = address.City,
-                                    Latitude = address.Latitude,
-                                    Longitude = address.Longitude,
-                                    AddressType = address.AddressType,
-                                    IsDefault = address.IsDefault,
-                                    IsActive = address.IsActive,
-                                    CreatedAt = address.CreatedAt
-                                }).ToList() ?? new List<AddressDTO>();
+                            .Where(a => a.IsActive)
+                            .Select(address => new AddressDTO
+                                    {
+                                        Id = address.Id,
+                                        Address1 = address.Address1,
+                                        City = address.City,
+                                        Latitude = address.Latitude,
+                                        Longitude = address.Longitude,
+                                        AddressType = address.AddressType,
+                                        IsDefault = address.IsDefault,
+                                        IsActive = address.IsActive,
+                                        CreatedAt = address.CreatedAt
+                                    }).ToList() ?? new List<AddressDTO>();
 
                             var bookings = src.Client.Bookings ?? new List<Booking>();
                             dest.TotalBookings = bookings.Count;
                             dest.ActiveBookings = bookings.Count(b => b.IsActive &&
-                                (b.Status == "Pending" || b.Status == "Confirmed" || b.Status == "InProgress"));
+                            (b.Status == "Pending" || b.Status == "Confirmed" || b.Status == "InProgress"));
                             dest.TotalSpent = bookings
-                                .Where(b => b.TotalPrice.HasValue)
-                                .Sum(b => b.TotalPrice ?? 0m);
+                            .Where(b => b.TotalPrice.HasValue)
+                            .Sum(b => b.TotalPrice ?? 0m);
                         }
                     });
 

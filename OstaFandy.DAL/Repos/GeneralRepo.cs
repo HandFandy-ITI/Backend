@@ -15,7 +15,7 @@ namespace OstaFandy.DAL.Repos
     public class GeneralRepo<T> : IGeneralRepo<T> where T : class
     {
         private readonly AppDbContext _db;
-        internal DbSet<T> dbSet;
+        public  DbSet<T> dbSet;
 
         public GeneralRepo(AppDbContext db)
         {
