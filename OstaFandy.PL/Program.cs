@@ -41,9 +41,27 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJWTService, JWTService>();
+
+            builder.Services.AddScoped<IUserService, UserService>();
+            builder.Services.AddScoped<IHandyManService, HandyManService>();
+
+
             builder.Services.AddScoped<IUserService,UserService>();
             builder.Services.AddScoped<IHandyManService,HandyManService>();
             builder.Services.AddScoped<IClientService, ClientService>();
+
+            builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
+            builder.Services.AddScoped<IAnalyticsRepo, AnalyticsRepo>();
+
+            builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
+
+
+
+
+            builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
+
+
+
             #endregion
 
             #region PaymentServices
@@ -65,7 +83,8 @@ namespace OstaFandy.PL
             //JWT Authentication
             #region JWTAuth
             builder.Services.AddAuthentication(op => op.DefaultAuthenticateScheme = "myschema")
-                .AddJwtBearer("myschema", option => {
+                .AddJwtBearer("myschema", option =>
+                {
                     var key = builder.Configuration.GetSection("Jwt");
                     option.TokenValidationParameters = new TokenValidationParameters
                     {
@@ -113,7 +132,6 @@ namespace OstaFandy.PL
 
             app.UseAuthentication();
             app.UseAuthorization();
-
 
             app.MapControllers();
 

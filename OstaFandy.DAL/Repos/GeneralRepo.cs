@@ -91,7 +91,23 @@ namespace OstaFandy.DAL.Repos
         {
             dbSet.AddRange(entites);
         }
+
+        //public T GetById(int id, string? includeProperties = null)
+        //{
+        //    IQueryable<T> query = dbSet;
+
+        //    if (includeProperties != null)
+        //    {
+        //        foreach (var prop in includeProperties.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries))
+        //        {
+        //            query = query.Include(prop);
+        //        }
+        //    }
+
+        //    T? entity = query.FirstOrDefault(e => EF.Property<int>(e, "UserId") == id || EF.Property<int>(e, "Id") == id);
+        //    return entity ?? throw new InvalidOperationException($"Entity of type {typeof(T).Name} with ID {id} not found.");
+        //}
     }
+}
 
 
-    }
