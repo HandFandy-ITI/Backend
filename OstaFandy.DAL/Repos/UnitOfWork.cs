@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,6 +24,12 @@ namespace OstaFandy.DAL.Repos
         private IUserTypeRepo _userTypeRepo;
         private IHandyManRepo _handymanRepo;
         private IAddressRepo _addressRepo;
+        private IBookingRepo _bookingRepo;
+
+        private IAnalyticsRepo _analyticsRepo;
+
+        private IBookingRepo _bookingRepo;
+
 
 
 
@@ -34,7 +40,15 @@ namespace OstaFandy.DAL.Repos
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
 
         public IAddressRepo AddressRepo => _addressRepo ?? new AddressRepo(_db);
+
         public IReviewRepo ReviewRepo => _reviewRepo ??= new ReviewRepo(_db);
+
+        public IAnalyticsRepo AnalyticsRepo => _analyticsRepo ??= new AnalyticsRepo(_db);
+
+        public IBookingRepo BookingRepo => _bookingRepo ??= new BookingRepo(_db);
+
+        public IBookingRepo BookingRepo => _bookingRepo ??= new BookingRepo(_db);
+
         public int Save()
         {
             return _db.SaveChanges();

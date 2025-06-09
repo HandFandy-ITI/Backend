@@ -15,6 +15,14 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IAddressRepo AddressRepo { get; }
         public IReviewRepo ReviewRepo { get; }
 
+        public IAnalyticsRepo AnalyticsRepo { get; }
+
+        public IBookingRepo BookingRepo { get; }
+
+        public IBookingRepo BookingRepo { get; }
+
+
+
 
         public int Save();
         public IDbContextTransaction BeginTransaction();
