@@ -23,6 +23,10 @@ namespace OstaFandy.DAL.Repos.IRepos
         IServiceRepo ServiceRepo { get; }
 
         public int Save();
+
+        public Task<int> SaveAsync();
         public IDbContextTransaction BeginTransaction();
+
+        Task<IDbContextTransaction> BeginTransactionasync();
     }
 }
