@@ -20,6 +20,12 @@ namespace OstaFandy.DAL.Repos
         {
             return !_db.Users.Any(u => u.Email == email || u.Phone == phone);
         }
+
+        public int GetCountOfActiveClient()
+        {
+            return _db.Clients.Count(c => c.User.IsActive == true);
+        }
+
         public bool SoftDelete(int id)
         {
             var user = _db.Users.Find(id);
