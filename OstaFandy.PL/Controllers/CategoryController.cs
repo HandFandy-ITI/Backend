@@ -23,6 +23,25 @@ namespace OstaFandy.PL.Controllers
             return Ok(result);
         }
 
+
+        //[HttpGet("paginated")]
+        //public ActionResult<PaginatedResult<CategoryDTO>> GetPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
+        //{
+        //    var result = _categoryService.GetAllPaginated(pageNumber, pageSize);
+        //    return Ok(result);
+        //}
+        [HttpGet("paginated")]
+        public ActionResult<PaginatedResult<CategoryDTO>> GetPaginated(
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 10,
+    [FromQuery] string? search = null,
+    [FromQuery] string? status = null)
+        {
+            var result = _categoryService.GetAllPaginated(pageNumber, pageSize, search, status);
+            return Ok(result);
+        }
+
+
         [HttpGet("{id}")]
         public ActionResult<CategoryDTO> GetById(int id)
         {
@@ -33,11 +52,16 @@ namespace OstaFandy.PL.Controllers
 
         [HttpPost]
         [Authorize(Policy = "Admin")]
-        public IActionResult Add(CategoryDTO dto)
+        public IActionResult Add([FromBody] CategoryCreateDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             _categoryService.Add(dto);
-            return Ok("Category added successfully.");
+            return Ok(new { message = "Category added successfully." });
         }
+
+
 
         [HttpPut("{id}")]
         [Authorize(Policy = "Admin")]
