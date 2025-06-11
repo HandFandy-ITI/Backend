@@ -333,7 +333,7 @@ namespace OstaFandy.PL.BL
                 if (res > 0)
                 {
                     await transaction.CommitAsync();
-                    return 1;
+                    return user.Id;
                 }
                 else
                 {
