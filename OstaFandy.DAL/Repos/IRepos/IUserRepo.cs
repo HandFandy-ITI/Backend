@@ -11,5 +11,7 @@ namespace OstaFandy.DAL.Repos.IRepos
     {
         bool CheckUniqueOfEmailPhone(string email, string phone);
         bool SoftDelete(int id);
+
+        int GetCountOfActiveClient();
     }
 }
