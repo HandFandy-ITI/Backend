@@ -47,5 +47,14 @@
         Stripe
     }
 
-
+    public enum DashboardFilter
+    {
+        Today,
+        ThisWeek,
+        ThisMonth,
+        RevenueGreaterThan1000,
+        JobsGreaterThan10,
+        RatingGreaterThan4,
+        PendingApproval
+    }
 }

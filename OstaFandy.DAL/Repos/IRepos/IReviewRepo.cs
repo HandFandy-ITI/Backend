@@ -7,9 +7,8 @@ using OstaFandy.DAL.Entities;
 
 namespace OstaFandy.DAL.Repos.IRepos
 {
-    public interface IBookingRepo:IGeneralRepo<Booking>
+    public interface IReviewRepo : IGeneralRepo<Review>
     {
-        public int GetAllCompletedJobCount();
-        public decimal GetTotalPrice();
+        public decimal GetAverageRating();
     }
 }

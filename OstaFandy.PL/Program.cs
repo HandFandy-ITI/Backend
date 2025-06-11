@@ -52,7 +52,20 @@ namespace OstaFandy.PL
 
             builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
 
+
+            builder.Services.AddScoped<IOrderFeedbackService, OrderFeedbackService>();
+
+
+            builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
+            
+            
+            builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+
+
+
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
             #endregion
 
             #region PaymentServices

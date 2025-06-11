@@ -25,8 +25,9 @@ namespace OstaFandy.DAL.Repos
         private IHandyManRepo _handymanRepo;
         private IAddressRepo _addressRepo;
         private IBookingRepo _bookingRepo;
-
+        private IReviewRepo _reviewRepo;
         private IAnalyticsRepo _analyticsRepo;
+        private IJobAssignmentRepo _JobAssignmentRepo;
 
 
         private ICategoryRepo _categoryRepo;
@@ -41,8 +42,9 @@ namespace OstaFandy.DAL.Repos
 
         public IAddressRepo AddressRepo => _addressRepo ?? new AddressRepo(_db);
         public IAnalyticsRepo AnalyticsRepo => _analyticsRepo ??= new AnalyticsRepo(_db);
-
+        public IReviewRepo ReviewRepo => _reviewRepo ??= new ReviewRepo(_db);
         public IBookingRepo BookingRepo => _bookingRepo ??= new BookingRepo(_db);
+        public IJobAssignmentRepo JobAssignmentRepo => _JobAssignmentRepo ??= new JobAssignmentRepo(_db);
 
 
         public ICategoryRepo CategoryRepo => _categoryRepo ??= new CategoryRepo(_db);
