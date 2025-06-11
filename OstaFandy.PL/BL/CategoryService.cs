@@ -71,12 +71,21 @@ namespace OstaFandy.PL.BL
         //}
         public PaginatedResult<CategoryDTO> GetAllPaginated(int pageNumber, int pageSize, string? search = null, string? status = null)
         {
-            var query = _unit.CategoryRepo.GetAll(); // Remove IsActive default filter
+            var query = _unit.CategoryRepo.GetAll(); 
 
             if (!string.IsNullOrEmpty(search))
                 query = query.Where(c => c.Name.Contains(search) || c.Description.Contains(search));
 
-            if (!string.IsNullOrEmpty(status))
+            //if (!string.IsNullOrEmpty(status))
+            //{
+            //    if (status == "Active")
+            //        query = query.Where(c => c.IsActive);
+            //    else if (status == "Inactive")
+            //        query = query.Where(c => !c.IsActive);
+            //}
+
+
+            if (!string.IsNullOrEmpty(status) && status != "All")
             {
                 if (status == "Active")
                     query = query.Where(c => c.IsActive);

@@ -7,11 +7,17 @@ namespace OstaFandy.PL.BL.IBL
         {
             IEnumerable<ServiceDTO> GetAll();
             IEnumerable<ServiceDTO> GetByCategoryId(int categoryId);
+
             ServiceDTO? GetById(int id);
-            void Add(ServiceDTO dto);
             void Update(ServiceDTO dto);
             bool SoftDelete(int id);
-        }
+
+        PaginatedResult<ServiceDTO> GetAllPaginated(int pageNumber, int pageSize, string? search = null, string? status = null, string? sortField = null, string? sortOrder = null, int? categoryId = null);
+
+
+
+        void Add(ServiceCreateDTO dto);
+    }
 
     
 }
