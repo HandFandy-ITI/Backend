@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using OstaFandy.DAL.Entities;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.General;
 
 namespace OstaFandy.PL.Mapper
 {
@@ -10,7 +11,7 @@ namespace OstaFandy.PL.Mapper
         {
             #region User
             CreateMap<User, UserDto>().ReverseMap();
-            CreateMap<UserType, UserTypeDto>().ReverseMap();
+            CreateMap<DAL.Entities.UserType, UserTypeDto>().ReverseMap();
             CreateMap<User, UserRegesterDto>().ReverseMap();
             CreateMap<User, UserLoginDto>().ReverseMap();
             #endregion
@@ -169,6 +170,73 @@ namespace OstaFandy.PL.Mapper
            .ForMember(dest => dest.ServiceNames, opt => opt.MapFrom(src =>
                src.BookingServices.Select(bs => bs.Service.Name).ToList()));
             #endregion
+
+            #region service catalogAdd commentMore actions
+            CreateMap<Category, CategoryDTO>().ReverseMap();
+            CreateMap<Service, ServiceDTO>().ReverseMap();
+            #endregion
+
+
+            #region feedback admin page
+            CreateMap<Review, OrderFeedbackDto>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.BookingId = src.BookingId;
+                    dest.HandymanName = $"{src.Booking.JobAssignment.Handyman.User.FirstName}  {src.Booking.JobAssignment.Handyman.User.LastName}";
+                    dest.HandymanSpecialty = src.Booking.JobAssignment.Handyman.Specialization?.Name;
+                    dest.ClientName = $"{src.Booking.Client.User.FirstName} {src.Booking.Client.User.LastName}";
+                    dest.ServiceName = src.Booking.JobAssignment.Handyman.Specialization.Name;
+                    dest.Rating = src.Rating;
+                    dest.Comment = src.Comment;
+                    dest.CompletedAt = src.Booking.JobAssignment.CompletedAt;
+                    dest.ReviewCreatedAt = src.CreatedAt;
+
+                })
+                .ReverseMap();
+            #endregion
+
+            CreateMap<Booking, DashboardDTO>()
+            .AfterMap((src, dest) =>
+            {
+                dest.Service = src.BookingServices != null && src.BookingServices.Any()
+                    ? string.Join(", ", src.BookingServices.Select(bs => bs.Service.Name))
+                    : string.Empty;
+
+                dest.location = src.Address?.City ?? "";
+
+                dest.client = src.Client?.User != null
+                    ? $"{src.Client.User.FirstName} {src.Client.User.LastName}" : "";
+
+                dest.handyman = src.JobAssignment?.Handyman?.User != null
+                    ? $"{src.JobAssignment.Handyman.User.FirstName} {src.JobAssignment.Handyman.User.LastName}"
+                    : "Not Assigned";
+
+                dest.review = src.Reviews != null && src.Reviews.Any()
+                    ? src.Reviews.Average(r => r.Rating).ToString("F1")
+                    : "No Review";
+
+                dest.Revenue = src.TotalPrice ?? 0;
+            });
+
+            #region Handyman application
+            CreateMap<HandyManApplicationDto, User>()
+           .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
+           .ReverseMap();
+
+            CreateMap<HandyManApplicationDto, Handyman>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => HandymenStatus.Pending))
+                .ForMember(dest => dest.DefaultAddressId, opt => opt.Ignore()); 
+
+            CreateMap<HandyManApplicationDto, Address>()
+                .ForMember(dest => dest.Address1, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(_ => true))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Latitude))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Longitude))
+                .ForMember(dest => dest.AddressType, opt => opt.MapFrom(src => src.AddressType))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
+            #endregion
+
             #region service catalog
 
             // Category Mappings

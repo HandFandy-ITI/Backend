@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.utils;
+
 
 namespace OstaFandy.PL.Controllers
 {
@@ -16,34 +18,34 @@ namespace OstaFandy.PL.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<PagedPaymentResponseDto>> GetAllPayments([FromQuery] PaymentFilterDto filter)
+        public async Task<ActionResult<ApiResponse<PagedPaymentResponseDto>>> GetAllPayments([FromQuery] PaymentFilterDto filter)
         {
             try
             {
                 var result = await _paymentService.GetAllPaymentsAsync(filter);
-                return Ok(result);
+                return Ok(ApiResponse<PagedPaymentResponseDto>.SuccessResult(result));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+                return StatusCode(500, ApiResponse<PagedPaymentResponseDto>.ErrorResult("Internal server error", new List<string> { ex.Message }));
             }
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<PaymentDetailsDto>> GetPaymentById(int id)
+        public async Task<ActionResult<ApiResponse<PaymentDetailsDto>>> GetPaymentById(int id)
         {
             try
             {
                 var payment = await _paymentService.GetPaymentByIdAsync(id);
 
                 if (payment == null)
-                    return NotFound(new { message = "Payment not found" });
+                    return NotFound(ApiResponse<PaymentDetailsDto>.ErrorResult("Payment not found"));
 
-                return Ok(payment);
+                return Ok(ApiResponse<PaymentDetailsDto>.SuccessResult(payment));
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Internal server error", error = ex.Message });
+                return StatusCode(500, ApiResponse<PaymentDetailsDto>.ErrorResult("Internal server error", new List<string> { ex.Message }));
             }
         }
     }

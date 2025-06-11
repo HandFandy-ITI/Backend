@@ -22,7 +22,7 @@ namespace OstaFandy.PL.Controllers
             var result = _categoryService.GetAll();
             return Ok(result);
         }
-       
+
 
 
      

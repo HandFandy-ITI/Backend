@@ -22,11 +22,14 @@ namespace OstaFandy.DAL.Repos
         private IUserRepo _userRepo;
 
         private IUserTypeRepo _userTypeRepo;
+        private IPaymentRepo _paymentRepo;
+
         private IHandyManRepo _handymanRepo;
         private IAddressRepo _addressRepo;
         private IBookingRepo _bookingRepo;
-
+        private IReviewRepo _reviewRepo;
         private IAnalyticsRepo _analyticsRepo;
+        private IJobAssignmentRepo _JobAssignmentRepo;
 
 
         private ICategoryRepo _categoryRepo;
@@ -34,15 +37,22 @@ namespace OstaFandy.DAL.Repos
 
 
         // This propertyes initializes the repos if it hasn't been initialized yet
-        public IUserRepo UserRepo => _userRepo??=new UserRepo(_db);
+        public IUserRepo UserRepo => _userRepo ??= new UserRepo(_db);
         public IUserTypeRepo UserTypeRepo => _userTypeRepo ??= new UserTypeRepo(_db);
+        public IPaymentRepo PaymentRepo => _paymentRepo ??= new PaymentRepo(_db);
+
 
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
 
         public IAddressRepo AddressRepo => _addressRepo ?? new AddressRepo(_db);
         public IAnalyticsRepo AnalyticsRepo => _analyticsRepo ??= new AnalyticsRepo(_db);
-
+        public IReviewRepo ReviewRepo => _reviewRepo ??= new ReviewRepo(_db);
         public IBookingRepo BookingRepo => _bookingRepo ??= new BookingRepo(_db);
+        public IJobAssignmentRepo JobAssignmentRepo => _JobAssignmentRepo ??= new JobAssignmentRepo(_db);
+
+
+        public ICategoryRepo CategoryRepo => _categoryRepo ??= new CategoryRepo(_db);
+        public IServiceRepo ServiceRepo => _serviceRepo ??= new ServiceRepo(_db);
 
 
         public ICategoryRepo CategoryRepo => _categoryRepo ??= new CategoryRepo(_db);
@@ -53,11 +63,19 @@ namespace OstaFandy.DAL.Repos
             return _db.SaveChanges();
         }
 
+        public async Task<int> SaveAsync()
+        {
+            return await _db.SaveChangesAsync();
+        }
+
         public IDbContextTransaction BeginTransaction()
         {
             return _db.Database.BeginTransaction();
         }
 
-
+        public async Task<IDbContextTransaction> BeginTransactionasync()
+        {
+            return await _db.Database.BeginTransactionAsync();
+        }
     }
 }

@@ -9,7 +9,7 @@ namespace OstaFandy.PL.BL.IBL
 
         PaginatedResult<CategoryDTO> GetAllPaginated(int pageNumber, int pageSize, string? search = null, string? status = null);
 
-        CategoryDTO? GetById(int id);
+            CategoryDTO? GetById(int id);
            void Add(CategoryCreateDTO dto);
 
             void Update(CategoryDTO dto);

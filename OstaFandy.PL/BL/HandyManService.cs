@@ -6,6 +6,7 @@ using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.General;
 using OstaFandy.PL.utils;
 
 namespace OstaFandy.PL.BL
@@ -15,11 +16,13 @@ namespace OstaFandy.PL.BL
         public readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<HandyManService> _logger;
         private readonly IMapper _mapper;
-        public HandyManService(IUnitOfWork unitOfWork, ILogger<HandyManService> logger, IMapper mapper)
+        private readonly ICloudinaryService _cloudinaryService;
+        public HandyManService(IUnitOfWork unitOfWork, ILogger<HandyManService> logger, IMapper mapper,ICloudinaryService cloudinaryService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
+            _cloudinaryService = cloudinaryService;
         }
 
         public PaginationHelper<Handyman> GetAll(string searchString = "", int pageNumber = 1, int pageSize = 5)
@@ -278,6 +281,74 @@ namespace OstaFandy.PL.BL
 
             }
         }
+
+        public async Task<int> CreateHandyManApplicationAsync(HandyManApplicationDto handymandto)
+        {
+            if (handymandto == null)
+                return 0; // invalid input
+
+            using var transaction = await _unitOfWork.BeginTransactionasync();
+
+            try
+            {
+                var existingUser = _unitOfWork.UserRepo.CheckUniqueOfEmailPhone(handymandto.Email, handymandto.Phone);
+                if (!existingUser)
+                    return -1; // existing user
+
+                if (handymandto.Password != handymandto.ConfirmPassword)
+                    return -2; // passwords do not match
+
+                // User
+                var user = _mapper.Map<User>(handymandto);
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(handymandto.Password);
+                user.CreatedAt = DateTime.Now;
+                user.UpdatedAt = DateTime.Now;
+                user.UserTypes.Add(_unitOfWork.UserTypeRepo.FirstOrDefault(s => s.TypeName == General.UserType.Handyman));
+                _unitOfWork.UserRepo.Insert(user);
+                await _unitOfWork.SaveAsync();
+
+                // Address
+                var address = _mapper.Map<Address>(handymandto);
+                address.UserId = user.Id;
+                _unitOfWork.AddressRepo.Insert(address);
+                await _unitOfWork.SaveAsync();
+
+                // Upload images
+                var imgUrl = await _cloudinaryService.UploadImageAsync(handymandto.Img);
+                var nationalIdImgUrl = await _cloudinaryService.UploadImageAsync(handymandto.NationalIdImg);
+
+                // Handyman
+                var handyman = _mapper.Map<Handyman>(handymandto);
+                handyman.UserId = user.Id;
+                handyman.Img = imgUrl;
+                handyman.NationalIdImg = nationalIdImgUrl;
+                handyman.DefaultAddressId = address.Id;
+                handyman.Status = HandymenStatus.Pending;
+
+                _unitOfWork.HandyManRepo.Insert(handyman);
+
+                var res = await _unitOfWork.SaveAsync();
+
+
+                if (res > 0)
+                {
+                    await transaction.CommitAsync();
+                    return user.Id;
+                }
+                else
+                {
+                    await transaction.RollbackAsync();
+                    return 0;
+                }
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "Error occurred while creating handyman application");
+                return 0;
+            }
+        }
+
     }
 }
 

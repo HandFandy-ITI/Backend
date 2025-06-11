@@ -38,16 +38,13 @@ namespace OstaFandy.PL
 
 
             #region RegisterServices
+            //system services
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<IJWTService, JWTService>();
-
-            builder.Services.AddScoped<IUserService, UserService>();
+            //roles
             builder.Services.AddScoped<IHandyManService, HandyManService>();
-
-
             builder.Services.AddScoped<IUserService,UserService>();
-            builder.Services.AddScoped<IHandyManService,HandyManService>();
             builder.Services.AddScoped<IClientService, ClientService>();
 
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
@@ -56,16 +53,22 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
 
 
+            builder.Services.AddScoped<IOrderFeedbackService, OrderFeedbackService>();
 
 
             builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
+            
+            
+            builder.Services.AddScoped<IDashboardService, DashboardService>();
 
 
+
+
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
             #endregion
 
             #region PaymentServices
-            builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 

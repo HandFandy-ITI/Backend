@@ -63,6 +63,7 @@ namespace OstaFandy.PL.Controllers
             _serviceService.Add(dto);
             return Ok(new { message = "Service added successfully." });
         }
+
         [HttpPut("{id}")]
         [Authorize(Policy = "Admin")]
         public IActionResult Update(int id, [FromBody] ServiceUpdateDTO dto)
@@ -71,6 +72,7 @@ namespace OstaFandy.PL.Controllers
             _serviceService.Update(dto);
             return NoContent();
         }
+
         [HttpDelete("{id}")]
         [Authorize(Policy = "Admin")]
         public IActionResult Delete(int id)

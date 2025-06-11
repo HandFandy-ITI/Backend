@@ -17,7 +17,10 @@ namespace OstaFandy.PL.BL.IBL
         AdminHandyManDTO GetById(int id);
         bool DeleteHandyman(int id);
         AdminHandyManDTO EditHandyman(EditHandymanDTO editHandymanDto);
- 
+
+        public Task<int> CreateHandyManApplicationAsync(HandyManApplicationDto handymandto);
+
+
 
     }
 }

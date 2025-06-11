@@ -118,6 +118,7 @@ namespace OstaFandy.PL.BL
             _unit.ServiceRepo.Update(service);
             _unit.Save();
         }
+
         public bool SoftDelete(int id)
         {
             var service = _unit.ServiceRepo.GetById(id);
