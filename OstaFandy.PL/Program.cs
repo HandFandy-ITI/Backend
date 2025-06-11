@@ -69,7 +69,6 @@ namespace OstaFandy.PL
             #endregion
 
             #region PaymentServices
-            builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 
