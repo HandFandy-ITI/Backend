@@ -63,16 +63,14 @@ namespace OstaFandy.PL.Controllers
             _serviceService.Add(dto);
             return Ok(new { message = "Service added successfully." });
         }
-
         [HttpPut("{id}")]
         [Authorize(Policy = "Admin")]
-        public IActionResult Update(int id, [FromBody] ServiceDTO dto)
+        public IActionResult Update(int id, [FromBody] ServiceUpdateDTO dto)
         {
             if (id != dto.Id) return BadRequest("ID mismatch.");
             _serviceService.Update(dto);
-            return Ok("Service updated.");
+            return NoContent();
         }
-
         [HttpDelete("{id}")]
         [Authorize(Policy = "Admin")]
         public IActionResult Delete(int id)

@@ -179,7 +179,8 @@ namespace OstaFandy.PL.Mapper
             CreateMap<Service, ServiceDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
             CreateMap<ServiceDTO, Service>(); 
-            CreateMap<ServiceCreateDTO, Service>(); 
+            CreateMap<ServiceCreateDTO, Service>();
+            CreateMap<ServiceUpdateDTO, Service>();
 
             #endregion
 

@@ -110,7 +110,7 @@ namespace OstaFandy.PL.BL
             _unit.Save();
         }
 
-        public void Update(ServiceDTO dto)
+        public void Update(ServiceUpdateDTO dto)
         {
             var service = _mapper.Map<Service>(dto);
             service.UpdatedAt = DateTime.UtcNow;
@@ -118,7 +118,6 @@ namespace OstaFandy.PL.BL
             _unit.ServiceRepo.Update(service);
             _unit.Save();
         }
-
         public bool SoftDelete(int id)
         {
             var service = _unit.ServiceRepo.GetById(id);

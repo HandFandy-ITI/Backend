@@ -25,12 +25,7 @@ namespace OstaFandy.PL.Controllers
        
 
 
-        //[HttpGet("paginated")]
-        //public ActionResult<PaginatedResult<CategoryDTO>> GetPaginated([FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
-        //{
-        //    var result = _categoryService.GetAllPaginated(pageNumber, pageSize);
-        //    return Ok(result);
-        //}
+     
         [HttpGet("paginated")]
         public ActionResult<PaginatedResult<CategoryDTO>> GetPaginated(
     [FromQuery] int pageNumber = 1,
