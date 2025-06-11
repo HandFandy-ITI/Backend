@@ -54,6 +54,10 @@ namespace OstaFandy.DAL.Repos
         public ICategoryRepo CategoryRepo => _categoryRepo ??= new CategoryRepo(_db);
         public IServiceRepo ServiceRepo => _serviceRepo ??= new ServiceRepo(_db);
 
+
+        public ICategoryRepo CategoryRepo => _categoryRepo ??= new CategoryRepo(_db);
+        public IServiceRepo ServiceRepo => _serviceRepo ??= new ServiceRepo(_db);
+
         public int Save()
         {
             return _db.SaveChanges();

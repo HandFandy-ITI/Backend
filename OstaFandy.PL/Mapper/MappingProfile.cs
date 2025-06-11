@@ -237,6 +237,21 @@ namespace OstaFandy.PL.Mapper
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
             #endregion
 
+            #region service catalog
+
+            // Category Mappings
+            CreateMap<Category, CategoryDTO>().ReverseMap();
+            CreateMap<CategoryCreateDTO, Category>();
+
+            // Service Mappings
+            CreateMap<Service, ServiceDTO>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+            CreateMap<ServiceDTO, Service>(); 
+            CreateMap<ServiceCreateDTO, Service>();
+            CreateMap<ServiceUpdateDTO, Service>();
+
+            #endregion
+
         }
     }
 }

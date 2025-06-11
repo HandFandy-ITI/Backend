@@ -28,6 +28,8 @@ namespace OstaFandy.DAL.Repos.IRepos
 
         public Task<int> SaveAsync();
         public IDbContextTransaction BeginTransaction();
+        ICategoryRepo CategoryRepo { get; }
+        IServiceRepo ServiceRepo { get; }
 
         Task<IDbContextTransaction> BeginTransactionasync();
     }

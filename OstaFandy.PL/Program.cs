@@ -33,7 +33,7 @@ namespace OstaFandy.PL
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
-
+            
             // Register your services here
 
 
