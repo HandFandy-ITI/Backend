@@ -11,6 +11,8 @@ namespace OstaFandy.DAL.Repos.IRepos
     {
         public IUserRepo UserRepo { get; }
         IUserTypeRepo UserTypeRepo { get; }
+        IPaymentRepo PaymentRepo { get; }
+
         public IHandyManRepo HandyManRepo { get; }
         public IAddressRepo AddressRepo { get; }
         public IAnalyticsRepo AnalyticsRepo { get; }
