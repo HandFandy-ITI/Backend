@@ -23,68 +23,22 @@ namespace OstaFandy.PL.BL
             return _mapper.Map<IEnumerable<CategoryDTO>>(categories);
         }
 
-
-        //public PaginatedResult<CategoryDTO> GetAllPaginated(int pageNumber, int pageSize)
-        //{
-        //    var query = _unit.CategoryRepo.GetAll(c => c.IsActive);
-        //    var totalItems = query.Count();
-        //    var items = query
-        //        .Skip((pageNumber - 1) * pageSize)
-        //        .Take(pageSize)
-        //        .ToList();
-
-        //    return new PaginatedResult<CategoryDTO>
-        //    {
-        //        TotalItems = totalItems,
-        //        Items = _mapper.Map<List<CategoryDTO>>(items),
-        //        PageNumber = pageNumber,
-        //        PageSize = pageSize
-        //    };
-        //}
-
-        //public PaginatedResult<CategoryDTO> GetAllPaginated(int pageNumber, int pageSize, string? search = null, string? status = null)
-        //{
-        //    var query = _unit.CategoryRepo.GetAll();
-
-        //    if (!string.IsNullOrEmpty(search))
-        //        query = query.Where(c => c.Name.Contains(search) || c.Description.Contains(search));
-
-        //    if (status == "Active")
-        //        query = query.Where(c => c.IsActive);
-        //    else if (status == "Inactive")
-        //        query = query.Where(c => !c.IsActive);
-
-        //    var totalItems = query.Count();
-
-        //    var items = query
-        //        .Skip((pageNumber - 1) * pageSize)
-        //        .Take(pageSize)
-        //        .ToList();
-
-        //    return new PaginatedResult<CategoryDTO>
-        //    {
-        //        TotalItems = totalItems,
-        //        Items = _mapper.Map<List<CategoryDTO>>(items),
-        //        PageNumber = pageNumber,
-        //        PageSize = pageSize
-        //    };
-        //}
         public PaginatedResult<CategoryDTO> GetAllPaginated(int pageNumber, int pageSize, string? search = null, string? status = null)
         {
-            var query = _unit.CategoryRepo.GetAll(); 
+            var query = _unit.CategoryRepo.GetAll();
 
-            if (!string.IsNullOrEmpty(search))
-                query = query.Where(c => c.Name.Contains(search) || c.Description.Contains(search));
+            // ✅ Cleaned Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.Trim().ToLower();
 
-            //if (!string.IsNullOrEmpty(status))
-            //{
-            //    if (status == "Active")
-            //        query = query.Where(c => c.IsActive);
-            //    else if (status == "Inactive")
-            //        query = query.Where(c => !c.IsActive);
-            //}
+                query = query.Where(c =>
+                    (!string.IsNullOrEmpty(c.Name) && c.Name.ToLower().Contains(search)) ||
+                    (!string.IsNullOrEmpty(c.Description) && c.Description.ToLower().Contains(search))
+                );
+            }
 
-
+            // ✅ Status filter remains same
             if (!string.IsNullOrEmpty(status) && status != "All")
             {
                 if (status == "Active")
@@ -96,10 +50,10 @@ namespace OstaFandy.PL.BL
             var totalItems = query.Count();
 
             var items = query
-     .OrderByDescending(c => c.CreatedAt)
-     .Skip((pageNumber - 1) * pageSize)
-     .Take(pageSize)
-     .ToList();
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
             return new PaginatedResult<CategoryDTO>
             {
@@ -109,9 +63,6 @@ namespace OstaFandy.PL.BL
                 PageSize = pageSize
             };
         }
-
-
-
 
         public CategoryDTO? GetById(int id)
         {
@@ -131,7 +82,12 @@ namespace OstaFandy.PL.BL
 
         public void Update(CategoryDTO dto)
         {
-            var category = _mapper.Map<Category>(dto);
+            var category = _unit.CategoryRepo.GetById(dto.Id);
+            if (category == null) throw new Exception("Category not found");
+
+            category.Name = dto.Name;
+            category.Description = dto.Description;
+            category.IsActive = dto.IsActive;
             category.UpdatedAt = DateTime.UtcNow;
 
             _unit.CategoryRepo.Update(category);
@@ -144,6 +100,26 @@ namespace OstaFandy.PL.BL
             if (category == null) return false;
 
             category.IsActive = false;
+            category.UpdatedAt = DateTime.UtcNow;
+
+            _unit.CategoryRepo.Update(category);
+            _unit.Save();
+            return true;
+        }
+
+        public bool ToggleStatus(int id)
+        {
+            var category = _unit.CategoryRepo.GetById(id);
+            if (category == null) return false;
+
+            if (category.IsActive)
+            {
+                var activeServices = _unit.ServiceRepo.GetAll(s => s.CategoryId == id && s.IsActive).Any();
+                if (activeServices)
+                    return false;
+            }
+
+            category.IsActive = !category.IsActive;
             category.UpdatedAt = DateTime.UtcNow;
 
             _unit.CategoryRepo.Update(category);

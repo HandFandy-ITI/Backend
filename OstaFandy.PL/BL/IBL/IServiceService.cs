@@ -2,22 +2,21 @@
 
 namespace OstaFandy.PL.BL.IBL
 {
-  
-        public interface IServiceService
-        {
-            IEnumerable<ServiceDTO> GetAll();
-            IEnumerable<ServiceDTO> GetByCategoryId(int categoryId);
+    public interface IServiceService
+    {
+        IEnumerable<ServiceDTO> GetAll();
+        IEnumerable<ServiceDTO> GetByCategoryId(int categoryId);
+        ServiceDTO? GetById(int id);
 
-            ServiceDTO? GetById(int id);
-        void Update(ServiceUpdateDTO dto);
-            bool SoftDelete(int id);
-
-        PaginatedResult<ServiceDTO> GetAllPaginated(int pageNumber, int pageSize, string? search = null, string? status = null, string? sortField = null, string? sortOrder = null, int? categoryId = null);
-
-
+        PaginatedResult<ServiceDTO> GetAllPaginated(
+            int pageNumber, int pageSize,
+            string? search = null, string? status = null,
+            string? sortField = null, string? sortOrder = null,
+            int? categoryId = null);
 
         void Add(ServiceCreateDTO dto);
-        }
-
-    
+        void Update(ServiceUpdateDTO dto);
+        bool SoftDelete(int id);
+        bool ToggleStatus(int id);
+    }
 }
