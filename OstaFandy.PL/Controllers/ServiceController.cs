@@ -25,18 +25,17 @@ namespace OstaFandy.PL.Controllers
 
         [HttpGet("paginated")]
         public ActionResult<PaginatedResult<ServiceDTO>> GetPaginated(
-    int pageNumber = 1,
-    int pageSize = 10,
-    string? search = null,
-    string? status = null,
-    string? sortField = null,
-    string? sortOrder = null,
-    int? categoryId = null)
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? search = null,
+            string? status = null,
+            string? sortField = null,
+            string? sortOrder = null,
+            int? categoryId = null)
         {
             var result = _serviceService.GetAllPaginated(pageNumber, pageSize, search, status, sortField, sortOrder, categoryId);
             return Ok(result);
         }
-
 
         [HttpGet("by-category/{categoryId}")]
         public ActionResult<IEnumerable<ServiceDTO>> GetByCategoryId(int categoryId)
@@ -79,6 +78,14 @@ namespace OstaFandy.PL.Controllers
         {
             bool success = _serviceService.SoftDelete(id);
             return success ? Ok("Service deleted.") : NotFound();
+        }
+
+        [HttpPatch("{id}/toggle-status")]
+        [Authorize(Policy = "Admin")]
+        public IActionResult ToggleStatus(int id)
+        {
+            bool success = _serviceService.ToggleStatus(id);
+            return success ? Ok("Service status updated.") : NotFound();
         }
     }
 }

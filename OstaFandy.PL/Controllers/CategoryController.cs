@@ -23,20 +23,16 @@ namespace OstaFandy.PL.Controllers
             return Ok(result);
         }
 
-
-
-     
         [HttpGet("paginated")]
         public ActionResult<PaginatedResult<CategoryDTO>> GetPaginated(
-    [FromQuery] int pageNumber = 1,
-    [FromQuery] int pageSize = 10,
-    [FromQuery] string? search = null,
-    [FromQuery] string? status = null)
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? search = null,
+            [FromQuery] string? status = null)
         {
             var result = _categoryService.GetAllPaginated(pageNumber, pageSize, search, status);
             return Ok(result);
         }
-
 
         [HttpGet("{id}")]
         public ActionResult<CategoryDTO> GetById(int id)
@@ -65,7 +61,7 @@ namespace OstaFandy.PL.Controllers
         {
             if (id != dto.Id) return BadRequest("ID mismatch.");
             _categoryService.Update(dto);
-            return Ok("Category updated.");
+            return Ok(new { message = "Category updated." });
         }
 
         [HttpDelete("{id}")]
@@ -74,6 +70,16 @@ namespace OstaFandy.PL.Controllers
         {
             bool success = _categoryService.SoftDelete(id);
             return success ? Ok("Category deleted.") : NotFound();
+        }
+
+        [HttpPatch("{id}/toggle-status")]
+        [Authorize(Policy = "Admin")]
+        public IActionResult ToggleStatus(int id)
+        {
+            bool success = _categoryService.ToggleStatus(id);
+            return success
+                ? Ok("Category status updated.")
+                : BadRequest("Cannot deactivate category with active services.");
         }
     }
 }

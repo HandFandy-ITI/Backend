@@ -171,9 +171,17 @@ namespace OstaFandy.PL.Mapper
                src.BookingServices.Select(bs => bs.Service.Name).ToList()));
             #endregion
 
-            #region service catalogAdd commentMore actions
+            #region 
+            // Category
             CreateMap<Category, CategoryDTO>().ReverseMap();
-            CreateMap<Service, ServiceDTO>().ReverseMap();
+            CreateMap<CategoryCreateDTO, Category>();
+
+            // Service
+            CreateMap<Service, ServiceDTO>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+
+            CreateMap<ServiceCreateDTO, Service>();
+            CreateMap<ServiceUpdateDTO, Service>();
             #endregion
 
 

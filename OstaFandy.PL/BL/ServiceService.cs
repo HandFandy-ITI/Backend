@@ -24,23 +24,20 @@ namespace OstaFandy.PL.BL
         }
 
         public PaginatedResult<ServiceDTO> GetAllPaginated(
-         int pageNumber,
-         int pageSize,
-         string? search = null,
-         string? status = null,
-         string? sortField = null,
-         string? sortOrder = null,
-         int? categoryId = null) // <-- added optional categoryId
+      int pageNumber,
+      int pageSize,
+      string? search = null,
+      string? status = null,
+      string? sortField = null,
+      string? sortOrder = null,
+      int? categoryId = null)
         {
-            var query = _unit.ServiceRepo.GetAll(includeProperties: "Category");
+            var query = _unit.ServiceRepo.GetAll(includeProperties: "Category").AsQueryable();
 
-            // 🔍 Filter by Category
+            // Filters
             if (categoryId.HasValue)
-            {
                 query = query.Where(s => s.CategoryId == categoryId.Value);
-            }
 
-            // 🔍 Search filter
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.Trim().ToLower();
@@ -49,34 +46,17 @@ namespace OstaFandy.PL.BL
                     s.Description.ToLower().Contains(search));
             }
 
-            // ✅ Status filter
             if (!string.IsNullOrEmpty(status) && status != "All")
             {
-                if (status == "Active")
-                    query = query.Where(s => s.IsActive);
-                else if (status == "Inactive")
-                    query = query.Where(s => !s.IsActive);
+                query = query.Where(s => (status == "Active") ? s.IsActive : !s.IsActive);
             }
 
-            // ↕️ Sorting
-            sortField = sortField?.ToLower() ?? "name";
-            bool ascending = sortOrder?.ToLower() != "desc";
+            // Sorting
+            query = ApplySorting(query, sortField, sortOrder);
 
-            query = sortField switch
-            {
-                "name" => ascending ? query.OrderBy(s => s.Name) : query.OrderByDescending(s => s.Name),
-                "fixedprice" => ascending ? query.OrderBy(s => s.FixedPrice) : query.OrderByDescending(s => s.FixedPrice),
-                "estimatedminutes" => ascending ? query.OrderBy(s => s.EstimatedMinutes) : query.OrderByDescending(s => s.EstimatedMinutes),
-                _ => query.OrderBy(s => s.Name)
-            };
-
-            // 📄 Pagination
+            // Pagination
             var totalItems = query.Count();
-
-            var items = query
-                .Skip((pageNumber - 1) * pageSize)
-                .Take(pageSize)
-                .ToList();
+            var items = query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToList();
 
             return new PaginatedResult<ServiceDTO>
             {
@@ -87,6 +67,20 @@ namespace OstaFandy.PL.BL
             };
         }
 
+
+        private IQueryable<Service> ApplySorting(IQueryable<Service> query, string? sortField, string? sortOrder)
+        {
+            var ascending = string.IsNullOrEmpty(sortOrder) || sortOrder.ToLower() == "asc";
+            sortField = sortField?.ToLower() ?? "name";
+
+            return sortField switch
+            {
+                "name" => ascending ? query.OrderBy(s => s.Name) : query.OrderByDescending(s => s.Name),
+                "fixedprice" => ascending ? query.OrderBy(s => s.FixedPrice) : query.OrderByDescending(s => s.FixedPrice),
+                "estimatedminutes" => ascending ? query.OrderBy(s => s.EstimatedMinutes) : query.OrderByDescending(s => s.EstimatedMinutes),
+                _ => query.OrderBy(s => s.Name)
+            };
+        }
 
         public IEnumerable<ServiceDTO> GetByCategoryId(int categoryId)
         {
@@ -112,10 +106,14 @@ namespace OstaFandy.PL.BL
 
         public void Update(ServiceUpdateDTO dto)
         {
-            var service = _mapper.Map<Service>(dto);
-            service.UpdatedAt = DateTime.UtcNow;
+            var existingService = _unit.ServiceRepo.GetById(dto.Id);
+            if (existingService == null)
+                throw new Exception("Service not found");
 
-            _unit.ServiceRepo.Update(service);
+            _mapper.Map(dto, existingService);
+            existingService.UpdatedAt = DateTime.UtcNow;
+
+            _unit.ServiceRepo.Update(existingService);
             _unit.Save();
         }
 
@@ -125,6 +123,19 @@ namespace OstaFandy.PL.BL
             if (service == null) return false;
 
             service.IsActive = false;
+            service.UpdatedAt = DateTime.UtcNow;
+
+            _unit.ServiceRepo.Update(service);
+            _unit.Save();
+            return true;
+        }
+
+        public bool ToggleStatus(int id)
+        {
+            var service = _unit.ServiceRepo.GetById(id);
+            if (service == null) return false;
+
+            service.IsActive = !service.IsActive;
             service.UpdatedAt = DateTime.UtcNow;
 
             _unit.ServiceRepo.Update(service);
