@@ -53,6 +53,8 @@ namespace OstaFandy.PL.Controllers
             return Ok(new { message = "Category added successfully." });
         }
 
+
+
         [HttpPut("{id}")]
         [Authorize(Policy = "Admin")]
         public IActionResult Update(int id, CategoryDTO dto)
