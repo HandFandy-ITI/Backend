@@ -24,12 +24,14 @@ namespace OstaFandy.PL.Controllers
         private readonly IMapper _map;
         private readonly IHandyManService _handymanService;
         private readonly IUserService _userservice;
+        private readonly IJWTService _jwtService;
+
 
         private readonly ILogger<HandyManService> _logger;
 
 
 
-        public AdminHandyManController(IHandyManService HandyManService, IUserService userService, IMapper map, ILogger<HandyManService> logger)
+        public AdminHandyManController(IHandyManService HandyManService, IUserService userService, IMapper map, ILogger<HandyManService> logger, IJWTService jwtService)
 
         {
             _map = map;
@@ -37,13 +39,14 @@ namespace OstaFandy.PL.Controllers
             _userservice = userService;
 
             _logger = logger;
+            _jwtService = jwtService;
         }
         [HttpGet]
         [EndpointDescription("AdminHandyMan/getall")]
         [EndpointSummary("return all handymen")]
-        public IActionResult GetAll(string searchString = "", int pageNumber = 1, int pageSize = 5)
+        public IActionResult GetAll(string searchString = "", int pageNumber = 1, int pageSize = 5, bool? isActive = null)
         {
-            var result = _handymanService.GetAll(searchString, pageNumber, pageSize);
+            var result = _handymanService.GetAll(searchString, pageNumber, pageSize, isActive);
 
             if (result.Data == null || !result.Data.Any())
             {
@@ -139,7 +142,7 @@ namespace OstaFandy.PL.Controllers
             {
                 success = true,
                 message = $"Handyman status updated to {statusUpdate.Status} successfully"
-            });  
+            });
 
         }
 
@@ -259,6 +262,84 @@ namespace OstaFandy.PL.Controllers
             }
 
         }
+
+
+        [Route("Handyman-register")]
+        [HttpPost]
+        [EndpointDescription("api/AdminHandyMan/register-Handyma")]
+        [EndpointSummary("add handyman application")]
+        public IActionResult HandyManApplication([FromForm] HandyManApplicationDto handymandto)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "Invalid input",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            var res = _handymanService.CreateHandyManApplicationAsync(handymandto).Result;
+            if (res == 0)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "Invalid input",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            else if (res == -1)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "User already exists",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            else if (res == -2)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "Password and confirm password do not match",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            else if (res > 0)
+            {
+                var user = _userservice.GetById(res);
+                
+
+                var token = _jwtService.GeneratedToken(user);
+                return Ok(new ResponseDto<string>
+                {
+                    IsSuccess = true,
+                    Message = "registered successfully please wait for aprrovment",
+                    Data = token,
+                    StatusCode = StatusCodes.Status201Created
+                });
+            }
+            else
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "An error occurred while registeration",
+                    Data = null,
+                    StatusCode = StatusCodes.Status500InternalServerError
+                });
+
+
+            }
+        }
+
+
     }
 }
 

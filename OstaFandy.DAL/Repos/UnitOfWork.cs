@@ -35,7 +35,7 @@ namespace OstaFandy.DAL.Repos
 
 
         // This propertyes initializes the repos if it hasn't been initialized yet
-        public IUserRepo UserRepo => _userRepo??=new UserRepo(_db);
+        public IUserRepo UserRepo => _userRepo ??= new UserRepo(_db);
         public IUserTypeRepo UserTypeRepo => _userTypeRepo ??= new UserTypeRepo(_db);
 
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
@@ -55,11 +55,19 @@ namespace OstaFandy.DAL.Repos
             return _db.SaveChanges();
         }
 
+        public async Task<int> SaveAsync()
+        {
+            return await _db.SaveChangesAsync();
+        }
+
         public IDbContextTransaction BeginTransaction()
         {
             return _db.Database.BeginTransaction();
         }
 
-
+        public async Task<IDbContextTransaction> BeginTransactionasync()
+        {
+            return await _db.Database.BeginTransactionAsync();
+        }
     }
 }

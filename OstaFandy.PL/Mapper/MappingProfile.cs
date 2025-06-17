@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using OstaFandy.DAL.Entities;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.General;
 
 namespace OstaFandy.PL.Mapper
 {
@@ -10,7 +11,7 @@ namespace OstaFandy.PL.Mapper
         {
             #region User
             CreateMap<User, UserDto>().ReverseMap();
-            CreateMap<UserType, UserTypeDto>().ReverseMap();
+            CreateMap<DAL.Entities.UserType, UserTypeDto>().ReverseMap();
             CreateMap<User, UserRegesterDto>().ReverseMap();
             CreateMap<User, UserLoginDto>().ReverseMap();
             #endregion
@@ -196,7 +197,7 @@ namespace OstaFandy.PL.Mapper
             CreateMap<Booking, DashboardDTO>()
             .AfterMap((src, dest) =>
             {
-                dest.Service = src.BookingServices != null && src.BookingServices.Any()
+                 dest.Service = src.BookingServices != null && src.BookingServices.Any()
                     ? string.Join(", ", src.BookingServices.Select(bs => bs.Service.Name))
                     : string.Empty;
 
@@ -215,6 +216,24 @@ namespace OstaFandy.PL.Mapper
 
                 dest.Revenue = src.TotalPrice ?? 0;
             });
+            #region Handyman application
+            CreateMap<HandyManApplicationDto, User>()
+           .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
+           .ReverseMap();
+
+            CreateMap<HandyManApplicationDto, Handyman>()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => HandymenStatus.Pending))
+                .ForMember(dest => dest.DefaultAddressId, opt => opt.Ignore()); 
+
+            CreateMap<HandyManApplicationDto, Address>()
+                .ForMember(dest => dest.Address1, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.IsDefault, opt => opt.MapFrom(_ => true))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Latitude))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Longitude))
+                .ForMember(dest => dest.AddressType, opt => opt.MapFrom(src => src.AddressType))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
+            #endregion
         }
     }
 }
