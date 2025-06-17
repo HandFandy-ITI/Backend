@@ -23,6 +23,20 @@ namespace OstaFandy.PL.Controllers
             return Ok(result);
         }
 
+        [HttpGet("paginated")]
+        public ActionResult<PaginatedResult<ServiceDTO>> GetPaginated(
+            int pageNumber = 1,
+            int pageSize = 10,
+            string? search = null,
+            string? status = null,
+            string? sortField = null,
+            string? sortOrder = null,
+            int? categoryId = null)
+        {
+            var result = _serviceService.GetAllPaginated(pageNumber, pageSize, search, status, sortField, sortOrder, categoryId);
+            return Ok(result);
+        }
+
         [HttpGet("by-category/{categoryId}")]
         public ActionResult<IEnumerable<ServiceDTO>> GetByCategoryId(int categoryId)
         {
@@ -40,19 +54,22 @@ namespace OstaFandy.PL.Controllers
 
         [HttpPost]
         [Authorize(Policy = "Admin")]
-        public IActionResult Add(ServiceDTO dto)
+        public IActionResult Add([FromBody] ServiceCreateDTO dto)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             _serviceService.Add(dto);
-            return Ok("Service added.");
+            return Ok(new { message = "Service added successfully." });
         }
 
         [HttpPut("{id}")]
         [Authorize(Policy = "Admin")]
-        public IActionResult Update(int id, ServiceDTO dto)
+        public IActionResult Update(int id, [FromBody] ServiceUpdateDTO dto)
         {
             if (id != dto.Id) return BadRequest("ID mismatch.");
             _serviceService.Update(dto);
-            return Ok("Service updated.");
+            return NoContent();
         }
 
         [HttpDelete("{id}")]
@@ -61,6 +78,14 @@ namespace OstaFandy.PL.Controllers
         {
             bool success = _serviceService.SoftDelete(id);
             return success ? Ok("Service deleted.") : NotFound();
+        }
+
+        [HttpPatch("{id}/toggle-status")]
+        [Authorize(Policy = "Admin")]
+        public IActionResult ToggleStatus(int id)
+        {
+            bool success = _serviceService.ToggleStatus(id);
+            return success ? Ok("Service status updated.") : NotFound();
         }
     }
 }

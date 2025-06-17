@@ -171,10 +171,19 @@ namespace OstaFandy.PL.Mapper
                src.BookingServices.Select(bs => bs.Service.Name).ToList()));
             #endregion
 
-            #region service catalogAdd commentMore actions
+            #region 
+            // Category
             CreateMap<Category, CategoryDTO>().ReverseMap();
-            CreateMap<Service, ServiceDTO>().ReverseMap();
+            CreateMap<CategoryCreateDTO, Category>();
+
+            // Service
+            CreateMap<Service, ServiceDTO>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+
+            CreateMap<ServiceCreateDTO, Service>();
+            CreateMap<ServiceUpdateDTO, Service>();
             #endregion
+
 
             #region feedback admin page
             CreateMap<Review, OrderFeedbackDto>()
@@ -216,6 +225,7 @@ namespace OstaFandy.PL.Mapper
 
                 dest.Revenue = src.TotalPrice ?? 0;
             });
+ 
             #region Handyman application
             CreateMap<HandyManApplicationDto, User>()
            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
@@ -234,6 +244,24 @@ namespace OstaFandy.PL.Mapper
                 .ForMember(dest => dest.AddressType, opt => opt.MapFrom(src => src.AddressType))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
             #endregion
+ 
+
+            #region service catalog
+
+            // Category Mappings
+            CreateMap<Category, CategoryDTO>().ReverseMap();
+            CreateMap<CategoryCreateDTO, Category>();
+
+            // Service Mappings
+            CreateMap<Service, ServiceDTO>()
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
+            CreateMap<ServiceDTO, Service>(); 
+            CreateMap<ServiceCreateDTO, Service>();
+            CreateMap<ServiceUpdateDTO, Service>();
+
+            #endregion
+
+ 
         }
     }
 }

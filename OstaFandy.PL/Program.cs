@@ -44,12 +44,16 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IJWTService, JWTService>();
             //roles
             builder.Services.AddScoped<IHandyManService, HandyManService>();
+ 
+            builder.Services.AddScoped<IUserService,UserService>();
+ 
             builder.Services.AddScoped<IClientService, ClientService>();
 
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
             builder.Services.AddScoped<IAnalyticsRepo, AnalyticsRepo>();
 
             builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
+
 
             builder.Services.AddScoped<IOrderFeedbackService, OrderFeedbackService>();
 
@@ -61,11 +65,16 @@ namespace OstaFandy.PL
 
 
 
+ 
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+ 
+
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
+ 
             #endregion
 
             #region PaymentServices
-            builder.Services.AddScoped<IPaymentRepo, PaymentRepo>();
             builder.Services.AddScoped<IPaymentService, PaymentService>();
 
 

@@ -8,25 +8,25 @@ namespace OstaFandy.PL.BL
 {
     public class PaymentService : IPaymentService
     {
-        private readonly IPaymentRepo _paymentRepo;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public PaymentService(IPaymentRepo paymentRepo, IMapper mapper)
+        public PaymentService(IUnitOfWork unitOfWork, IMapper mapper)
         {
-            _paymentRepo = paymentRepo;
+            _unitOfWork = unitOfWork;
             _mapper = mapper;
         }
 
         public async Task<PagedPaymentResponseDto> GetAllPaymentsAsync(PaymentFilterDto filter)
         {
-            var payments = await _paymentRepo.GetAllAsync(
+            var payments = await _unitOfWork.PaymentRepo.GetAllAsync(
                 filter.Status,
                 filter.Method,
                 filter.SearchTerm,
                 filter.PageNumber,
                 filter.PageSize);
 
-            var totalCount = await _paymentRepo.GetTotalCountAsync(
+            var totalCount = await _unitOfWork.PaymentRepo.GetTotalCountAsync(
                 filter.Status,
                 filter.Method,
                 filter.SearchTerm);
@@ -49,7 +49,7 @@ namespace OstaFandy.PL.BL
 
         public async Task<PaymentDetailsDto?> GetPaymentByIdAsync(int id)
         {
-            var payment = await _paymentRepo.GetByIdAsync(id);
+            var payment = await _unitOfWork.PaymentRepo.GetByIdAsync(id);
 
             if (payment == null)
                 return null;
