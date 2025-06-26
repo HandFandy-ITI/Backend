@@ -342,7 +342,7 @@ namespace OstaFandy.PL.BL
                 {
                     await transaction.CommitAsync();
  
-                    return 1;
+                    
  
                     return user.Id;
                  }

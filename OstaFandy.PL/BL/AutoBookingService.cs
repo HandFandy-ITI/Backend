@@ -35,10 +35,81 @@ namespace OstaFandy.PL.BL
             }
             catch (Exception ex)
             {
-                
+
                 throw new Exception("An error occurred while retrieving bookings.", ex);
             }
         }
+
+        //get booking by id
+        public BookingViewDto GetBookingById(int id)
+        {
+            try
+            {
+                if (id <= 0)
+                {
+                    throw new ArgumentException("Invalid booking ID.");
+                }
+                var booking = _unitOfWork.BookingRepo.FirstOrDefault(b=>b.Id==id, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category");
+                if (booking == null)
+                {
+                    throw new KeyNotFoundException($"Booking with ID {id} not found.");
+                }
+                var bookingDto = _mapper.Map<BookingViewDto>(booking);
+                return bookingDto;
+            }
+            catch(Exception ex)
+            {
+                throw new ApplicationException("An error occurred while retrieving the booking.", ex);
+            }
+        
+        }
+        //get booking by client id
+        public List<BookingViewDto> GetBookingsByClientId(int clientId)
+        {
+            try
+            {
+                if (clientId <= 0)
+                {
+                    throw new ArgumentException("Invalid client ID.");
+                }
+                var bookings = _unitOfWork.BookingRepo.GetAll(b => b.ClientId == clientId, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category");
+                if (bookings == null || !bookings.Any())
+                {
+                    return new List<BookingViewDto>();
+                }
+                var bookingDtos = _mapper.Map<List<BookingViewDto>>(bookings);
+                return bookingDtos;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("An error occurred while retrieving bookings for the client.", ex);
+            }
+        }
+        //get booking by handyman id
+        public List<BookingViewDto> GetBookingsByHandyManId(int HandyManId)
+        {
+            try
+            {
+                if (HandyManId <= 0)
+                {
+                    throw new ArgumentException("Invalid client ID.");
+                }
+                var bookings = _unitOfWork.BookingRepo.GetAll(b => b.JobAssignment.Handyman.UserId == HandyManId, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category");
+                if (bookings == null || !bookings.Any())
+                {
+                    return new List<BookingViewDto>();
+                }
+                var bookingDtos = _mapper.Map<List<BookingViewDto>>(bookings);
+                return bookingDtos;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("An error occurred while retrieving bookings for the client.", ex);
+            }
+        }
+        //create booking
+        //update statues 
+
 
 
     }

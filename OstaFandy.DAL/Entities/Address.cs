@@ -4,7 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NetTopologySuite.Geometries;
 using Microsoft.EntityFrameworkCore;
+
 
 namespace OstaFandy.DAL.Entities;
 
@@ -29,6 +31,9 @@ public partial class Address
 
     [Column(TypeName = "decimal(9, 6)")]
     public decimal Longitude { get; set; }
+
+   public Point Location { get; set; }
+
 
     [Required]
     [StringLength(20)]
