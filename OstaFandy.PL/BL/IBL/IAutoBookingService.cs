@@ -4,6 +4,11 @@ namespace OstaFandy.PL.BL.IBL
 {
     public interface IAutoBookingService
     {
-        public List<BookingViewDto> GetAllBookings();
+         List<BookingViewDto> GetAllBookings();
+         BookingViewDto GetBookingById(int id);
+
+        List<BookingViewDto> GetBookingsByClientId(int clientId);
+
+        List<BookingViewDto> GetBookingsByHandyManId(int HandyManId);
     }
 }

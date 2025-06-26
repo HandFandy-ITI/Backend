@@ -10,7 +10,9 @@
 
         public string? CategoryName { get; set; } 
 
-        public List<string>? ServiceNames { get; set; } 
+        public List<string>? ServiceNames { get; set; }
+
+        public decimal? TotalPrice { get; set; }
         public string? Note { get; set; }
 
         public DateTime PreferredDate { get; set; }
