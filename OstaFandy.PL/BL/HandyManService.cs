@@ -17,7 +17,7 @@ namespace OstaFandy.PL.BL
         private readonly ILogger<HandyManService> _logger;
         private readonly IMapper _mapper;
         private readonly ICloudinaryService _cloudinaryService;
-        public HandyManService(IUnitOfWork unitOfWork, ILogger<HandyManService> logger, IMapper mapper,ICloudinaryService cloudinaryService)
+        public HandyManService(IUnitOfWork unitOfWork, ILogger<HandyManService> logger, IMapper mapper, ICloudinaryService cloudinaryService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -53,16 +53,17 @@ namespace OstaFandy.PL.BL
                         h.Specialization.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase)
                     ).ToList();
                 }
- 
+
                 if (isActive == true)
                 {
-                data = data.Where(a => a.User.IsActive == true).ToList();
-                }else if(isActive == false)
+                    data = data.Where(a => a.User.IsActive == true).ToList();
+                }
+                else if (isActive == false)
                 {
                     data = data.Where(a => a.User.IsActive == false).ToList();
                 }
 
-                    return PaginationHelper<Handyman>.Create(data, pageNumber, pageSize, searchString);
+                return PaginationHelper<Handyman>.Create(data, pageNumber, pageSize, searchString);
             }
             catch (Exception ex)
             {
@@ -189,15 +190,15 @@ namespace OstaFandy.PL.BL
                     };
 
                     _unitOfWork.AddressRepo.Insert(defaultAddress);
-                    _unitOfWork.Save();  
+                    _unitOfWork.Save();
                     handyman.DefaultAddressId = defaultAddress.Id;
                     _unitOfWork.HandyManRepo.Update(handyman);
                     _unitOfWork.Save();
-                } 
+                }
 
- 
-                var createdHandyman = _unitOfWork.HandyManRepo.GetById(user.Id); 
- 
+
+                var createdHandyman = _unitOfWork.HandyManRepo.GetById(user.Id);
+
                 return _mapper.Map<AdminHandyManDTO>(createdHandyman);
             }
             catch (Exception ex)
@@ -211,11 +212,11 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                 var handyman = _unitOfWork.HandyManRepo.GetById(id);
+                var handyman = _unitOfWork.HandyManRepo.GetById(id);
 
                 if (handyman == null)
                 {
-                    return null; 
+                    return null;
                 }
 
                 // Map to DTO and return
@@ -341,11 +342,11 @@ namespace OstaFandy.PL.BL
                 if (res > 0)
                 {
                     await transaction.CommitAsync();
- 
-                    
- 
+
+
+
                     return user.Id;
-                 }
+                }
                 else
                 {
                     await transaction.RollbackAsync();
@@ -359,6 +360,39 @@ namespace OstaFandy.PL.BL
                 return 0;
             }
         }
+
+        public HandyManStatsDto? GetHandyManStats(int handymanId)
+        {
+            try
+            {
+                var handyman = _unitOfWork.HandyManRepo.FirstOrDefault(h => h.UserId == handymanId, "JobAssignments.Booking,JobAssignments.Quotes");
+                if (handyman == null)
+                {
+                    _logger.LogWarning($"Handyman with ID {handymanId} not found");
+                    return null;
+                }
+                return (new HandyManStatsDto
+                {
+                    TodayJobs = handyman.JobAssignments
+                        .Count(j => j.IsActive && j.Status == "Completed" && j.AssignedAt.Date == DateTime.UtcNow.Date),
+
+                    PendingQuotes = handyman.JobAssignments
+                         .SelectMany(j => j.Quotes)
+                         .Count(q => q.Status == QuotesStatus.Pending),
+
+                    CompletedJobs = handyman.JobAssignments
+                         .Count(j => j.Booking != null && j.Booking.Status == BookingStatus.Completed)
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while getting total jobs for handyman with ID {handymanId}");
+                return null;
+            }
+        }
+
+
+
 
     }
 }
