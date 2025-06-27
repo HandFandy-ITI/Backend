@@ -64,4 +64,12 @@ namespace OstaFandy.PL.DTOs
         public bool IsDefault { get; set; }
 
     }
+
+    public class HandyManStatsDto
+    {
+        public int TodayJobs { get; set; }
+        public int PendingQuotes { get; set; }
+
+        public int CompletedJobs { get; set; }
+    }
 }

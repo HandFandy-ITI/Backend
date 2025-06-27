@@ -21,10 +21,10 @@ namespace OstaFandy.PL.BL
             #region Claims  
             var userdata = new List<Claim>
            {
-               new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
-               new Claim(ClaimTypes.Email, user.Email),
-               new Claim(ClaimTypes.GivenName, user.FirstName),
-               new Claim(ClaimTypes.Surname, user.LastName),
+               new Claim("NameIdentifier", user.Id.ToString()),
+               new Claim("Email", user.Email),
+               new Claim("GivenName", user.FirstName),
+               new Claim("Surname", user.LastName),
                new Claim("UserType", user.UserTypes.FirstOrDefault()?.TypeName ?? string.Empty),
            };
             #endregion

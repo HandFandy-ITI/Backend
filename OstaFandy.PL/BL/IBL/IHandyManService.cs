@@ -20,6 +20,8 @@ namespace OstaFandy.PL.BL.IBL
 
         public Task<int> CreateHandyManApplicationAsync(HandyManApplicationDto handymandto);
 
+        HandyManStatsDto? GetHandyManStats(int handymanId);
+
 
 
     }
