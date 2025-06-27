@@ -22,7 +22,7 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                var bookings = _unitOfWork.BookingRepo.GetAll(null, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category");
+                var bookings = _unitOfWork.BookingRepo.GetAll(null, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
 
                 if (bookings == null || !bookings.Any())
                 {
@@ -49,7 +49,7 @@ namespace OstaFandy.PL.BL
                 {
                     throw new ArgumentException("Invalid booking ID.");
                 }
-                var booking = _unitOfWork.BookingRepo.FirstOrDefault(b=>b.Id==id, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category");
+                var booking = _unitOfWork.BookingRepo.FirstOrDefault(b=>b.Id==id, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
                 if (booking == null)
                 {
                     throw new KeyNotFoundException($"Booking with ID {id} not found.");
@@ -72,7 +72,7 @@ namespace OstaFandy.PL.BL
                 {
                     throw new ArgumentException("Invalid client ID.");
                 }
-                var bookings = _unitOfWork.BookingRepo.GetAll(b => b.ClientId == clientId, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category");
+                var bookings = _unitOfWork.BookingRepo.GetAll(b => b.ClientId == clientId, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
                 if (bookings == null || !bookings.Any())
                 {
                     return new List<BookingViewDto>();
@@ -94,7 +94,7 @@ namespace OstaFandy.PL.BL
                 {
                     throw new ArgumentException("Invalid client ID.");
                 }
-                var bookings = _unitOfWork.BookingRepo.GetAll(b => b.JobAssignment.Handyman.UserId == HandyManId, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category");
+                var bookings = _unitOfWork.BookingRepo.GetAll(b => b.JobAssignment.Handyman.UserId == HandyManId, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
                 if (bookings == null || !bookings.Any())
                 {
                     return new List<BookingViewDto>();
