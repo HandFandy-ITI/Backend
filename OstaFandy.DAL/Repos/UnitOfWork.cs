@@ -18,6 +18,7 @@ namespace OstaFandy.DAL.Repos
         {
             _db = db;
         }
+        #region d
         //add repos here
         private IUserRepo _userRepo;
 
@@ -31,15 +32,17 @@ namespace OstaFandy.DAL.Repos
         private IAnalyticsRepo _analyticsRepo;
         private IJobAssignmentRepo _JobAssignmentRepo;
 
-
+        private IClientRepo _ClientRepo;
         private ICategoryRepo _categoryRepo;
         private IServiceRepo _serviceRepo;
-
+        private INotificationRepo _notificationRepo;
+ 
 
         // This propertyes initializes the repos if it hasn't been initialized yet
         public IUserRepo UserRepo => _userRepo ??= new UserRepo(_db);
         public IUserTypeRepo UserTypeRepo => _userTypeRepo ??= new UserTypeRepo(_db);
         public IPaymentRepo PaymentRepo => _paymentRepo ??= new PaymentRepo(_db);
+        public INotificationRepo NotificationRepo=> _notificationRepo ??= new NotificationRepo(_db);
 
 
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
@@ -54,8 +57,7 @@ namespace OstaFandy.DAL.Repos
         public ICategoryRepo CategoryRepo => _categoryRepo ??= new CategoryRepo(_db);
         public IServiceRepo ServiceRepo => _serviceRepo ??= new ServiceRepo(_db);
 
-
-
+        public IClientRepo ClientRepo => _ClientRepo ??= new ClientRepo(_db);
 
         public int Save()
         {
@@ -76,5 +78,7 @@ namespace OstaFandy.DAL.Repos
         {
             return await _db.Database.BeginTransactionAsync();
         }
+        #endregion
+   
     }
 }
