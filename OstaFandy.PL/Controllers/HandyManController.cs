@@ -15,10 +15,10 @@ namespace OstaFandy.PL.Controllers
             _HandyManService = HandyManService;
         }
 
-        [HttpGet("GetHandyManStats")]
-        public IActionResult GetHandyManStats(int HandymanId)
+        [HttpGet("GetHandyManStats/{id}")]
+        public IActionResult GetHandyManStats(int id)
         {
-            var todayJobsCount = _HandyManService.GetHandyManStats(HandymanId);
+            var todayJobsCount = _HandyManService.GetHandyManStats(id);
             return Ok(todayJobsCount);
         }
 

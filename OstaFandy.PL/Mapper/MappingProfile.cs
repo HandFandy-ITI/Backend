@@ -168,7 +168,10 @@ namespace OstaFandy.PL.Mapper
            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src =>
                src.BookingServices.FirstOrDefault().Service.Category.Name))
            .ForMember(dest => dest.ServiceNames, opt => opt.MapFrom(src =>
-               src.BookingServices.Select(bs => bs.Service.Name).ToList()));
+               src.BookingServices.Select(bs => bs.Service.Name).ToList()))
+           .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Address.Latitude))
+           .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Address.Longitude));
+
             #endregion
 
             #region 

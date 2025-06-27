@@ -22,7 +22,7 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                var bookings = _unitOfWork.BookingRepo.GetAll(null, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category");
+                var bookings = _unitOfWork.BookingRepo.GetAll(null, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
 
                 if (bookings == null || !bookings.Any())
                 {
