@@ -203,6 +203,7 @@ namespace OstaFandy.PL.Mapper
                 .ReverseMap();
             #endregion
 
+            #region Dashboard
             CreateMap<Booking, DashboardDTO>()
             .AfterMap((src, dest) =>
             {
@@ -225,7 +226,8 @@ namespace OstaFandy.PL.Mapper
 
                 dest.Revenue = src.TotalPrice ?? 0;
             });
- 
+            #endregion
+
             #region Handyman application
             CreateMap<HandyManApplicationDto, User>()
            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(_ => true))
@@ -261,7 +263,25 @@ namespace OstaFandy.PL.Mapper
 
             #endregion
 
- 
-        }
+
+            #region handyman page job tap
+            //public int jobassingmentid { get; set; }
+            //public string clientname { get; set; }
+            //public int clientnumber { get; set; }
+            //public string address { get; set; }
+            //public string status { get; set; }
+
+            CreateMap<JobAssignment, HandymanJobsDTO>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.JobAssignmentId = src.Id;
+                    dest.ClientName = $"{src.Booking.Client.User.FirstName} {src.Booking.Client.User.LastName}";
+                    dest.ClientNumber = src.Booking.Client.User.Phone;
+                    dest.Address = src.Booking.Address?.Address1 ?? "No Address";
+                    dest.Status = src.Status;
+                })
+                .ReverseMap();
+        #endregion
+    }
     }
 }
