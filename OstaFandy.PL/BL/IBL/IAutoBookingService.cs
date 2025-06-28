@@ -1,4 +1,5 @@
-﻿using OstaFandy.PL.DTOs;
+﻿using OstaFandy.DAL.Entities;
+using OstaFandy.PL.DTOs;
 
 namespace OstaFandy.PL.BL.IBL
 {
@@ -10,5 +11,7 @@ namespace OstaFandy.PL.BL.IBL
         List<BookingViewDto> GetBookingsByClientId(int clientId);
 
         List<BookingViewDto> GetBookingsByHandyManId(int HandyManId);
+
+        Task<List<AvailableTimeSlot>> GetAvailableTimeSlotAsync(AvailableTimeSlotsRequestDto reqdata);
     }
 }

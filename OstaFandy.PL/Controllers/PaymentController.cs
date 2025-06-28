@@ -48,5 +48,12 @@ namespace OstaFandy.PL.Controllers
                 return StatusCode(500, ApiResponse<PaymentDetailsDto>.ErrorResult("Internal server error", new List<string> { ex.Message }));
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePaymentIntent(decimal amount)
+        {
+            var ClientSecret = await _paymentService.CreatePaymentIntent(amount);
+            return Ok(ClientSecret);
+        }
     }
 }

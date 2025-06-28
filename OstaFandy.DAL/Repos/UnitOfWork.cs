@@ -67,7 +67,10 @@ namespace OstaFandy.DAL.Repos
         public IChatRepo ChatRepo => _chatRepo ??= new ChatRepo(_db);
         public IMessageRepo MessageRepo => _messageRepo ??= new MessageRepo(_db);
 
-        public IClientRepo ClientRepo => _ClientRepo??=new ClientRepo(_db);
+        public IClientRepo ClientRepo => _ClientRepo ??= new ClientRepo(_db);
+
+
+
 
         public int Save()
         {
