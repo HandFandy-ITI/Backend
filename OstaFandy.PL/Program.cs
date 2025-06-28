@@ -65,6 +65,7 @@ namespace OstaFandy.PL
             
             
             builder.Services.AddScoped<IDashboardService, DashboardService>();
+            builder.Services.AddScoped<IClientPageService, ClientPageService>();
 
 
 

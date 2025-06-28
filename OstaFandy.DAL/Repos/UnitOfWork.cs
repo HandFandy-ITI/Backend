@@ -36,6 +36,7 @@ namespace OstaFandy.DAL.Repos
         private ICategoryRepo _categoryRepo;
         private IServiceRepo _serviceRepo;
         private INotificationRepo _notificationRepo;
+        private IQuoteRepo _quoteRepo;
  
 
         private IChatRepo _chatRepo;
@@ -46,6 +47,7 @@ namespace OstaFandy.DAL.Repos
         public IUserTypeRepo UserTypeRepo => _userTypeRepo ??= new UserTypeRepo(_db);
         public IPaymentRepo PaymentRepo => _paymentRepo ??= new PaymentRepo(_db);
         public INotificationRepo NotificationRepo=> _notificationRepo ??= new NotificationRepo(_db);
+        public IQuoteRepo QuoteRepo=> _quoteRepo ??= new QuoteRepo(_db);
 
 
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
