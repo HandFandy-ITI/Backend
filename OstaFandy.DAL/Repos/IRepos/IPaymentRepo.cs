@@ -3,7 +3,7 @@
 namespace OstaFandy.DAL.Repos.IRepos
 
 {
-    public interface IPaymentRepo
+    public interface IPaymentRepo:IGeneralRepo<Payment>
     {
         Task<IEnumerable<Payment>> GetAllAsync(
             string? status = null,

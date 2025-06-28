@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
@@ -107,7 +108,79 @@ namespace OstaFandy.PL.BL
                 throw new ApplicationException("An error occurred while retrieving bookings for the client.", ex);
             }
         }
+        //get free time slot
+        public async Task<List<AvailableTimeSlot>> GetAvailableTimeSlotAsync(AvailableTimeSlotsRequestDto reqdata)
+        {
+            try
+            {
+                var availableTimeSlots = await _unitOfWork.BookingRepo
+                    .GetAvailableTimeSlotsAsync(reqdata.CategoryId, reqdata.Day, reqdata.UserLatitude, reqdata.UserLongitude, reqdata.EstimatedMinutes);
+
+                return availableTimeSlots;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error getting available time slots", ex);
+            }
+        }
         //create booking
+        public async Task<int> CreateBooking(CreateBookingDTO bookingdto)
+        {
+            if(bookingdto == null) { return 0; }
+
+            using var trnsaction= await _unitOfWork.BeginTransactionasync();
+            try
+            {
+                //booking 
+                var booking = _mapper.Map<Booking>(bookingdto);
+                _unitOfWork.BookingRepo.Insert(booking);
+                await _unitOfWork.SaveAsync();
+
+                //job assign
+                var jobassign = _mapper.Map<JobAssignment>(bookingdto);
+                jobassign.BookingId = booking.Id;
+                jobassign.AssignedAt = DateTime.Now;
+                jobassign.CreatedAt = DateTime.Now;
+                _unitOfWork.JobAssignmentRepo.Insert(jobassign);
+
+
+                //booking service part
+                foreach (var S in bookingdto.ServiceIds)
+                {
+                    var bookingservice = new BookingService
+                    {
+                        ServiceId = S,
+                        BookingId = booking.Id,
+                    };
+                    _unitOfWork.BookingServiceRepo.Insert(bookingservice);
+                }
+
+                //payment
+                var payment=_mapper.Map<Payment>(bookingdto);
+                payment.BookingId = booking.Id;
+                _unitOfWork.PaymentRepo.Insert(payment);
+
+                var res=await _unitOfWork.SaveAsync();
+                if (res > 0) 
+                {
+                    await trnsaction.CommitAsync();
+                    return 1;
+                }
+                else
+                {
+                    await trnsaction.RollbackAsync();
+                    return -1;
+                }
+
+            }
+            catch(Exception ex) 
+            {
+                await trnsaction.RollbackAsync();
+                Console.WriteLine(ex.ToString());
+                return -2;
+            }
+        }
+
         //update statues 
 
 

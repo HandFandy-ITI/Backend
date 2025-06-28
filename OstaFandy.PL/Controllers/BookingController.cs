@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OstaFandy.DAL.Entities;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 
@@ -78,6 +79,86 @@ namespace OstaFandy.PL.Controllers
             });
 
 
+        }
+
+        [HttpGet("FreeSlot")]
+        public async Task<IActionResult> GetFreeSlot([FromQuery] int categoryId,[FromQuery] DateTime day,[FromQuery] decimal userLatitude,[FromQuery] decimal userLongitude,[FromQuery] int estimatedMinutes)
+        {
+            var reqdata = new AvailableTimeSlotsRequestDto
+            {
+                CategoryId = categoryId,
+                Day = day,
+                UserLatitude = userLatitude,
+                UserLongitude = userLongitude,
+                EstimatedMinutes = estimatedMinutes
+            };
+           
+            var freeslot = await _autoBookingService.GetAvailableTimeSlotAsync(reqdata);
+            if (freeslot == null || !freeslot.Any())
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "No Avliable time please choose another day",
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            else
+            {
+                return Ok(new ResponseDto<List<AvailableTimeSlot>>
+                {
+                    IsSuccess=true,
+                    Data=freeslot,
+                    Message="",
+                    StatusCode= StatusCodes.Status200OK
+                });
+            }
+        }
+
+        [HttpPost("createbooking")]
+        public async Task<IActionResult> CreateBooking(CreateBookingDTO dto)
+        {
+            var res=await _autoBookingService.CreateBooking(dto);
+
+            if (res == 0)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "Booking placed successfully",
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            else if (res == -1)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "Something went wrong. Please try again later.",
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            else if (res == -2)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "Oops! Something went wrong on our end. Please try again shortly.",
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            else {
+                return StatusCode(StatusCodes.Status201Created, new ResponseDto<string>
+                {
+                    IsSuccess = true,
+                    Data = null,
+                    Message = "Booking confirmed successfully",
+                    StatusCode = StatusCodes.Status201Created
+                });
+
+            }
         }
     }
 }

@@ -27,6 +27,8 @@ namespace OstaFandy.DAL.Repos.IRepos
         IServiceRepo ServiceRepo { get; }
         IChatRepo ChatRepo { get; }
         IMessageRepo MessageRepo { get; }
+
+        IBookingServiceRepo BookingServiceRepo { get; } 
         public int Save();
 
         public Task<int> SaveAsync();

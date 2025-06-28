@@ -3,6 +3,8 @@ using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.DAL.Repos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.DAL.Entities;
+using Stripe;
 
 namespace OstaFandy.PL.BL
 {
@@ -10,11 +12,14 @@ namespace OstaFandy.PL.BL
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _config;
 
-        public PaymentService(IUnitOfWork unitOfWork, IMapper mapper)
+        public PaymentService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration config)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _config = config;
+            StripeConfiguration.ApiKey = _config["Stripe:SecretKey"];
         }
 
         public async Task<PagedPaymentResponseDto> GetAllPaymentsAsync(PaymentFilterDto filter)
@@ -55,6 +60,21 @@ namespace OstaFandy.PL.BL
                 return null;
 
             return _mapper.Map<PaymentDetailsDto>(payment);
+        }
+
+        public async Task<string> CreatePaymentIntent(decimal amount)
+        {
+            var options = new PaymentIntentCreateOptions
+            {
+                Amount = (long)(amount * 100), // Stripe uses cents
+                Currency = "egp",
+                PaymentMethodTypes = new List<string> { "card" },
+            };
+
+            var service = new PaymentIntentService();
+            var intent = await service.CreateAsync(options);
+
+            return intent.ClientSecret;
         }
     }
 }
