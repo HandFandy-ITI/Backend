@@ -17,7 +17,13 @@ namespace OstaFandy.PL.Mapper
             #endregion
 
             #region Address
-            CreateMap<Address, AddressDTO>().ReverseMap();
+            CreateMap<Address, AddressDTO>()
+                    .ForSourceMember(src => src.Location, opt => opt.DoNotValidate());
+
+            CreateMap<AddressDTO, Address>()
+                .ForMember(dest => dest.Location, opt => opt.Ignore());
+
+            CreateMap<CreateAddressDTO, Address>().ReverseMap();
             #endregion
 
             #region JobAssignment
@@ -100,7 +106,7 @@ namespace OstaFandy.PL.Mapper
                                 Address1 = src.Client.DefaultAddress.Address1,
                                 City = src.Client.DefaultAddress.City,
                                 Latitude = src.Client.DefaultAddress.Latitude,
-                                Longitude = src.Client.DefaultAddress.Longitude,
+                                Longitude = src.Client.DefaultAddress.Longitude,                             
                                 AddressType = src.Client.DefaultAddress.AddressType,
                                 IsDefault = src.Client.DefaultAddress.IsDefault,
                                 IsActive = src.Client.DefaultAddress.IsActive,
