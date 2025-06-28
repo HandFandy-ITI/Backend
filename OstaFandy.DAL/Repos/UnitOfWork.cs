@@ -36,16 +36,20 @@ namespace OstaFandy.DAL.Repos
         private ICategoryRepo _categoryRepo;
         private IServiceRepo _serviceRepo;
         private INotificationRepo _notificationRepo;
+        private IQuoteRepo _quoteRepo;
  
 
         private IChatRepo _chatRepo;
         private IMessageRepo _messageRepo;
+
+
 
         // This propertyes initializes the repos if it hasn't been initialized yet
         public IUserRepo UserRepo => _userRepo ??= new UserRepo(_db);
         public IUserTypeRepo UserTypeRepo => _userTypeRepo ??= new UserTypeRepo(_db);
         public IPaymentRepo PaymentRepo => _paymentRepo ??= new PaymentRepo(_db);
         public INotificationRepo NotificationRepo=> _notificationRepo ??= new NotificationRepo(_db);
+        public IQuoteRepo QuoteRepo=> _quoteRepo ??= new QuoteRepo(_db);
 
 
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);
@@ -63,7 +67,7 @@ namespace OstaFandy.DAL.Repos
         public IChatRepo ChatRepo => _chatRepo ??= new ChatRepo(_db);
         public IMessageRepo MessageRepo => _messageRepo ??= new MessageRepo(_db);
 
-        public IClientRepo ClientRepo => _ClientRepo ??=new ClientRepo(_db);
+        public IClientRepo ClientRepo => _ClientRepo??=new ClientRepo(_db);
 
         public int Save()
         {

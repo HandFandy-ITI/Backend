@@ -67,7 +67,7 @@ public partial class AppDbContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Addresses__UserI__47DBAE45");
         });
-
+       
         modelBuilder.Entity<BlockDate>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__BlockDat__3214EC075295912A");

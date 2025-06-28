@@ -81,5 +81,33 @@ namespace OstaFandy.PL.Controllers
                 return StatusCode(500, new { message = "An error occurred while updating job status.", error = ex.Message });
             }
         }
+
+        [HttpPost("/quote")]
+        [EndpointDescription("HandymanJobs/AddQuote")]
+        [EndpointSummary("Add a quote for a specific job. You must provide the jobId, price, and notes in the request body.")]
+        public IActionResult AddQuote(int jobId, decimal Price, string Notes)
+        {
+            if (Price <= 0 || string.IsNullOrEmpty(Notes))
+            {
+                return BadRequest(new { message = "Invalid quote data." });
+            }
+            try
+            {
+                var result = _handymanJobService.AddQuote(jobId, Price, Notes);
+                if (result)
+                {
+                    return Ok(new { message = "Quote added successfully." });
+                }
+                else
+                {
+                    return NotFound(new { message = $"Job with ID {jobId} not found." });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while adding a quote.");
+                return StatusCode(500, new { message = "An error occurred while adding a quote.", error = ex.Message });
+            }
+        }
     }
 }
