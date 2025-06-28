@@ -8,6 +8,7 @@ using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.General;
+using OstaFandy.PL.Hubs;
 
 namespace OstaFandy.PL
 {
@@ -66,6 +67,15 @@ namespace OstaFandy.PL
 
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
+
+
+
+            #endregion
+
+
+            #region chat
+            // chat services
+            builder.Services.AddScoped<IChatService, ChatService>();
             #endregion
 
             #region PaymentServices
@@ -106,6 +116,10 @@ namespace OstaFandy.PL
             #endregion
 
 
+            //signaR
+            builder.Services.AddSignalR();
+
+
             builder.Services.AddCors(options =>
             {
                 options.AddPolicy(name: MyAllowSpecificOrigins,
@@ -113,7 +127,8 @@ namespace OstaFandy.PL
                     {
                         policy.WithOrigins("http://localhost:4200")
                               .AllowAnyHeader()
-                              .AllowAnyMethod();
+                              .AllowAnyMethod()
+                        .AllowCredentials();
                     });
             });
 
@@ -136,6 +151,7 @@ namespace OstaFandy.PL
             app.UseAuthorization();
 
             app.MapControllers();
+            app.MapHub<ChatHub>("/chatHub");
 
             app.Run();
         }
