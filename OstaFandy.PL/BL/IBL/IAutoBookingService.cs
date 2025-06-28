@@ -13,5 +13,7 @@ namespace OstaFandy.PL.BL.IBL
         List<BookingViewDto> GetBookingsByHandyManId(int HandyManId);
 
         Task<List<AvailableTimeSlot>> GetAvailableTimeSlotAsync(AvailableTimeSlotsRequestDto reqdata);
+
+        Task<int> CreateBooking(CreateBookingDTO bookingdto);
     }
 }

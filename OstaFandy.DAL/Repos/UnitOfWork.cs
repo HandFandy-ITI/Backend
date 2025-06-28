@@ -42,6 +42,8 @@ namespace OstaFandy.DAL.Repos
         private IChatRepo _chatRepo;
         private IMessageRepo _messageRepo;
 
+        private IBookingServiceRepo _bookingServiceRepo;
+
 
 
         // This propertyes initializes the repos if it hasn't been initialized yet
@@ -68,6 +70,8 @@ namespace OstaFandy.DAL.Repos
         public IMessageRepo MessageRepo => _messageRepo ??= new MessageRepo(_db);
 
         public IClientRepo ClientRepo => _ClientRepo ??= new ClientRepo(_db);
+
+        public IBookingServiceRepo BookingServiceRepo => _bookingServiceRepo ??= new BookingServiceRepo(_db);
 
 
 
