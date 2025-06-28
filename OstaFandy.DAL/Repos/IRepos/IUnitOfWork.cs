@@ -24,7 +24,8 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IJobAssignmentRepo JobAssignmentRepo { get; }
         ICategoryRepo CategoryRepo { get; }
         IServiceRepo ServiceRepo { get; }
-
+        IChatRepo ChatRepo { get; }
+        IMessageRepo MessageRepo { get; }
         public int Save();
 
         public Task<int> SaveAsync();
