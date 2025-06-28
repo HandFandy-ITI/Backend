@@ -168,7 +168,10 @@ namespace OstaFandy.PL.Mapper
            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src =>
                src.BookingServices.FirstOrDefault().Service.Category.Name))
            .ForMember(dest => dest.ServiceNames, opt => opt.MapFrom(src =>
-               src.BookingServices.Select(bs => bs.Service.Name).ToList()));
+               src.BookingServices.Select(bs => bs.Service.Name).ToList()))
+           .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Address.Latitude))
+           .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Address.Longitude));
+
             #endregion
 
             #region 
@@ -203,10 +206,11 @@ namespace OstaFandy.PL.Mapper
                 .ReverseMap();
             #endregion
 
+            #region Dashboard
             CreateMap<Booking, DashboardDTO>()
             .AfterMap((src, dest) =>
             {
-                dest.Service = src.BookingServices != null && src.BookingServices.Any()
+                 dest.Service = src.BookingServices != null && src.BookingServices.Any()
                     ? string.Join(", ", src.BookingServices.Select(bs => bs.Service.Name))
                     : string.Empty;
 
@@ -225,6 +229,7 @@ namespace OstaFandy.PL.Mapper
 
                 dest.Revenue = src.TotalPrice ?? 0;
             });
+            #endregion
 
             #region Handyman application
             CreateMap<HandyManApplicationDto, User>()
@@ -244,6 +249,7 @@ namespace OstaFandy.PL.Mapper
                 .ForMember(dest => dest.AddressType, opt => opt.MapFrom(src => src.AddressType))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
             #endregion
+ 
 
             #region service catalog
 
@@ -260,6 +266,25 @@ namespace OstaFandy.PL.Mapper
 
             #endregion
 
-        }
+
+            #region handyman page job tap
+            //public int jobassingmentid { get; set; }
+            //public string clientname { get; set; }
+            //public int clientnumber { get; set; }
+            //public string address { get; set; }
+            //public string status { get; set; }
+
+            CreateMap<JobAssignment, HandymanJobsDTO>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.JobAssignmentId = src.Id;
+                    dest.ClientName = $"{src.Booking.Client.User.FirstName} {src.Booking.Client.User.LastName}";
+                    dest.ClientNumber = src.Booking.Client.User.Phone;
+                    dest.Address = src.Booking.Address?.Address1 ?? "No Address";
+                    dest.Status = src.Status;
+                })
+                .ReverseMap();
+        #endregion
+    }
     }
 }

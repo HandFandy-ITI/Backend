@@ -1,4 +1,6 @@
-﻿namespace OstaFandy.PL.DTOs
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace OstaFandy.PL.DTOs
 {
     public class BookingViewDto
     {
@@ -10,7 +12,9 @@
 
         public string? CategoryName { get; set; } 
 
-        public List<string>? ServiceNames { get; set; } 
+        public List<string>? ServiceNames { get; set; }
+
+        public decimal? TotalPrice { get; set; }
         public string? Note { get; set; }
 
         public DateTime PreferredDate { get; set; }
@@ -18,5 +22,11 @@
         public int EstimatedMinutes { get; set; }
 
         public string? Status { get; set; }
+
+        public decimal Latitude { get; set; }
+
+        public decimal Longitude { get; set; }
+
+
     }
 }

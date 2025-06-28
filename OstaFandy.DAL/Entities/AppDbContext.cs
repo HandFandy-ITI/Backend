@@ -61,6 +61,8 @@ public partial class AppDbContext : DbContext
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
+            entity.Property(e => e.Location).HasColumnType("geography");
+
             entity.HasOne(d => d.User).WithMany(p => p.Addresses)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK__Addresses__UserI__47DBAE45");

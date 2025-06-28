@@ -28,13 +28,15 @@ namespace OstaFandy.PL
 
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+                options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
+                    sqlOptions=> sqlOptions.UseNetTopologySuite()
+                    );
             });
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 
-            
+
             // Register your services here
 
 
@@ -45,7 +47,9 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IJWTService, JWTService>();
             //roles
             builder.Services.AddScoped<IHandyManService, HandyManService>();
+ 
             builder.Services.AddScoped<IUserService,UserService>();
+ 
             builder.Services.AddScoped<IClientService, ClientService>();
 
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
@@ -64,6 +68,9 @@ namespace OstaFandy.PL
 
 
 
+ 
+            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+ 
 
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
@@ -76,6 +83,9 @@ namespace OstaFandy.PL
             #region chat
             // chat services
             builder.Services.AddScoped<IChatService, ChatService>();
+            builder.Services.AddScoped<IHandymanJobsService, HandymanJobsService>();
+
+ 
             #endregion
 
             #region PaymentServices

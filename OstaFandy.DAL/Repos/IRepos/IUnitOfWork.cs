@@ -12,8 +12,9 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IUserRepo UserRepo { get; }
         IUserTypeRepo UserTypeRepo { get; }
         IPaymentRepo PaymentRepo { get; }
-
+        public INotificationRepo NotificationRepo { get; }
         public IHandyManRepo HandyManRepo { get; }
+        public IClientRepo ClientRepo { get; }
         public IAddressRepo AddressRepo { get; }
         public IAnalyticsRepo AnalyticsRepo { get; }
 
@@ -29,7 +30,7 @@ namespace OstaFandy.DAL.Repos.IRepos
 
         public Task<int> SaveAsync();
         public IDbContextTransaction BeginTransaction();
-       
+
 
         Task<IDbContextTransaction> BeginTransactionasync();
     }
