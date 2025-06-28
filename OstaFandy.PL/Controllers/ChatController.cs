@@ -33,18 +33,17 @@ namespace OstaFandy.PL.Controllers
         //    return Ok(new { success = true });
         //}
 
-
         [HttpPost("send")]
         [Authorize]
         public IActionResult Send([FromBody] MessageDTO dto)
         {
-            var userIdClaim = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
+            var userIdClaim = User.FindFirst("NameIdentifier");
             if (userIdClaim == null) return Unauthorized();
 
             dto.SenderId = int.Parse(userIdClaim.Value);
 
             _chatService.SendMessage(dto);
-            return Ok();
+            return Ok(new { message = "Message sent successfully", success = true });
         }
 
 
@@ -56,5 +55,24 @@ namespace OstaFandy.PL.Controllers
             var history = _chatService.GetMessages(chatId);
             return Ok(history);
         }
+
+
+
+        [HttpGet("handyman/threads")]
+        [Authorize(AuthenticationSchemes = "myschema")]
+        public IActionResult GetHandymanThreads()
+        {
+            var userIdClaim = User.FindFirst("NameIdentifier");
+            if (userIdClaim == null) return Unauthorized();
+
+            int handymanId = int.Parse(userIdClaim.Value);
+            var threads = _chatService.GetHandymanThreads(handymanId);
+            return Ok(threads);
+        }
+
+
+
+
+
     }
 }
