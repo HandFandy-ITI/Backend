@@ -38,7 +38,7 @@ namespace OstaFandy.PL.Controllers
         [Authorize]
         public IActionResult Send([FromBody] MessageDTO dto)
         {
-            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            var userIdClaim = User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier");
             if (userIdClaim == null) return Unauthorized();
 
             dto.SenderId = int.Parse(userIdClaim.Value);
