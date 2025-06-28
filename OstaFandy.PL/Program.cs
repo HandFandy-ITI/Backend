@@ -69,6 +69,7 @@ namespace OstaFandy.PL
 
 
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+            builder.Services.AddScoped<IHandymanJobsService, HandymanJobsService>();
 
 
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
