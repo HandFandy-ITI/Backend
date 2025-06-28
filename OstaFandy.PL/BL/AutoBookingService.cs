@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
@@ -107,7 +108,23 @@ namespace OstaFandy.PL.BL
                 throw new ApplicationException("An error occurred while retrieving bookings for the client.", ex);
             }
         }
+        //get free time slot
+        public async Task<List<AvailableTimeSlot>> GetAvailableTimeSlotAsync(AvailableTimeSlotsRequestDto reqdata)
+        {
+            try
+            {
+                var availableTimeSlots = await _unitOfWork.BookingRepo
+                    .GetAvailableTimeSlotsAsync(reqdata.CategoryId, reqdata.Day, reqdata.UserLatitude, reqdata.UserLongitude, reqdata.EstimatedMinutes);
+
+                return availableTimeSlots;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error getting available time slots", ex);
+            }
+        }
         //create booking
+
         //update statues 
 
 

@@ -1,4 +1,5 @@
 ﻿using OstaFandy.PL.DTOs;
+using Stripe;
 
 namespace OstaFandy.PL.BL.IBL
 {
@@ -6,5 +7,7 @@ namespace OstaFandy.PL.BL.IBL
     {
         Task<PagedPaymentResponseDto> GetAllPaymentsAsync(PaymentFilterDto filter);
         Task<PaymentDetailsDto?> GetPaymentByIdAsync(int id);
+
+        Task<string> CreatePaymentIntent(decimal amount);
     }
 }
