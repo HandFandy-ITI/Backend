@@ -110,6 +110,8 @@ namespace OstaFandy.PL.Controllers
                 _logger.LogError(ex, "An error occurred while adding a quote.");
                 return StatusCode(500, new { message = "An error occurred while adding a quote.", error = ex.Message });
             }
+            fgjfg
+
         }
     }
 }
