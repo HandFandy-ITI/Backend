@@ -92,38 +92,75 @@ namespace OstaFandy.PL.Controllers
         [HttpPost("login")]
         public IActionResult Login([FromBody] UserLoginDto userLoginDto)
         {
-            if (!ModelState.IsValid)
+            try
             {
-                var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return BadRequest(new ResponseDto<string>
+                if (!ModelState.IsValid)
                 {
-                    IsSuccess = false,
-                    Message = "Invalid input",
-                    Data = string.Join(", ", errors),
-                    StatusCode = StatusCodes.Status400BadRequest
+                    var errors = ModelState.Values
+                        .SelectMany(v => v.Errors)
+                        .Select(e => e.ErrorMessage)
+                        .ToList();
+
+                    return BadRequest(new ResponseDto<string>
+                    {
+                        IsSuccess = false,
+                        Message = "Invalid input",
+                        Data = string.Join(", ", errors),
+                        StatusCode = StatusCodes.Status400BadRequest
+                    });
+                }
+
+                var user = _userService.GetUserByEmail(userLoginDto.Email);
+
+                // Check if user is null or hash is missing
+                if (user == null || string.IsNullOrWhiteSpace(user.PasswordHash))
+                {
+                    return Unauthorized(new ResponseDto<string>
+                    {
+                        IsSuccess = false,
+                        Message = "Invalid email or password",
+                        Data = null,
+                        StatusCode = StatusCodes.Status401Unauthorized
+                    });
+                }
+
+                // Try verifying password
+                bool passwordMatches = BCrypt.Net.BCrypt.Verify(userLoginDto.Password, user.PasswordHash);
+
+                if (!passwordMatches)
+                {
+                    return Unauthorized(new ResponseDto<string>
+                    {
+                        IsSuccess = false,
+                        Message = "Invalid email or password",
+                        Data = null,
+                        StatusCode = StatusCodes.Status401Unauthorized
+                    });
+                }
+
+                // Generate token and return
+                var token = _jwtService.GeneratedToken(user);
+
+                return Ok(new ResponseDto<string>
+                {
+                    IsSuccess = true,
+                    Message = "Login Successful",
+                    Data = token,
+                    StatusCode = StatusCodes.Status200OK
                 });
             }
-            var user = _userService.GetUserByEmail(userLoginDto.Email);
-            if (user == null || !BCrypt.Net.BCrypt.Verify(userLoginDto.Password, user.PasswordHash))
+            catch (Exception ex)
             {
-                return Unauthorized(new ResponseDto<string>
+                // Catch anything unexpected and return 500 with message
+                return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto<string>
                 {
                     IsSuccess = false,
-                    Message = "Invalid email or password",
-                    Data = null,
-                    StatusCode = StatusCodes.Status401Unauthorized
+                    Message = "An unexpected error occurred.",
+                    Data = ex.Message,
+                    StatusCode = StatusCodes.Status500InternalServerError
                 });
             }
-            var token = _jwtService.GeneratedToken(user);
-            return Ok(new ResponseDto<string>
-            {
-                IsSuccess = true,
-                Message = "Login Successful",
-                Data = token,
-                StatusCode = StatusCodes.Status200OK
-            });
-
-
         }
+
     }
 }
