@@ -17,6 +17,8 @@ public partial class BookingService
 
     public int ServiceId { get; set; }
 
+    public int Quantity { get; set; }
+
     [ForeignKey("BookingId")]
     [InverseProperty("BookingServices")]
     public virtual Booking Booking { get; set; }
