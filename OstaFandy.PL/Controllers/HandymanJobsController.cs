@@ -5,12 +5,7 @@ using OstaFandy.PL.DTOs;
 
 namespace OstaFandy.PL.Controllers
 {
-    public class AddQuoteDTO
-    {
-        public int JobId { get; set; }
-        public decimal Price { get; set; }
-        public string Notes { get; set; }
-    }
+    
 
     [Route("api/[controller]")]
     [ApiController]
