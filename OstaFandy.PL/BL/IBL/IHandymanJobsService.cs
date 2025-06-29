@@ -8,5 +8,7 @@ namespace OstaFandy.PL.BL.IBL
         PaginationHelper<HandymanJobsDTO> GetAll(string searchString = "", int pageNumber = 1, int pageSize = 5, string? status = null, int? handymanId = null);
         
         bool SentNotificationToClientToUpdataStatus(int jobId, string status);
+
+        bool AddQuote(int jobId, decimal price, string Notes);
     }
 }

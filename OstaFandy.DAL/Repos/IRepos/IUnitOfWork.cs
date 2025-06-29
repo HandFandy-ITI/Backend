@@ -17,6 +17,7 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IClientRepo ClientRepo { get; }
         public IAddressRepo AddressRepo { get; }
         public IAnalyticsRepo AnalyticsRepo { get; }
+        public IQuoteRepo QuoteRepo{ get; }
 
         public IBookingRepo BookingRepo { get; }
 
@@ -24,7 +25,10 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IJobAssignmentRepo JobAssignmentRepo { get; }
         ICategoryRepo CategoryRepo { get; }
         IServiceRepo ServiceRepo { get; }
+        IChatRepo ChatRepo { get; }
+        IMessageRepo MessageRepo { get; }
 
+        IBookingServiceRepo BookingServiceRepo { get; } 
         public int Save();
 
         public Task<int> SaveAsync();

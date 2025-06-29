@@ -22,7 +22,7 @@ public partial class Message
     public string Content { get; set; }
 
     [Column(TypeName = "datetime")]
-    public DateTime? SentAt { get; set; }
+    public DateTime SentAt { get; set; }
 
     public bool? IsRead { get; set; }
 

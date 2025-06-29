@@ -20,6 +20,8 @@ namespace OstaFandy.PL.BL
             _logger = logger;
 
         }
+
+        #region get all jobs for the handyman
         public PaginationHelper<HandymanJobsDTO> GetAll(string searchString = "", int pageNumber = 1, int pageSize = 5, string? status = null, int? handymanId = null)
         {
             try
@@ -44,7 +46,9 @@ namespace OstaFandy.PL.BL
                 throw new Exception("An error occurred while fetching handyman jobs.", ex);
             }
         }
+        #endregion
 
+        #region send notification to client to update job status
         public bool SentNotificationToClientToUpdataStatus(int jobId, string status)
         {
             try
@@ -71,9 +75,9 @@ namespace OstaFandy.PL.BL
                 var notification = new Notification
                 {
                     UserId = user.Id,
-                    Type = "Change job status",
-                    Title = "Job Status Update",
-                    Message = $"The status of your job with ID {jobId} need your approve to updated to '{status}' status.",
+                    Type = $"{jobId},{status}",
+                    Title = $"Job Status Update Request",
+                    Message = $"The handyman has requested to change the status of job #{jobId} from '{alljob.Status}' to '{status}'. Please approve or reject this request.",
                     CreatedAt = DateTime.UtcNow,
                     IsRead = false
                 };
@@ -88,6 +92,71 @@ namespace OstaFandy.PL.BL
                 throw new Exception($"An error occurred while updating job status for job ID {jobId}.", ex);
             }
         }
-        
+        #endregion
+
+
+
+        #region add quote to the job
+        public bool AddQuote(int jobId, decimal price, string Notes)
+        {
+            try
+            {
+                var job = _unitOfWork.JobAssignmentRepo.GetById(jobId);
+                if (job == null)
+                {
+                    _logger.LogWarning($"Job with ID {jobId} not found.");
+                    return false;
+                }
+                if (price <= 0)
+                {
+                    _logger.LogWarning("Price must be greater than zero.");
+                    return false;
+                }
+                if (string.IsNullOrWhiteSpace(Notes))
+                {
+                    _logger.LogWarning("Notes cannot be empty.");
+                    return false;
+                }
+                _unitOfWork.QuoteRepo.Insert(new Quote
+                {
+                    JobAssignmentId = jobId,
+                    Price = price,
+                    Notes = Notes,
+                    Status = "Pending",
+                    CreatedAt = DateTime.UtcNow
+                });
+                var booking = _unitOfWork.BookingRepo.GetById(job.BookingId);
+                if (booking == null)
+                {
+                    _logger.LogWarning($"Booking with ID {job.BookingId} not found.");
+                    return false;
+                }
+                var client = _unitOfWork.ClientRepo.GetById(booking.ClientId);
+                if (client == null)
+                {
+                    _logger.LogWarning($"Client with ID {booking.ClientId} not found.");
+                    return false;
+                }
+                var user = _unitOfWork.UserRepo.GetById(client.UserId);
+                var notification = new Notification
+                {
+                    UserId = user.Id,
+                    Type = "{Change job status}",
+                    Title = $"Acceptance for new job assign",
+                    Message = $"The status of your job with ID {jobId} need your approve to be provide.",
+                    CreatedAt = DateTime.UtcNow,
+                    IsRead = false
+                };
+                _unitOfWork.NotificationRepo.Insert(notification);
+                return _unitOfWork.Save() > 0;
+
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while adding quote for job ID {jobId}.");
+                throw new Exception($"An error occurred while adding quote for job ID {jobId}.", ex);
+            }
+            
+        }
+        #endregion
     }
 }

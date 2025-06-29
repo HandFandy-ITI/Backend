@@ -4,11 +4,11 @@ using OstaFandy.DAL.Repos.IRepos;
 
 namespace OstaFandy.DAL.Repos
 {
-    public class PaymentRepo : IPaymentRepo
+    public class PaymentRepo : GeneralRepo<Payment>, IPaymentRepo
     {
         private readonly AppDbContext _context;
 
-        public PaymentRepo(AppDbContext context)
+        public PaymentRepo(AppDbContext context):base(context)
         {
             _context = context;
         }

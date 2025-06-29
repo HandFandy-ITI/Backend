@@ -17,7 +17,13 @@ namespace OstaFandy.PL.Mapper
             #endregion
 
             #region Address
-            CreateMap<Address, AddressDTO>().ReverseMap();
+            CreateMap<Address, AddressDTO>()
+                    .ForSourceMember(src => src.Location, opt => opt.DoNotValidate());
+
+            CreateMap<AddressDTO, Address>()
+                .ForMember(dest => dest.Location, opt => opt.Ignore());
+
+            CreateMap<CreateAddressDTO, Address>().ReverseMap();
             #endregion
 
             #region JobAssignment
@@ -100,7 +106,7 @@ namespace OstaFandy.PL.Mapper
                                 Address1 = src.Client.DefaultAddress.Address1,
                                 City = src.Client.DefaultAddress.City,
                                 Latitude = src.Client.DefaultAddress.Latitude,
-                                Longitude = src.Client.DefaultAddress.Longitude,
+                                Longitude = src.Client.DefaultAddress.Longitude,                             
                                 AddressType = src.Client.DefaultAddress.AddressType,
                                 IsDefault = src.Client.DefaultAddress.IsDefault,
                                 IsActive = src.Client.DefaultAddress.IsActive,
@@ -171,6 +177,31 @@ namespace OstaFandy.PL.Mapper
                src.BookingServices.Select(bs => bs.Service.Name).ToList()))
            .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Address.Latitude))
            .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Address.Longitude));
+
+
+            //create bokking mapping
+            CreateMap<CreateBookingDTO, Booking>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => BookingStatus.Confirmed))
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+            
+
+            CreateMap<CreateBookingDTO, Payment>()
+                .ForMember(dest => dest.Method, opt => opt.MapFrom(src => src.Method))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.PaymentStatus))
+                .ForMember(dest => dest.ReceiptUrl, opt => opt.MapFrom(src => src.ReceiptUrl))
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.BookingId, opt => opt.Ignore());
+
+            CreateMap<CreateBookingDTO, JobAssignment>()
+                .ForMember(dest => dest.HandymanId, opt => opt.MapFrom(src => src.HandymanId))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "Assigned"))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+                .ForMember(dest => dest.AssignedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.BookingId, opt => opt.Ignore());
 
             #endregion
 
