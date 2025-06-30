@@ -48,7 +48,7 @@ namespace OstaFandy.PL.DTOs
         public int EstimatedMinutes { get; set; }
         public decimal TotalPrice { get; set; }
         public string Note { get; set; }
-        public List<int> ServiceIds { get; set; }
+        public List<BookingServiceDTO> serviceDto { get; set; }
 
         //job assign part
         public int HandymanId { get; set; }
@@ -62,6 +62,12 @@ namespace OstaFandy.PL.DTOs
 
         public string ReceiptUrl { get; set; }
 
+    }
+
+    public class BookingServiceDTO
+    {
+        public int ServiceId { get; set; }
+        public int Quantity { get; set; }
     }
 
 }

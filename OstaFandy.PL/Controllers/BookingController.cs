@@ -153,7 +153,7 @@ namespace OstaFandy.PL.Controllers
                 return StatusCode(StatusCodes.Status201Created, new ResponseDto<string>
                 {
                     IsSuccess = true,
-                    Data = null,
+                    Data = res.ToString(),
                     Message = "Booking confirmed successfully",
                     StatusCode = StatusCodes.Status201Created
                 });
