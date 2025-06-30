@@ -222,15 +222,15 @@ namespace OstaFandy.PL.BL
 
 
         #region get handyman quotes
-        public PaginationHelper<OstaFandy.DAL.Entities.Quote> GetHandymanQuotes(int handymanId, int pageNumber,int pageSize,string searchString)
+        public PaginationHelper<AllQuotes> GetHandymanQuotes(int handymanId, int pageNumber,int pageSize,string searchString)
         {
             if (handymanId <= 0)
             {
                 _logger.LogWarning("Handyman ID must be a positive integer.");
-                return new PaginationHelper<OstaFandy.DAL.Entities.Quote>();
+                return new PaginationHelper<AllQuotes>();
             }
 
-            var quotes = _unitOfWork.QuoteRepo.GetAll(q => q.JobAssignment.HandymanId == handymanId);
+            var quotes = _unitOfWork.QuoteRepo.GetAll(q => q.JobAssignment.HandymanId == handymanId, includeProperties: "JobAssignment,JobAssignment.Booking,JobAssignment.Booking.Client.User");
             //, includeProperties: "JobAssignment,JobAssignment.Booking,JobAssignment.Booking.Client.User"
             var validQuotes = new List<OstaFandy.DAL.Entities.Quote>();
             foreach (var quote in quotes)
@@ -245,8 +245,8 @@ namespace OstaFandy.PL.BL
                 }
                 validQuotes.Add(quote);
             }
-
-            return PaginationHelper<OstaFandy.DAL.Entities.Quote>.Create(quotes, pageNumber, pageSize, searchString);
+            var mappedQuotes = _mapper.Map<List<AllQuotes>>(validQuotes);
+            return PaginationHelper<AllQuotes>.Create(mappedQuotes, pageNumber, pageSize, searchString);
         }
         #endregion
     }

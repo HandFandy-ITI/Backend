@@ -171,7 +171,7 @@ namespace OstaFandy.PL.Controllers
                     return Ok(new
                     {
                         message = "There are no handyman jobs found.",
-                        data = new List<OstaFandy.DAL.Entities.Quote>(),
+                        data = new List<AllQuotes>(),
                         currentPage = result.CurrentPage,
                         totalPages = result.TotalPages,
                         totalCount = result.TotalCount,

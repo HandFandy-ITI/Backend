@@ -12,6 +12,6 @@ namespace OstaFandy.PL.BL.IBL
 
         bool AddQuote(int jobId, decimal price, string Notes);
 
-        PaginationHelper<Quote> GetHandymanQuotes(int handymanId, int pageNumber, int pageSize, string searchString);
+        PaginationHelper<AllQuotes> GetHandymanQuotes(int handymanId, int pageNumber, int pageSize, string searchString);
     }
 }
