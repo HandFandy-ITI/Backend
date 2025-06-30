@@ -33,6 +33,29 @@ namespace OstaFandy.PL.Controllers
         //    return Ok(new { success = true });
         //}
 
+        //[HttpPost("send")]
+        //[Authorize]
+        //public IActionResult Send([FromBody] MessageDTO dto)
+        //{
+        //    try
+        //    {
+        //        var userIdClaim = User.FindFirst("NameIdentifier");
+        //        if (userIdClaim == null) return Unauthorized();
+
+        //        dto.SenderId = int.Parse(userIdClaim.Value);
+        //        _chatService.SendMessage(dto);
+
+        //        return Ok(new { message = "Message sent successfully", success = true });
+        //    }
+        //    catch (UnauthorizedAccessException ex)
+        //    {
+        //        return Forbid(ex.Message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Server error", details = ex.Message });
+        //    }
+        //}
         [HttpPost("send")]
         [Authorize]
         public IActionResult Send([FromBody] MessageDTO dto)
@@ -40,12 +63,11 @@ namespace OstaFandy.PL.Controllers
             var userIdClaim = User.FindFirst("NameIdentifier");
             if (userIdClaim == null) return Unauthorized();
 
-            dto.SenderId = int.Parse(userIdClaim.Value);
+            dto.SenderId = int.Parse(userIdClaim.Value); // ✅ token-based ID only
 
             _chatService.SendMessage(dto);
             return Ok(new { message = "Message sent successfully", success = true });
         }
-
 
 
         // 3. Get full message history for a chat
