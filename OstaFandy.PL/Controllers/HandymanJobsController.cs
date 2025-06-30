@@ -1,7 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OstaFandy.DAL.Entities;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.utils;
+using Stripe;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OstaFandy.PL.Controllers
 {
@@ -84,6 +88,7 @@ namespace OstaFandy.PL.Controllers
             }
         }
 
+
         [HttpPost("quote")]
         [EndpointDescription("HandymanJobs/AddQuote")]
         [EndpointSummary("Add a quote for a specific job. You must provide the jobId, price, and notes in the request body.")]
@@ -110,8 +115,54 @@ namespace OstaFandy.PL.Controllers
                 _logger.LogError(ex, "An error occurred while adding a quote.");
                 return StatusCode(500, new { message = "An error occurred while adding a quote.", error = ex.Message });
             }
-            
 
+
+
+        }
+        [HttpGet("quotes/{handymanId}")]
+        [EndpointDescription("HandymanJobs/GetHandymanQuotes")]
+        [EndpointSummary("Get all quotes for a specific handyman by their ID.")]
+        public IActionResult GetHandymanQuotes(int handymanId, int pageNumber = 1, int pageSize = 5, string searchString="")
+        {
+            try
+            {
+                if (handymanId <= 0)
+                {
+                    return BadRequest("Handyman ID must be a positive integer.");
+                }
+
+                if (pageNumber <= 0)
+                {
+                    return BadRequest("Page number must be greater than 0.");
+                }
+
+                if (pageSize <= 0 || pageSize > 100)
+                {
+                    return BadRequest("Page size must be between 1 and 100.");
+                }
+
+                var result = _handymanJobService.GetHandymanQuotes(handymanId, pageNumber, pageSize, searchString ?? string.Empty);
+
+                if (result.Data == null || !result.Data.Any())
+                {
+                    return Ok(new
+                    {
+                        message = "There are no handyman jobs found.",
+                        data = new List<AllQuotes>(),
+                        currentPage = result.CurrentPage,
+                        totalPages = result.TotalPages,
+                        totalCount = result.TotalCount,
+                        searchString = result.SearchString
+                    });
+                }
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while fetching quotes for handyman {HandymanId}", handymanId);
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
         }
     }
 }

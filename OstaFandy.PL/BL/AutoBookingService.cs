@@ -145,12 +145,13 @@ namespace OstaFandy.PL.BL
 
 
                 //booking service part
-                foreach (var S in bookingdto.ServiceIds)
+                foreach (var S in bookingdto.serviceDto)
                 {
                     var bookingservice = new BookingService
                     {
-                        ServiceId = S,
+                        ServiceId = S.ServiceId,
                         BookingId = booking.Id,
+                        Quantity = S.Quantity > 0 ? S.Quantity : 1
                     };
                     _unitOfWork.BookingServiceRepo.Insert(bookingservice);
                 }
@@ -164,7 +165,7 @@ namespace OstaFandy.PL.BL
                 if (res > 0) 
                 {
                     await trnsaction.CommitAsync();
-                    return 1;
+                    return booking.Id;
                 }
                 else
                 {

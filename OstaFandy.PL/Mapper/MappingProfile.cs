@@ -315,7 +315,21 @@ namespace OstaFandy.PL.Mapper
                     dest.Status = src.Status;
                 })
                 .ReverseMap();
-        #endregion
-    }
+            #endregion
+
+            #region made all quotes for handyman
+            CreateMap<Quote, AllQuotes>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.JobAssignmentId = src.JobAssignmentId;
+                    dest.price = src.Price;
+                    dest.estimatedMinutes = src.EstimatedMinutes;
+                    dest.notes = src.Notes;
+                    dest.status = src.Status;
+                    dest.createdAt = src.CreatedAt;
+                })
+                .ReverseMap();
+            #endregion
+        }
     }
 }
