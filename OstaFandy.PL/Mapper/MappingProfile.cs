@@ -178,6 +178,32 @@ namespace OstaFandy.PL.Mapper
            .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Address.Latitude))
            .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Address.Longitude));
 
+
+            //create bokking mapping
+            CreateMap<CreateBookingDTO, Booking>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => BookingStatus.Confirmed))
+            .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
+
+
+            CreateMap<CreateBookingDTO, Payment>()
+                .ForMember(dest => dest.Method, opt => opt.MapFrom(src => src.Method))
+                .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.PaymentStatus))
+                .ForMember(dest => dest.PaymentIntentId, opt => opt.MapFrom(src => src.PaymentIntentId))
+                .ForMember(dest => dest.ReceiptUrl, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.BookingId, opt => opt.Ignore());
+
+            CreateMap<CreateBookingDTO, JobAssignment>()
+                .ForMember(dest => dest.HandymanId, opt => opt.MapFrom(src => src.HandymanId))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => "Assigned"))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
+                .ForMember(dest => dest.AssignedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
+                .ForMember(dest => dest.BookingId, opt => opt.Ignore());
+
             #endregion
 
             #region 
@@ -362,6 +388,21 @@ namespace OstaFandy.PL.Mapper
                  .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
 
+            #endregion
+
+
+            #region made all quotes for handyman
+            CreateMap<Quote, AllQuotes>()
+                .AfterMap((src, dest) =>
+                {
+                    dest.JobAssignmentId = src.JobAssignmentId;
+                    dest.price = src.Price;
+                    dest.estimatedMinutes = src.EstimatedMinutes;
+                    dest.notes = src.Notes;
+                    dest.status = src.Status;
+                    dest.createdAt = src.CreatedAt;
+                })
+                .ReverseMap();
             #endregion
 
         }

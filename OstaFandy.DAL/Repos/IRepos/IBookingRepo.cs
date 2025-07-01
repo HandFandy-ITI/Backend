@@ -11,5 +11,8 @@ namespace OstaFandy.DAL.Repos.IRepos
     {
         public int GetAllCompletedJobCount();
         public decimal GetTotalPrice();
+
+         Task<List<AvailableTimeSlot>> GetAvailableTimeSlotsAsync(
+           int categoryId, DateTime day, decimal userLat, decimal userLong, int estimatedMinutes);
     }
 }

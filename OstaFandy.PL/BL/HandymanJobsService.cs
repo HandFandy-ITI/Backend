@@ -4,6 +4,7 @@ using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 using OstaFandy.PL.utils;
+using Stripe;
 
 namespace OstaFandy.PL.BL
 {
@@ -97,6 +98,65 @@ namespace OstaFandy.PL.BL
 
 
         #region add quote to the job
+        //public bool AddQuote(int jobId, decimal price, string Notes)
+        //{
+        //    try
+        //    {
+        //        var job = _unitOfWork.JobAssignmentRepo.GetById(jobId);
+        //        if (job == null)
+        //        {
+        //            _logger.LogWarning($"Job with ID {jobId} not found.");
+        //            return false;
+        //        }
+        //        if (price <= 0)
+        //        {
+        //            _logger.LogWarning("Price must be greater than zero.");
+        //            return false;
+        //        }
+        //        if (string.IsNullOrWhiteSpace(Notes))
+        //        {
+        //            _logger.LogWarning("Notes cannot be empty.");
+        //            return false;
+        //        }
+        //        _unitOfWork.QuoteRepo.Insert(new OstaFandy.DAL.Entities.Quote
+        //        {
+        //            JobAssignmentId = jobId,
+        //            Price = price,
+        //            Notes = Notes,
+        //            Status = "Pending",
+        //            CreatedAt = DateTime.UtcNow
+        //        });
+        //        var booking = _unitOfWork.BookingRepo.GetById(job.BookingId);
+        //        if (booking == null)
+        //        {
+        //            _logger.LogWarning($"Booking with ID {job.BookingId} not found.");
+        //            return false;
+        //        }
+        //        var client = _unitOfWork.ClientRepo.GetById(booking.ClientId);
+        //        if (client == null)
+        //        {
+        //            _logger.LogWarning($"Client with ID {booking.ClientId} not found.");
+        //            return false;
+        //        }
+        //        var user = _unitOfWork.UserRepo.GetById(client.UserId);
+        //        var notification = new Notification
+        //        {
+        //            UserId = user.Id,
+        //            Type = "{Change job status}",
+        //            Title = $"Acceptance for new job assign",
+        //            Message = $"The status of your job with ID {jobId} need your approve to be provide.",
+        //            CreatedAt = DateTime.UtcNow,
+        //            IsRead = false
+        //        };
+        //        _unitOfWork.NotificationRepo.Insert(notification);
+        //        return _unitOfWork.Save() > 1;
+
+        //    } catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"Error occurred while adding quote for job ID {jobId}.");
+        //        throw new Exception($"An error occurred while adding quote for job ID {jobId}.", ex);
+        //    }
+        //}
         public bool AddQuote(int jobId, decimal price, string Notes)
         {
             try
@@ -117,7 +177,7 @@ namespace OstaFandy.PL.BL
                     _logger.LogWarning("Notes cannot be empty.");
                     return false;
                 }
-                _unitOfWork.QuoteRepo.Insert(new Quote
+                _unitOfWork.QuoteRepo.Insert(new OstaFandy.DAL.Entities.Quote
                 {
                     JobAssignmentId = jobId,
                     Price = price,
@@ -148,14 +208,45 @@ namespace OstaFandy.PL.BL
                     IsRead = false
                 };
                 _unitOfWork.NotificationRepo.Insert(notification);
-                return _unitOfWork.Save() > 1;
+                return _unitOfWork.Save() > 0;
 
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error occurred while adding quote for job ID {jobId}.");
                 throw new Exception($"An error occurred while adding quote for job ID {jobId}.", ex);
             }
-            
+
+        }
+        #endregion
+
+
+        #region get handyman quotes
+        public PaginationHelper<AllQuotes> GetHandymanQuotes(int handymanId, int pageNumber,int pageSize,string searchString)
+        {
+            if (handymanId <= 0)
+            {
+                _logger.LogWarning("Handyman ID must be a positive integer.");
+                return new PaginationHelper<AllQuotes>();
+            }
+
+            var quotes = _unitOfWork.QuoteRepo.GetAll(q => q.JobAssignment.HandymanId == handymanId, includeProperties: "JobAssignment,JobAssignment.Booking,JobAssignment.Booking.Client.User");
+            //, includeProperties: "JobAssignment,JobAssignment.Booking,JobAssignment.Booking.Client.User"
+            var validQuotes = new List<OstaFandy.DAL.Entities.Quote>();
+            foreach (var quote in quotes)
+            {
+                if (quote.JobAssignment == null ||
+                    quote.JobAssignment.Booking == null ||
+                    quote.JobAssignment.Booking.Client == null ||
+                    quote.JobAssignment.Booking.Client.User == null)
+                {
+                    _logger.LogWarning($"Quote with ID {quote.Id} has incomplete job assignment or booking information.");
+                    continue;
+                }
+                validQuotes.Add(quote);
+            }
+            var mappedQuotes = _mapper.Map<List<AllQuotes>>(validQuotes);
+            return PaginationHelper<AllQuotes>.Create(mappedQuotes, pageNumber, pageSize, searchString);
         }
         #endregion
     }

@@ -53,8 +53,18 @@ public partial class AppDbContext : DbContext
 
     public virtual DbSet<UserType> UserTypes { get; set; }
 
+   public DbSet<AvailableTimeSlot> AvailableTimeSlots { get; set; }
+   public DbSet<AvailableTimeSlotForHandyman> AvailableTimeSlotForHandyman { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+
+        modelBuilder.Entity<AvailableTimeSlot>(eb =>
+        {
+            eb.HasNoKey(); 
+            eb.ToView(null); 
+        });
+
         modelBuilder.Entity<Address>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("PK__Addresse__3214EC07750AE561");

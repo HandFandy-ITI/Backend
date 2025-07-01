@@ -1,4 +1,5 @@
-﻿using OstaFandy.PL.DTOs;
+﻿using OstaFandy.DAL.Entities;
+using OstaFandy.PL.DTOs;
 using OstaFandy.PL.utils;
 
 namespace OstaFandy.PL.BL.IBL
@@ -9,6 +10,7 @@ namespace OstaFandy.PL.BL.IBL
         
         bool SentNotificationToClientToUpdataStatus(int jobId, string status);
 
-        bool AddQuote(int jobId, decimal price, string Notes);
+        public bool AddQuote(int jobId, decimal price, string Notes);
+        PaginationHelper<AllQuotes> GetHandymanQuotes(int handymanId, int pageNumber, int pageSize, string searchString);
     }
 }

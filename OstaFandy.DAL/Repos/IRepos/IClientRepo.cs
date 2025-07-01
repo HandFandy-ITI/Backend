@@ -10,6 +10,7 @@ namespace OstaFandy.DAL.Repos.IRepos
     public interface IClientRepo : IGeneralRepo<Client>
     {
 
+
         Task<Client?> GetClientWithProfileData(int clientId);
         Task<Client?> GetClientWithBookingHistory(int clientId);
         Task<Client?> GetClientByUserId(int clientId);
@@ -19,5 +20,9 @@ namespace OstaFandy.DAL.Repos.IRepos
         void Update(Client client);
         void Delete(Client client);
         IQueryable<Client> GetAll(System.Linq.Expressions.Expression<Func<Client, bool>>? predicate = null);
+
+        Task<List<AvailableTimeSlotForHandyman>> GetAvailableTimeSlotsForHandymanAsync(
+           int HandymanId, DateTime Day, int estimatedMinutes);
+
     }
 }

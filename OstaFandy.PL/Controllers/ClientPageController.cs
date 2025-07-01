@@ -59,5 +59,23 @@ namespace OstaFandy.PL.Controllers
             return Ok(new { message = $"Job {jobId} status successfully updated to {approvedStatus} by client approval." });
         }
 
+
+        [HttpGet("GetAvailableTimeSlotForHandyman")]
+        [EndpointDescription("ClientPage/GetAvailableTimeSlotForHandyman")]
+        [EndpointSummary("Get available time slots for a handyman on a specific day.")]
+        public async Task<IActionResult> GetAvailableTimeSlotForHandymanAsync(int handymanId, DateTime day, int estimatedMinutes)
+        {
+            if (handymanId <= 0 || estimatedMinutes <= 0)
+            {
+                return BadRequest(new { message = "Invalid handyman ID or estimated minutes." });
+            }
+            var availableSlots = await _clientPageService.GetAvailableTimeSlotForHandymanAsync(handymanId, day, estimatedMinutes);
+            if (availableSlots == null || !availableSlots.Any())
+            {
+                return NotFound(new { message = "No available time slots found for the specified handyman on this day." });
+            }
+            return Ok(availableSlots);
+        }
+
     }
 }

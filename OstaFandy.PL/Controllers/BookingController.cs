@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OstaFandy.DAL.Entities;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 
@@ -78,6 +79,63 @@ namespace OstaFandy.PL.Controllers
             });
 
 
+        }
+
+        [HttpGet("FreeSlot")]
+        public async Task<IActionResult> GetFreeSlot([FromQuery] int categoryId,[FromQuery] DateTime day,[FromQuery] decimal userLatitude,[FromQuery] decimal userLongitude,[FromQuery] int estimatedMinutes)
+        {
+            var reqdata = new AvailableTimeSlotsRequestDto
+            {
+                CategoryId = categoryId,
+                Day = day,
+                UserLatitude = userLatitude,
+                UserLongitude = userLongitude,
+                EstimatedMinutes = estimatedMinutes
+            };
+           
+            var freeslot = await _autoBookingService.GetAvailableTimeSlotAsync(reqdata);
+            if (freeslot == null || !freeslot.Any())
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "No Avliable time please choose another day",
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            else
+            {
+                return Ok(new ResponseDto<List<AvailableTimeSlot>>
+                {
+                    IsSuccess=true,
+                    Data=freeslot,
+                    Message="",
+                    StatusCode= StatusCodes.Status200OK
+                });
+            }
+        }
+
+        [HttpPost("createbooking")]
+        public async Task<IActionResult> CreateBooking(CreateBookingDTO dto)
+        {
+            var res = await _autoBookingService.CreateBooking(dto);
+            if (res == null || res.BookingId <= 0)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "Booking failed",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+
+            return StatusCode(StatusCodes.Status201Created, new ResponseDto<object>
+            {
+                IsSuccess = true,
+                Message = "Booking confirmed successfully",
+                Data = new { bookingId = res.BookingId, chatId = res.ChatId },
+                StatusCode = StatusCodes.Status201Created
+            });
         }
     }
 }

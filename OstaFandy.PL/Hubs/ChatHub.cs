@@ -16,9 +16,15 @@ namespace OstaFandy.PL.Hubs
             await Groups.RemoveFromGroupAsync(Context.ConnectionId, chatId);
         }
 
-        public async Task SendMessage(MessageDTO  message)
+        //public async Task SendMessage(MessageDTO  message)
+        //{
+        //    await Clients.Group(message.ChatId.ToString())
+        //        .SendAsync("ReceiveMessage", message);
+        //}
+
+        public async Task SendMessage(MessageDTO message)
         {
-            await Clients.Group(message.ChatId.ToString())
+            await Clients.Group($"chat-{message.ChatId}")
                 .SendAsync("ReceiveMessage", message);
         }
     }
