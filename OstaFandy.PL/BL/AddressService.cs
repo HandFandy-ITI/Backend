@@ -26,7 +26,7 @@ namespace OstaFandy.PL.BL
                 {
                     throw new ArgumentException("Invalid Id number");
                 }
-                var address = _unitOfWork.AddressRepo.GetAll(a=>a.UserId == userId);
+                var address = _unitOfWork.AddressRepo.GetAll(a=>a.UserId == userId && a.IsActive);
 
                 if (address == null) { 
                 

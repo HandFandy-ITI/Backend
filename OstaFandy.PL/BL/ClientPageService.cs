@@ -3,6 +3,7 @@ using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
+using OstaFandy.PL.DTOs;
 
 namespace OstaFandy.PL.BL
 {
@@ -123,5 +124,21 @@ namespace OstaFandy.PL.BL
                 throw new Exception($"An error occurred while approving quote status for job assignment ID {jobId}.", ex);
             }
         }
+
+        public async Task<List<AvailableTimeSlotForHandyman>> GetAvailableTimeSlotForHandymanAsync(int HandymanId, DateTime Day, int estimatedMinutes)
+        {
+            try
+            {
+                var availableTimeSlots = await _unitOfWork.ClientRepo.GetAvailableTimeSlotsForHandymanAsync
+                    (HandymanId, Day, estimatedMinutes);
+
+                return availableTimeSlots;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Error getting available time slots", ex);
+            }
+        }
+         
     }
 }

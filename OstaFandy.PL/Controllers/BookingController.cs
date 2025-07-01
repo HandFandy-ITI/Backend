@@ -117,48 +117,25 @@ namespace OstaFandy.PL.Controllers
         [HttpPost("createbooking")]
         public async Task<IActionResult> CreateBooking(CreateBookingDTO dto)
         {
-            var res=await _autoBookingService.CreateBooking(dto);
+            var res = await _autoBookingService.CreateBooking(dto);
+            if (res == null || res.BookingId <= 0)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "Booking failed",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
 
-            if (res == 0)
+            return StatusCode(StatusCodes.Status201Created, new ResponseDto<object>
             {
-                return BadRequest(new ResponseDto<string>
-                {
-                    IsSuccess = false,
-                    Data = null,
-                    Message = "Booking placed successfully",
-                    StatusCode = StatusCodes.Status400BadRequest
-                });
-            }
-            else if (res == -1)
-            {
-                return BadRequest(new ResponseDto<string>
-                {
-                    IsSuccess = false,
-                    Data = null,
-                    Message = "Something went wrong. Please try again later.",
-                    StatusCode = StatusCodes.Status400BadRequest
-                });
-            }
-            else if (res == -2)
-            {
-                return BadRequest(new ResponseDto<string>
-                {
-                    IsSuccess = false,
-                    Data = null,
-                    Message = "Oops! Something went wrong on our end. Please try again shortly.",
-                    StatusCode = StatusCodes.Status400BadRequest
-                });
-            }
-            else {
-                return StatusCode(StatusCodes.Status201Created, new ResponseDto<string>
-                {
-                    IsSuccess = true,
-                    Data = res.ToString(),
-                    Message = "Booking confirmed successfully",
-                    StatusCode = StatusCodes.Status201Created
-                });
-
-            }
+                IsSuccess = true,
+                Message = "Booking confirmed successfully",
+                Data = new { bookingId = res.BookingId, chatId = res.ChatId },
+                StatusCode = StatusCodes.Status201Created
+            });
         }
     }
 }

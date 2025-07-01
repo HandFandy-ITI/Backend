@@ -3,6 +3,8 @@ using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.General;
+using Stripe;
 
 
 namespace OstaFandy.PL.BL
@@ -124,9 +126,9 @@ namespace OstaFandy.PL.BL
             }
         }
         //create booking
-        public async Task<int> CreateBooking(CreateBookingDTO bookingdto)
+        public async Task<BookingChatResponse?> CreateBooking(CreateBookingDTO bookingdto)
         {
-            if(bookingdto == null) { return 0; }
+            if (bookingdto == null) return null;
 
             using var trnsaction= await _unitOfWork.BeginTransactionasync();
             try
@@ -159,18 +161,52 @@ namespace OstaFandy.PL.BL
                 //payment
                 var payment=_mapper.Map<Payment>(bookingdto);
                 payment.BookingId = booking.Id;
+                if (bookingdto.Method== "stripe")
+                {
+                    var paymentIntentService = new PaymentIntentService();
+                    var paymentIntent = await paymentIntentService.GetAsync(bookingdto.PaymentIntentId);
+
+                    var chargeService = new ChargeService();
+                    var charge = chargeService.Get(paymentIntent.LatestChargeId);
+
+                    if (charge != null)
+                    {
+                        payment.ReceiptUrl = charge.ReceiptUrl;
+                    }
+                }
+               
+                
                 _unitOfWork.PaymentRepo.Insert(payment);
 
                 var res=await _unitOfWork.SaveAsync();
                 if (res > 0) 
                 {
+                    //await trnsaction.CommitAsync();
+                    //return booking.Id;
+                   var chat= new Chat
+                   {
+                       BookingId = booking.Id,
+                       StartedAt = DateTime.UtcNow
+                   };
+                    _unitOfWork.ChatRepo.Insert(chat);
+
+                    await _unitOfWork.SaveAsync();
+
+                    // Ensure chat exists and get chatId
+                    int chatId = chat.Id;
                     await trnsaction.CommitAsync();
-                    return booking.Id;
+
+                    // Return both bookingId + chatId
+                    return new BookingChatResponse
+                    {
+                        BookingId = booking.Id,
+                        ChatId = chatId
+                    };
                 }
                 else
                 {
                     await trnsaction.RollbackAsync();
-                    return -1;
+                    return null;
                 }
 
             }
@@ -178,7 +214,7 @@ namespace OstaFandy.PL.BL
             {
                 await trnsaction.RollbackAsync();
                 Console.WriteLine(ex.ToString());
-                return -2;
+                return null;
             }
         }
 

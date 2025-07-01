@@ -54,6 +54,7 @@ public partial class AppDbContext : DbContext
     public virtual DbSet<UserType> UserTypes { get; set; }
 
    public DbSet<AvailableTimeSlot> AvailableTimeSlots { get; set; }
+   public DbSet<AvailableTimeSlotForHandyman> AvailableTimeSlotForHandyman { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

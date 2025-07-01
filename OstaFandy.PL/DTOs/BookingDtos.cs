@@ -60,7 +60,9 @@ namespace OstaFandy.PL.DTOs
 
         public string PaymentStatus { get; set; }
 
-        public string ReceiptUrl { get; set; }
+        public string? PaymentIntentId { get; set; }
+
+        
 
     }
 
@@ -70,4 +72,10 @@ namespace OstaFandy.PL.DTOs
         public int Quantity { get; set; }
     }
 
+
+    public class BookingChatResponse
+    {
+        public int BookingId { get; set; }
+        public int ChatId { get; set; }
+    }
 }
