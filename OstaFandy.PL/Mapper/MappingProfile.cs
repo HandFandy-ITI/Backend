@@ -185,13 +185,14 @@ namespace OstaFandy.PL.Mapper
             .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => true))
             .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
             .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
-            
+
 
             CreateMap<CreateBookingDTO, Payment>()
                 .ForMember(dest => dest.Method, opt => opt.MapFrom(src => src.Method))
                 .ForMember(dest => dest.Amount, opt => opt.MapFrom(src => src.Amount))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.PaymentStatus))
-                .ForMember(dest => dest.ReceiptUrl, opt => opt.MapFrom(src => src.ReceiptUrl))
+                .ForMember(dest => dest.PaymentIntentId, opt => opt.MapFrom(src => src.PaymentIntentId))
+                .ForMember(dest => dest.ReceiptUrl, opt => opt.Ignore())
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.BookingId, opt => opt.Ignore());
 

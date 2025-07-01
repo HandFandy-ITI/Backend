@@ -3,6 +3,8 @@ using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.General;
+using Stripe;
 
 
 namespace OstaFandy.PL.BL
@@ -159,6 +161,21 @@ namespace OstaFandy.PL.BL
                 //payment
                 var payment=_mapper.Map<Payment>(bookingdto);
                 payment.BookingId = booking.Id;
+                if (bookingdto.Method== "stripe")
+                {
+                    var paymentIntentService = new PaymentIntentService();
+                    var paymentIntent = await paymentIntentService.GetAsync(bookingdto.PaymentIntentId);
+
+                    var chargeService = new ChargeService();
+                    var charge = chargeService.Get(paymentIntent.LatestChargeId);
+
+                    if (charge != null)
+                    {
+                        payment.ReceiptUrl = charge.ReceiptUrl;
+                    }
+                }
+               
+                
                 _unitOfWork.PaymentRepo.Insert(payment);
 
                 var res=await _unitOfWork.SaveAsync();
