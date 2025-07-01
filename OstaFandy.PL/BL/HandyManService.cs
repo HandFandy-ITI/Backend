@@ -374,7 +374,7 @@ namespace OstaFandy.PL.BL
                 return (new HandyManStatsDto
                 {
                     TodayJobs = handyman.JobAssignments
-                        .Count(j => j.IsActive && j.Status == "Completed" && j.AssignedAt.Date == DateTime.UtcNow.Date),
+                        .Count(j => j.IsActive && j.Status == "Assigned" && j.AssignedAt.Date == DateTime.UtcNow.Date),
 
                     PendingQuotes = handyman.JobAssignments
                          .SelectMany(j => j.Quotes)
