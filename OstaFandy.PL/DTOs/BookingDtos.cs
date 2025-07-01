@@ -60,7 +60,9 @@ namespace OstaFandy.PL.DTOs
 
         public string PaymentStatus { get; set; }
 
-        public string ReceiptUrl { get; set; }
+        public string? PaymentIntentId { get; set; }
+
+        
 
     }
 

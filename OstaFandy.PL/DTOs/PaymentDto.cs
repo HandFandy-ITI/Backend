@@ -43,4 +43,9 @@
         public bool HasNextPage { get; set; }
         public bool HasPreviousPage { get; set; }
     }
+
+    public class PaymentIntentRequest
+    {
+        public decimal Amount { get; set; }
+    }
 }

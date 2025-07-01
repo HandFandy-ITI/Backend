@@ -212,7 +212,7 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                var handyman = _unitOfWork.HandyManRepo.GetById(id);
+                var handyman = _unitOfWork.HandyManRepo.FirstOrDefault(h=>h.UserId==id, "Specialization,User");
 
                 if (handyman == null)
                 {
