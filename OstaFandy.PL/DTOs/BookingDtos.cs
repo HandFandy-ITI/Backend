@@ -70,4 +70,10 @@ namespace OstaFandy.PL.DTOs
         public int Quantity { get; set; }
     }
 
+
+    public class BookingChatResponse
+    {
+        public int BookingId { get; set; }
+        public int ChatId { get; set; }
+    }
 }

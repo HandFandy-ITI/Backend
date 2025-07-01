@@ -18,13 +18,24 @@ namespace OstaFandy.DAL.Repos
             _context = context;
         }
 
+        //public IEnumerable<Message> GetByChatId(int chatId)
+        //{
+        //    return _context.Messages
+        //        .Where(m => m.ChatId == chatId)
+        //        .OrderBy(m => m.SentAt)
+        //        .ToList();
+        //}
+
         public IEnumerable<Message> GetByChatId(int chatId)
         {
             return _context.Messages
+                .Include(m => m.Sender)
+                    .ThenInclude(u => u.UserTypes)
                 .Where(m => m.ChatId == chatId)
                 .OrderBy(m => m.SentAt)
                 .ToList();
         }
+
     }
 
 
