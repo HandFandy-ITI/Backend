@@ -4,10 +4,9 @@ namespace OstaFandy.PL.DTOs
 {
     public class CategoryDTO
     {
-        // For Read/Edit/Delete
+  
         public int Id { get; set; }
 
-        // Common for Create & Update
         [Required]
         [StringLength(100)]
         public string Name { get; set; }
@@ -15,12 +14,11 @@ namespace OstaFandy.PL.DTOs
         [StringLength(500)]
         public string Description { get; set; }
 
-        [StringLength(255)]
         public string? IconImg { get; set; }
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime? CreatedAt { get; set; }  // Optional: system-generated
+        public DateTime? CreatedAt { get; set; }
         public DateTime? UpdatedAt { get; set; }
     }
 
@@ -34,6 +32,24 @@ namespace OstaFandy.PL.DTOs
         public string Description { get; set; }
 
         public bool IsActive { get; set; } = true;
+
+        public IFormFile? IconImg { get; set; }  // 🆕 For image upload
+    }
+
+    public class CategoryUpdateDTO
+    {
+        public int Id { get; set; }
+
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; }
+
+        [StringLength(500)]
+        public string Description { get; set; }
+
+        //public bool IsActive { get; set; }
+
+        public IFormFile? IconImg { get; set; }  // 🆕 Optional image update
     }
 
     public class PaginatedResult<T>
@@ -43,5 +59,4 @@ namespace OstaFandy.PL.DTOs
         public int PageNumber { get; set; }
         public int PageSize { get; set; }
     }
-
 }

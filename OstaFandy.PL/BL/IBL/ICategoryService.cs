@@ -1,15 +1,12 @@
 ﻿using OstaFandy.PL.DTOs;
 
-namespace OstaFandy.PL.BL.IBL
+public interface ICategoryService
 {
-    public interface ICategoryService
-    {
-        IEnumerable<CategoryDTO> GetAll();
-        PaginatedResult<CategoryDTO> GetAllPaginated(int pageNumber, int pageSize, string? search = null, string? status = null);
-        CategoryDTO? GetById(int id);
-        void Add(CategoryCreateDTO dto);
-        void Update(CategoryDTO dto);
-        bool SoftDelete(int id);
-        bool ToggleStatus(int id);
-    }
+    IEnumerable<CategoryDTO> GetAll();
+    PaginatedResult<CategoryDTO> GetAllPaginated(int pageNumber, int pageSize, string? search = null, string? status = null);
+    CategoryDTO? GetById(int id);
+    Task AddAsync(CategoryCreateDTO dto); // changed
+    Task<bool> UpdateAsync(int id, CategoryUpdateDTO dto); // changed
+    bool SoftDelete(int id);
+    bool ToggleStatus(int id);
 }
