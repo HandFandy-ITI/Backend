@@ -9,5 +9,7 @@ namespace OstaFandy.DAL.Repos.IRepos
 {
     public interface IClientRepo : IGeneralRepo<Client>
     {
+        Task<List<AvailableTimeSlotForHandyman>> GetAvailableTimeSlotsForHandymanAsync(
+           int HandymanId, DateTime Day, int estimatedMinutes);
     }
 }
