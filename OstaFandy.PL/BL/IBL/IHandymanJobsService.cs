@@ -13,5 +13,7 @@ namespace OstaFandy.PL.BL.IBL
         bool AddQuote(int jobId, decimal price, string Notes, int EstimatedMinutes);
 
         PaginationHelper<AllQuotes> GetHandymanQuotes(int handymanId, int pageNumber, int pageSize, string searchString);
+        public Task<bool> ProcessQuoteResponseAsync(int quoteId, string action, int clientUserId, CreateBookingDTO bookingDto = null);
+        public QuoteDetailsDTO GetQuoteDetails(int quoteId);
     }
 }

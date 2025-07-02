@@ -18,6 +18,7 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IAddressRepo AddressRepo { get; }
         public IAnalyticsRepo AnalyticsRepo { get; }
         public IQuoteRepo QuoteRepo{ get; }
+        public IBlockDateRepo BlockDateRepo{ get; }
 
         public IBookingRepo BookingRepo { get; }
 
