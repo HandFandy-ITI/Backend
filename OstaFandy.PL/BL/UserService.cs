@@ -95,6 +95,12 @@ namespace OstaFandy.PL.BL
                 //add user to db
                 _unitOfWork.UserRepo.Insert(user);
                 res = _unitOfWork.Save();
+                var client = new Client
+                {
+                    UserId = user.Id,
+                };
+                _unitOfWork.ClientRepo.Insert(client);
+                _unitOfWork.Save();
                 if (res > 0)
                 {
                     return user.Id;

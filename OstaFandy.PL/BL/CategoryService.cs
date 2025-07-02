@@ -10,11 +10,13 @@ namespace OstaFandy.PL.BL
     {
         private readonly IUnitOfWork _unit;
         private readonly IMapper _mapper;
+        private readonly ICloudinaryService _cloudinaryService;
 
-        public CategoryService(IUnitOfWork unit, IMapper mapper)
+        public CategoryService(IUnitOfWork unit, IMapper mapper, ICloudinaryService cloudinaryService)
         {
             _unit = unit;
             _mapper = mapper;
+            _cloudinaryService = cloudinaryService;
         }
 
         public IEnumerable<CategoryDTO> GetAll()
@@ -27,24 +29,20 @@ namespace OstaFandy.PL.BL
         {
             var query = _unit.CategoryRepo.GetAll();
 
-            // ✅ Cleaned Search
             if (!string.IsNullOrWhiteSpace(search))
             {
                 search = search.Trim().ToLower();
-
                 query = query.Where(c =>
                     (!string.IsNullOrEmpty(c.Name) && c.Name.ToLower().Contains(search)) ||
                     (!string.IsNullOrEmpty(c.Description) && c.Description.ToLower().Contains(search))
                 );
             }
 
-            // ✅ Status filter remains same
             if (!string.IsNullOrEmpty(status) && status != "All")
             {
-                if (status == "Active")
-                    query = query.Where(c => c.IsActive);
-                else if (status == "Inactive")
-                    query = query.Where(c => !c.IsActive);
+                query = status == "Active"
+                    ? query.Where(c => c.IsActive)
+                    : query.Where(c => !c.IsActive);
             }
 
             var totalItems = query.Count();
@@ -70,34 +68,49 @@ namespace OstaFandy.PL.BL
             return category == null ? null : _mapper.Map<CategoryDTO>(category);
         }
 
-        public void Add(CategoryCreateDTO dto)
+        public async Task AddAsync(CategoryCreateDTO dto)
         {
             var category = _mapper.Map<Category>(dto);
             category.CreatedAt = DateTime.UtcNow;
             category.IsActive = true;
 
+            if (dto.IconImg != null)
+            {
+                var imgUrl = await _cloudinaryService.UploadImageAsync(dto.IconImg);
+                category.IconImg = imgUrl;
+            }
+
             _unit.CategoryRepo.Insert(category);
-            _unit.Save();
+            await _unit.SaveAsync();
         }
 
-        public void Update(CategoryDTO dto)
+        public async Task<bool> UpdateAsync(int id, CategoryUpdateDTO dto)
         {
-            var category = _unit.CategoryRepo.GetById(dto.Id);
-            if (category == null) throw new Exception("Category not found");
+            var category = _unit.CategoryRepo.GetById(id);
+            if (category == null)
+                return false;
 
             category.Name = dto.Name;
             category.Description = dto.Description;
-            category.IsActive = dto.IsActive;
+            //category.IsActive = dto.IsActive;
             category.UpdatedAt = DateTime.UtcNow;
 
+            if (dto.IconImg != null)
+            {
+                var imgUrl = await _cloudinaryService.UploadImageAsync(dto.IconImg);
+                category.IconImg = imgUrl;
+            }
+
             _unit.CategoryRepo.Update(category);
-            _unit.Save();
+            await _unit.SaveAsync();
+            return true;
         }
 
         public bool SoftDelete(int id)
         {
             var category = _unit.CategoryRepo.GetById(id);
-            if (category == null) return false;
+            if (category == null)
+                return false;
 
             category.IsActive = false;
             category.UpdatedAt = DateTime.UtcNow;
@@ -110,7 +123,8 @@ namespace OstaFandy.PL.BL
         public bool ToggleStatus(int id)
         {
             var category = _unit.CategoryRepo.GetById(id);
-            if (category == null) return false;
+            if (category == null)
+                return false;
 
             if (category.IsActive)
             {
