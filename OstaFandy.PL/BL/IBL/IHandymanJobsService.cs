@@ -10,7 +10,8 @@ namespace OstaFandy.PL.BL.IBL
         
         bool SentNotificationToClientToUpdataStatus(int jobId, string status);
 
-        public bool AddQuote(int jobId, decimal price, string Notes);
+        //public bool AddQuote(int jobId, decimal price, string Notes);
+        bool AddQuote(int jobId, decimal price, string Notes, int EstimatedMinutes);
         PaginationHelper<AllQuotes> GetHandymanQuotes(int handymanId, int pageNumber, int pageSize, string searchString);
     }
 }

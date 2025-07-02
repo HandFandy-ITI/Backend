@@ -13,7 +13,7 @@
         public int JobId { get; set; }
         public decimal Price { get; set; }
         public string Notes { get; set; }
-        public int? EstimatedMinutes { get; set; }
+        public int EstimatedMinutes { get; set; }
 
     }
 

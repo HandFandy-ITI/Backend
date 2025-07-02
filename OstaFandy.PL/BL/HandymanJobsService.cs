@@ -13,12 +13,14 @@ namespace OstaFandy.PL.BL
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<HandymanJobsService> _logger;
+        private readonly AppDbContext _db;  
 
-        public HandymanJobsService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<HandymanJobsService> logger)
+        public HandymanJobsService(AppDbContext db, IUnitOfWork unitOfWork, IMapper mapper, ILogger<HandymanJobsService> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _db = db;
 
         }
 
@@ -98,8 +100,69 @@ namespace OstaFandy.PL.BL
 
 
         #region add quote to the job
-        
-        public bool AddQuote(int jobId, decimal price, string Notes)
+
+        //public bool AddQuote(int jobId, decimal price, string Notes)
+        //{
+        //    try
+        //    {
+        //        var job = _unitOfWork.JobAssignmentRepo.GetById(jobId);
+        //        if (job == null)
+        //        {
+        //            _logger.LogWarning($"Job with ID {jobId} not found.");
+        //            return false;
+        //        }
+        //        if (price <= 0)
+        //        {
+        //            _logger.LogWarning("Price must be greater than zero.");
+        //            return false;
+        //        }
+        //        if (string.IsNullOrWhiteSpace(Notes))
+        //        {
+        //            _logger.LogWarning("Notes cannot be empty.");
+        //            return false;
+        //        }
+        //        _unitOfWork.QuoteRepo.Insert(new OstaFandy.DAL.Entities.Quote
+        //        {
+        //            JobAssignmentId = jobId,
+        //            Price = price,
+        //            Notes = Notes,
+        //            Status = "Pending",
+        //            CreatedAt = DateTime.UtcNow
+        //        });
+        //        var booking = _unitOfWork.BookingRepo.GetById(job.BookingId);
+        //        if (booking == null)
+        //        {
+        //            _logger.LogWarning($"Booking with ID {job.BookingId} not found.");
+        //            return false;
+        //        }
+        //        var client = _unitOfWork.ClientRepo.GetById(booking.ClientId);
+        //        if (client == null)
+        //        {
+        //            _logger.LogWarning($"Client with ID {booking.ClientId} not found.");
+        //            return false;
+        //        }
+        //        var user = _unitOfWork.UserRepo.GetById(client.UserId);
+        //        var notification = new Notification
+        //        {
+        //            UserId = user.Id,
+        //            Type = "{Change job status}",
+        //            Title = $"Acceptance for new job assign",
+        //            Message = $"The status of your job with ID {jobId} need your approve to be provide.",
+        //            CreatedAt = DateTime.UtcNow,
+        //            IsRead = false
+        //        };
+        //        _unitOfWork.NotificationRepo.Insert(notification);
+        //        return _unitOfWork.Save() > 0;
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, $"Error occurred while adding quote for job ID {jobId}.");
+        //        throw new Exception($"An error occurred while adding quote for job ID {jobId}.", ex);
+        //    }
+
+        //}
+        public bool AddQuote(int jobId, decimal price, string Notes, int EstimatedMinutes)
         {
             try
             {
@@ -114,19 +177,32 @@ namespace OstaFandy.PL.BL
                     _logger.LogWarning("Price must be greater than zero.");
                     return false;
                 }
+                if (EstimatedMinutes <= 0)
+                {
+                    _logger.LogWarning("EstimatedMinutes must be greater than zero.");
+                    return false;
+                }
                 if (string.IsNullOrWhiteSpace(Notes))
                 {
                     _logger.LogWarning("Notes cannot be empty.");
                     return false;
                 }
-                _unitOfWork.QuoteRepo.Insert(new OstaFandy.DAL.Entities.Quote
+                var quote = new OstaFandy.DAL.Entities.Quote
                 {
                     JobAssignmentId = jobId,
                     Price = price,
                     Notes = Notes,
+                    EstimatedMinutes = EstimatedMinutes,
                     Status = "Pending",
                     CreatedAt = DateTime.UtcNow
-                });
+                };
+
+                _unitOfWork.QuoteRepo.Insert(quote);
+                _unitOfWork.Save();
+                var quote2 = _db.Quotes
+                    .Where(q => q.JobAssignmentId == jobId && q.Price == price && q.Notes == Notes && q.EstimatedMinutes == EstimatedMinutes)
+                    .OrderByDescending(q => q.CreatedAt)
+                    .FirstOrDefault();
                 var booking = _unitOfWork.BookingRepo.GetById(job.BookingId);
                 if (booking == null)
                 {
@@ -143,12 +219,15 @@ namespace OstaFandy.PL.BL
                 var notification = new Notification
                 {
                     UserId = user.Id,
-                    Type = "{Change job status}",
-                    Title = $"Acceptance for new job assign",
-                    Message = $"The status of your job with ID {jobId} need your approve to be provide.",
+                    Type = "QuoteApproval",
+                    Title = "New Quote Received",
+                    Message = $"You have received a new quote for job #{jobId}. Price: ${price}. Please review and approve.",
                     CreatedAt = DateTime.UtcNow,
-                    IsRead = false
+                    IsRead = false,
+                    RelatedEntityType = "Quote",
+                    RelatedEntityId = quote2.Id
                 };
+
                 _unitOfWork.NotificationRepo.Insert(notification);
                 return _unitOfWork.Save() > 0;
 
