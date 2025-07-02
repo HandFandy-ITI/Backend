@@ -3,6 +3,8 @@ using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.General;
+using Stripe;
 
 
 namespace OstaFandy.PL.BL
@@ -11,11 +13,14 @@ namespace OstaFandy.PL.BL
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
 
-        public AutoBookingService(IUnitOfWork unitOfWork, IMapper mapper)
+
+        public AutoBookingService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration )
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _configuration = configuration;
         }
 
         //get all
@@ -159,6 +164,21 @@ namespace OstaFandy.PL.BL
                 //payment
                 var payment=_mapper.Map<Payment>(bookingdto);
                 payment.BookingId = booking.Id;
+                if (bookingdto.Method== "stripe")
+                {
+                    var paymentIntentService = new PaymentIntentService();
+                    var paymentIntent = await paymentIntentService.GetAsync(bookingdto.PaymentIntentId);
+
+                    var chargeService = new ChargeService();
+                    var charge = chargeService.Get(paymentIntent.LatestChargeId);
+
+                    if (charge != null)
+                    {
+                        payment.ReceiptUrl = charge.ReceiptUrl;
+                    }
+                }
+               
+                
                 _unitOfWork.PaymentRepo.Insert(payment);
 
                 var res=await _unitOfWork.SaveAsync();
@@ -202,6 +222,62 @@ namespace OstaFandy.PL.BL
         }
 
         //update statues 
+        public int CancelBooking(int bookingId)
+        {
+            try
+            {
+                var booking = _unitOfWork.BookingRepo.FirstOrDefault(b => b.Id == bookingId, "JobAssignment,Payments");
+
+                if (booking.Status == BookingStatus.Completed || booking.PreferredDate <= DateTime.Now.AddHours(24))
+                {
+                    return 0;
+                }
+
+                booking.Status = BookingStatus.Cancelled;
+                booking.IsActive = false;
+                booking.JobAssignment.Status = JobAssignmentsStatus.Cancelled;
+                booking.JobAssignment.IsActive = false;
+
+                var stripeSecretKey = _configuration["Stripe:SecretKey"];
+                var stripeClient = new StripeClient(stripeSecretKey);
+                var refundService = new RefundService(stripeClient);
+                var chargeService = new ChargeService(stripeClient);
+
+
+
+
+
+
+                foreach (var payment in booking.Payments)
+                {
+                    if (payment.Method == "stripe") 
+                    {
+                        var charges = chargeService.List(new ChargeListOptions
+                        {
+                            PaymentIntent = payment.PaymentIntentId,
+                            Limit = 1
+                        });
+
+                        var chargeId = charges.Data.FirstOrDefault()?.Id;
+
+                        var refundOptions = new RefundCreateOptions
+                        {
+                            Charge = chargeId
+                        };
+                        var refund = refundService.Create(refundOptions);
+                        payment.Status= PaymentsStatus.Refunded;
+
+                    }
+                }
+                _unitOfWork.Save();
+
+                return 1; 
+            }
+            catch (Exception ex)
+            {
+                return -1; 
+            }
+        }
 
 
 

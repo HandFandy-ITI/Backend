@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Timers;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OstaFandy.DAL.Entities;
 using OstaFandy.PL.BL.IBL;
@@ -136,6 +137,31 @@ namespace OstaFandy.PL.Controllers
                 Data = new { bookingId = res.BookingId, chatId = res.ChatId },
                 StatusCode = StatusCodes.Status201Created
             });
+        }
+
+        [HttpPatch("CancelBooking")]
+        public IActionResult CancelBooking(int BookingId)
+        {
+            var res=_autoBookingService.CancelBooking(BookingId);
+            if(res<1)
+            {
+                return BadRequest(new ResponseDto<string>{
+                    IsSuccess = false,
+                    Message ="Faild to cancel booking",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            else
+            {
+                return Ok(new ResponseDto<string>
+                {
+                    IsSuccess = true,
+                    Message = "Booking canceled successfully",
+                    Data = null,
+                    StatusCode = StatusCodes.Status200OK
+                });
+            }
         }
     }
 }

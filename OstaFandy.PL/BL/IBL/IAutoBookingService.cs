@@ -14,8 +14,9 @@ namespace OstaFandy.PL.BL.IBL
 
         Task<List<AvailableTimeSlot>> GetAvailableTimeSlotAsync(AvailableTimeSlotsRequestDto reqdata);
 
-        //Task<int> CreateBooking(CreateBookingDTO bookingdto);
         Task<BookingChatResponse?> CreateBooking(CreateBookingDTO bookingdto);
+
+        int CancelBooking(int bookingId);
 
     }
 }

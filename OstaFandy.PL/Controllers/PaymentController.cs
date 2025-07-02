@@ -50,10 +50,10 @@ namespace OstaFandy.PL.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePaymentIntent(decimal amount)
+        public async Task<IActionResult> CreatePaymentIntent([FromBody] PaymentIntentRequest request)
         {
-            var ClientSecret = await _paymentService.CreatePaymentIntent(amount);
-            return Ok(ClientSecret);
+            var ClientSecret = await _paymentService.CreatePaymentIntent(request.Amount);
+            return Ok(new { clientSecret = ClientSecret });
         }
     }
 }

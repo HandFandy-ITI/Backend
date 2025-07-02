@@ -16,6 +16,7 @@ namespace OstaFandy.PL.Controllers
             _categoryService = categoryService;
         }
 
+        // GET: api/category
         [HttpGet]
         public ActionResult<IEnumerable<CategoryDTO>> GetAll()
         {
@@ -23,6 +24,7 @@ namespace OstaFandy.PL.Controllers
             return Ok(result);
         }
 
+        // GET: api/category/paginated
         [HttpGet("paginated")]
         public ActionResult<PaginatedResult<CategoryDTO>> GetPaginated(
             [FromQuery] int pageNumber = 1,
@@ -34,36 +36,46 @@ namespace OstaFandy.PL.Controllers
             return Ok(result);
         }
 
+        // GET: api/category/{id}
         [HttpGet("{id}")]
         public ActionResult<CategoryDTO> GetById(int id)
         {
             var category = _categoryService.GetById(id);
-            if (category == null) return NotFound();
+            if (category == null)
+                return NotFound();
             return Ok(category);
         }
 
+        // POST: api/category
         [HttpPost]
         [Authorize(Policy = "Admin")]
-        public IActionResult Add([FromBody] CategoryCreateDTO dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Add([FromForm] CategoryCreateDTO dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            _categoryService.Add(dto);
+            await _categoryService.AddAsync(dto);
             return Ok(new { message = "Category added successfully." });
         }
 
-
-
+        // PUT: api/category/{id}
         [HttpPut("{id}")]
         [Authorize(Policy = "Admin")]
-        public IActionResult Update(int id, CategoryDTO dto)
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Update(int id, [FromForm] CategoryUpdateDTO dto)
         {
-            if (id != dto.Id) return BadRequest("ID mismatch.");
-            _categoryService.Update(dto);
+            if (id != dto.Id)
+                return BadRequest("ID mismatch.");
+
+            var success = await _categoryService.UpdateAsync(id, dto);
+            if (!success)
+                return NotFound(new { message = "Category not found." });
+
             return Ok(new { message = "Category updated." });
         }
 
+        // DELETE: api/category/{id}
         [HttpDelete("{id}")]
         [Authorize(Policy = "Admin")]
         public IActionResult Delete(int id)
@@ -72,6 +84,7 @@ namespace OstaFandy.PL.Controllers
             return success ? Ok("Category deleted.") : NotFound();
         }
 
+        // PATCH: api/category/{id}/toggle-status
         [HttpPatch("{id}/toggle-status")]
         [Authorize(Policy = "Admin")]
         public IActionResult ToggleStatus(int id)

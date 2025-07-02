@@ -212,7 +212,7 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                var handyman = _unitOfWork.HandyManRepo.GetById(id);
+                var handyman = _unitOfWork.HandyManRepo.FirstOrDefault(h=>h.UserId==id, "Specialization,User");
 
                 if (handyman == null)
                 {
@@ -374,7 +374,7 @@ namespace OstaFandy.PL.BL
                 return (new HandyManStatsDto
                 {
                     TodayJobs = handyman.JobAssignments
-                        .Count(j => j.IsActive && j.Status == "Completed" && j.AssignedAt.Date == DateTime.UtcNow.Date),
+                        .Count(j => j.IsActive && j.Status == "Assigned" && j.AssignedAt.Date == DateTime.UtcNow.Date),
 
                     PendingQuotes = handyman.JobAssignments
                          .SelectMany(j => j.Quotes)
