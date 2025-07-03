@@ -18,5 +18,7 @@ namespace OstaFandy.PL.BL.IBL
 
         int CancelBooking(int bookingId);
 
+        PaginatedResult<BookingViewDto> GetBookings(string handymanName = "", string status = "", bool? isActive = null, int pageNumber = 1, int pageSize = 10);
+
     }
 }

@@ -59,7 +59,7 @@ namespace OstaFandy.DAL.Repos
         {
            
             T? entity = dbSet.Find(id);
-            return entity ?? throw new InvalidOperationException($"Entity of type {typeof(T).Name} with ID {id} not found.");
+            return entity ;
         }
 
         public void Insert(T entity)
