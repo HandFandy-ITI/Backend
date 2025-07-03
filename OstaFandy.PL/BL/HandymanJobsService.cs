@@ -76,7 +76,9 @@ namespace OstaFandy.PL.BL
                     _logger.LogWarning($"Client with ID {booking.ClientId} not found.");
                     return false;
                 }
-                var user = _unitOfWork.UserRepo.GetById(client.UserId);
+
+                var user = _unitOfWork.UserRepo.GetById(client.Id);
+
                 //var notification = new Notification
                 //{
                 //    UserId = user.Id,
@@ -88,6 +90,7 @@ namespace OstaFandy.PL.BL
                 //};
                 //_unitOfWork.NotificationRepo.Insert(notification);
                 //_unitOfWork.Save();
+
                 var notification = new Notification
                 {
                     UserId = user.Id,
@@ -167,7 +170,7 @@ namespace OstaFandy.PL.BL
                     _logger.LogWarning($"Client with ID {booking.ClientId} not found.");
                     return false;
                 }
-                var user = _unitOfWork.UserRepo.GetById(client.UserId);
+                var user = _unitOfWork.UserRepo.GetById(client.Id);
                 var notification = new Notification
                 {
                     UserId = user.Id,
