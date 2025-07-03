@@ -53,6 +53,8 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
             builder.Services.AddScoped<IAnalyticsRepo, AnalyticsRepo>();
 
+            //builder.Services.AddScoped<IClientService, ClientService>();
+
             builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
 
             builder.Services.AddScoped<IOrderFeedbackService, OrderFeedbackService>();

@@ -1,4 +1,5 @@
-﻿using OstaFandy.PL.DTOs;
+﻿using OstaFandy.DAL.Entities;
+using OstaFandy.PL.DTOs;
 using OstaFandy.PL.utils;
 
 namespace OstaFandy.PL.BL.IBL
@@ -11,5 +12,11 @@ namespace OstaFandy.PL.BL.IBL
         AdminEditClientDTO EditClientDTO(AdminEditClientDTO editClientDto);
 
         bool DeleteClient(int id);
+
+        Task<ClientProfileDTO> GetClientProfile(int clientId);
+        Task<ClientOrderHistoryDTO> GetClientOrderHistory(int clientId);
+        Task<List<ClientQuoteDTO>> GetClientQuotes(int clientId);
+        Task<bool> UpdateClientProfile(int clientId, UpdateClientProfileDTO updateDto);
+        
     }
 }
