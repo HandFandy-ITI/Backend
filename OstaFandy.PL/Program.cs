@@ -7,6 +7,7 @@ using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
+using OstaFandy.PL.Controllers;
 using OstaFandy.PL.General;
 using OstaFandy.PL.Hubs;
 
@@ -70,6 +71,10 @@ namespace OstaFandy.PL
 
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
+
+            builder.Services.AddMemoryCache();
+
+            builder.Services.AddHttpClient<IChatBotService, ChatBotService>();
 
 
 

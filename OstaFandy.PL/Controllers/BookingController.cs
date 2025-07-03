@@ -36,6 +36,14 @@ namespace OstaFandy.PL.Controllers
             return Ok(bookings);
         }
 
+        [HttpGet("paged")]
+        public ActionResult<PaginatedResult<BookingViewDto>> GetPagedBookings([FromQuery] string handymanName = "",[FromQuery] string status = "",[FromQuery] bool? isActive = null,[FromQuery] int pageNumber = 1,[FromQuery] int pageSize = 10)
+        {
+            var result = _autoBookingService.GetBookings(handymanName, status, isActive, pageNumber, pageSize);
+
+            return Ok(result);
+        }
+
         [HttpGet("GetBookingById/{id}")]
         public IActionResult GetBookingById(int id)
         {
@@ -140,14 +148,35 @@ namespace OstaFandy.PL.Controllers
         }
 
         [HttpPatch("CancelBooking")]
-        public IActionResult CancelBooking(int BookingId)
+        public IActionResult CancelBooking([FromQuery] int bookingId)
         {
-            var res=_autoBookingService.CancelBooking(BookingId);
-            if(res<1)
+            var res = _autoBookingService.CancelBooking(bookingId);
+            if (res == 0)
             {
-                return BadRequest(new ResponseDto<string>{
+                return BadRequest(new ResponseDto<string>
+                {
                     IsSuccess = false,
-                    Message ="Faild to cancel booking",
+                    Message = "You cannot cancel a booking that has already been completed.",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            else if (res == -1)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "You must cancel the booking at least 24 hours in advance.",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
+            else if (res == -2)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "Failed to cancel the booking. Please try again.",
                     Data = null,
                     StatusCode = StatusCodes.Status400BadRequest
                 });
@@ -157,11 +186,14 @@ namespace OstaFandy.PL.Controllers
                 return Ok(new ResponseDto<string>
                 {
                     IsSuccess = true,
-                    Message = "Booking canceled successfully",
+                    Message = "Booking has been canceled successfully.",
                     Data = null,
                     StatusCode = StatusCodes.Status200OK
                 });
             }
         }
+
+
+
     }
 }
