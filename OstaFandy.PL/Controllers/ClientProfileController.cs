@@ -11,7 +11,7 @@ namespace OstaFandy.PL.Controllers
     {
         private readonly IClientService _clientService;
 
-        public ClientProfileController(IClientService clientService)
+        public ClientProfileController(IClientService clientService)                 
         {
             _clientService = clientService;
         }
