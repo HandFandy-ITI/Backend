@@ -1,8 +1,10 @@
 ﻿using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.Hubs;
 
 namespace OstaFandy.PL.Controllers
 {
@@ -11,10 +13,12 @@ namespace OstaFandy.PL.Controllers
     public class ChatController : ControllerBase
     {
         private readonly IChatService _chatService;
-
-        public ChatController(IChatService chatService)
+        private readonly IHubContext<ChatHub> _hubContext;
+        public ChatController(IChatService chatService, IHubContext<ChatHub> hubContext)
         {
             _chatService = chatService;
+            _hubContext = hubContext;
+
         }
 
         // 1. Ensure a chat session exists for a given booking
@@ -25,49 +29,33 @@ namespace OstaFandy.PL.Controllers
             return Ok(new { chatId });
         }
 
-        // 2. Send a message via HTTP (fallback if SignalR is not available)
-        //[HttpPost("send")]
-        //public IActionResult Send([FromBody] MessageDTO dto)
-        //{
-        //    _chatService.SendMessage(dto);
-        //    return Ok(new { success = true });
-        //}
 
-        //[HttpPost("send")]
-        //[Authorize]
-        //public IActionResult Send([FromBody] MessageDTO dto)
-        //{
-        //    try
-        //    {
-        //        var userIdClaim = User.FindFirst("NameIdentifier");
-        //        if (userIdClaim == null) return Unauthorized();
-
-        //        dto.SenderId = int.Parse(userIdClaim.Value);
-        //        _chatService.SendMessage(dto);
-
-        //        return Ok(new { message = "Message sent successfully", success = true });
-        //    }
-        //    catch (UnauthorizedAccessException ex)
-        //    {
-        //        return Forbid(ex.Message);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = "Server error", details = ex.Message });
-        //    }
-        //}
         [HttpPost("send")]
         [Authorize]
-        public IActionResult Send([FromBody] MessageDTO dto)
+        public async Task<IActionResult> Send([FromBody] MessageDTO dto)
         {
             var userIdClaim = User.FindFirst("NameIdentifier");
             if (userIdClaim == null) return Unauthorized();
 
-            dto.SenderId = int.Parse(userIdClaim.Value); // ✅ token-based ID only
+            dto.SenderId = int.Parse(userIdClaim.Value);
+            _chatService.SendMessage(dto); // Save message
 
-            _chatService.SendMessage(dto);
-            return Ok(new { message = "Message sent successfully", success = true });
+            // ✅ Fetch latest from DB (to include SentAt, SenderName, etc.)
+            var fullMessage = _chatService.GetMessages(dto.ChatId)
+                                          .OrderByDescending(m => m.SentAt)
+                                          .FirstOrDefault();
+
+            if (fullMessage == null)
+                return StatusCode(500, "Failed to retrieve saved message");
+
+            // ✅ Broadcast full message
+            await _hubContext.Clients.Group($"chat-{dto.ChatId}")
+                .SendAsync("ReceiveMessage", fullMessage);
+
+            return Ok(new { message = "Message sent", success = true });
         }
+
+
 
 
         // 3. Get full message history for a chat
