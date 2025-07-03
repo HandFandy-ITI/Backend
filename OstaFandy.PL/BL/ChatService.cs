@@ -164,7 +164,7 @@ namespace OstaFandy.PL.BL
         {
             var assignments = _unit.JobAssignmentRepo.GetAll(
                 j => j.HandymanId == handymanUserId &&
-                     j.Status == "InProgress" &&
+                     j.Status == "Assigned" &&
                      j.IsActive,
                 includeProperties: "Booking.Client.User,Booking.Chats.Messages"
             );
