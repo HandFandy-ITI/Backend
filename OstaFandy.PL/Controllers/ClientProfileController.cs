@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 
 namespace OstaFandy.PL.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class ClientProfileController : ControllerBase
     {
         private readonly IClientService _clientService;
@@ -16,7 +17,7 @@ namespace OstaFandy.PL.Controllers
         }
 
         [HttpGet("GetClientProfile/{clientId}")]
-        
+
         public async Task<IActionResult> GetClientProfile(int clientId)
         {
             try
@@ -208,8 +209,8 @@ namespace OstaFandy.PL.Controllers
             }
             catch (Exception ex)
             {
-                
-                
+
+
                 var fullException = ex;
                 var messages = new List<string>();
 
@@ -233,6 +234,5 @@ namespace OstaFandy.PL.Controllers
             }
         }
 
-       
     }
 }
