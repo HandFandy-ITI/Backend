@@ -3,7 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
+using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
+using Stripe;
 
 namespace OstaFandy.PL.Controllers
 {
@@ -11,12 +13,14 @@ namespace OstaFandy.PL.Controllers
     [ApiController]
     public class ClientPageController : ControllerBase
     {
+        private readonly INotificationService _notificationService;
         private readonly IClientPageService _clientPageService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<ClientPageController> _logger;
 
-        public ClientPageController(IUnitOfWork unitOfWork, ILogger<ClientPageController> logger, IClientPageService clientPageService)
+        public ClientPageController(IUnitOfWork unitOfWork, ILogger<ClientPageController> logger, IClientPageService clientPageService, INotificationService notificationService)
         {
+            _notificationService = notificationService;
             _clientPageService = clientPageService;
             _unitOfWork = unitOfWork;
             _logger = logger;
@@ -26,27 +30,57 @@ namespace OstaFandy.PL.Controllers
         [HttpPut("ApproveJobStatusChange")]
         [EndpointDescription("ClientPage/ApproveJobStatusChange")]
         [EndpointSummary("Approve the job status change by the client. " +
-            "This will update the job status and mark all notifications for that job as read.")]
-        public IActionResult ApproveJobStatusChange([FromQuery] int jobId, [FromQuery] string approvedStatus, [FromQuery] int clientUserId)
+    "This will update the job status and mark all notifications for that job as read.")]
+        public async Task<IActionResult> ApproveJobStatusChange([FromQuery] int jobId, [FromQuery] string approvedStatus, [FromQuery] int clientUserId)
         {
             _logger.LogInformation($"Received: jobId={jobId}, approvedStatus={approvedStatus}, clientUserId={clientUserId}");
+
             if (!ModelState.IsValid)
             {
                 _logger.LogWarning("ModelState is invalid: {ModelState}", ModelState);
                 return BadRequest(ModelState);
             }
-            if (approvedStatus == null)
+
+            if (string.IsNullOrEmpty(approvedStatus))
             {
-                _logger.LogWarning("ModelState is invalid: {ModelState}", ModelState);
+                _logger.LogWarning("Approved status is null or empty");
                 return BadRequest(new { message = "Approved status cannot be null or empty." });
             }
-            bool result = _clientPageService.ApproveJobStatusChange(jobId, approvedStatus, clientUserId);
-            if (!result)
+
+            try
             {
-                return BadRequest(new { message = $"Failed to update status for job {jobId}. Please ensure the transition is valid and the job exists." });
+                bool result = _clientPageService.ApproveJobStatusChange(jobId, approvedStatus, clientUserId);
+                if (!result)
+                {
+                    return BadRequest(new { message = $"Failed to update status for job {jobId}. Please ensure the transition is valid and the job exists." });
+                }
+
+                _logger.LogInformation($"Job {jobId} status successfully updated to {approvedStatus} by client approval.");
+
+                var handyman = _unitOfWork.HandyManRepo.GetHandymanByJobId(jobId);
+                _logger.LogInformation($"Found handyman: {handyman?.UserId} for job {jobId}");
+
+                if (handyman?.UserId != null)
+                {
+                    var message = $"Quote status for job {jobId} has been updated to {approvedStatus} by client.";
+                    await _notificationService.SendNotificationToHandyman(
+                        handyman.UserId.ToString(),
+                        message
+                    );
+                    _logger.LogInformation($"Notification sent to handyman {handyman.UserId} for job {jobId}");
+                }
+                else
+                {
+                    _logger.LogWarning($"No handyman found for job {jobId}");
+                }
+
+                return Ok(new { message = $"Job {jobId} status successfully updated to {approvedStatus} by client approval." });
             }
-            _logger.LogInformation($"Job {jobId} status successfully updated to {approvedStatus} by client approval.");
-            return Ok(new { message = $"Job {jobId} status successfully updated to {approvedStatus} by client approval." });
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error approving job status change for job {jobId}");
+                return StatusCode(500, new { message = "An error occurred while processing your request." });
+            }
         }
 
 
@@ -66,6 +100,20 @@ namespace OstaFandy.PL.Controllers
             notification.IsRead = true;
             _unitOfWork.NotificationRepo.Update(notification);
             _unitOfWork.Save();
+
+            var handyman = _unitOfWork.HandyManRepo.GetHandymanByNotificationId(notificationId);
+            var jobId = _unitOfWork.JobAssignmentRepo.GetJobIdByNotificationId(notificationId);
+            _logger.LogInformation($"Found handyman: {handyman?.UserId} for job {jobId}");
+
+            if (handyman?.UserId != null)
+            {
+                var message = $"Quote status for job {jobId} has been updated to Reject by client.";
+                  _notificationService.SendNotificationToHandyman(
+                    handyman.UserId.ToString(),
+                    message
+                );
+                _logger.LogInformation($"Notification sent to handyman {handyman.UserId} for job {jobId}");
+            }
             return Ok(new { message = "Notification marked as read." });
         }
         #endregion
@@ -87,7 +135,7 @@ namespace OstaFandy.PL.Controllers
                 n.CreatedAt,
                 n.IsRead,
                 CurrentJobStatus = n.RelatedEntityType == "JobAssignment" && n.RelatedEntityId.HasValue
-                    ? _unitOfWork.JobAssignmentRepo.GetById(n.RelatedEntityId.Value)?.Status
+                    ? _unitOfWork.JobAssignmentRepo.GetByIdOrDefault(n.RelatedEntityId.Value)?.Status
                     : null,
                 RelatedEntityId = n.RelatedEntityId,
 
@@ -126,7 +174,19 @@ namespace OstaFandy.PL.Controllers
                 {
                     return BadRequest(new { message = $"Failed to update status for job {jobId}. Please ensure the transition is valid and the job exists." });
                 }
-
+                var handymanId = _unitOfWork.JobAssignmentRepo.gethandymanbyjobid(jobId);
+                var job = _unitOfWork.JobAssignmentRepo.GetById(jobId);
+                if (job?.HandymanId != null)
+                {
+                    var handyman = _unitOfWork.HandyManRepo.GetById(job.HandymanId);
+                    if (handyman?.UserId != null)
+                    {
+                          _notificationService.SendNotificationToHandyman(
+                            handyman.UserId.ToString(),
+                            $"Quote status for job {jobId} has been updated to {approvedStatus} by client."
+                        );
+                    }
+                }
                 _logger.LogInformation($"Job {jobId} status successfully updated to {approvedStatus} by client approval.");
                 return Ok(new { message = $"Job {jobId} status successfully updated to {approvedStatus} by client approval." });
             }

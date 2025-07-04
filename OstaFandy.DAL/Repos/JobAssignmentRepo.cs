@@ -15,5 +15,17 @@ namespace OstaFandy.DAL.Repos
         {
             _db = db;
         }
+        public int gethandymanbyjobid(int id)
+        {
+            int handymanid = _db.JobAssignments.Where(a => a.Id == id).Select(a => a.HandymanId).FirstOrDefault();
+            return handymanid;
+        }
+        public int GetJobIdByNotificationId(int notificationId)
+        {
+            return (int) _db.Notifications
+               .Where(n => n.Id == notificationId)
+               .Select(n => n.RelatedEntityId)
+               .FirstOrDefault();
+        }
     }
 }
