@@ -9,5 +9,8 @@ namespace OstaFandy.DAL.Repos.IRepos
 {
     public interface IJobAssignmentRepo : IGeneralRepo<JobAssignment>  
     {
+        int gethandymanbyjobid(int id);
+
+        int GetJobIdByNotificationId(int notificationId);
     }
 }
