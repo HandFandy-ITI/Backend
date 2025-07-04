@@ -35,6 +35,7 @@ namespace OstaFandy.PL
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
             // Register your services here
@@ -157,6 +158,7 @@ namespace OstaFandy.PL
 
             app.MapControllers();
             app.MapHub<ChatHub>("/chatHub");
+            app.MapHub<NotificationHub>("/notificationHub");
 
             app.Run();
         }

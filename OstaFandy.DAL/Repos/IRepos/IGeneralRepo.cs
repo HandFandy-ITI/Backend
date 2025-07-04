@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace OstaFandy.DAL.Repos.IRepos
 {
@@ -17,6 +18,7 @@ namespace OstaFandy.DAL.Repos.IRepos
         public T FirstOrDefault(Expression<Func<T, bool>> filter, string? includeProperties = null);
         public void Update(T entity);
         public void AddRange(IEnumerable<T> entites);
+        public T? GetByIdOrDefault(int id);
     }
 
 

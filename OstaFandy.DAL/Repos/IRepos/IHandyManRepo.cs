@@ -11,6 +11,8 @@ namespace OstaFandy.DAL.Repos.IRepos
     {
  
         public bool checkUniqueNationalId(string nationalid);
- 
+
+        Handyman GetHandymanByJobId(int JobId);
+        Handyman GetHandymanByNotificationId(int NotificationId);
     }
 }
