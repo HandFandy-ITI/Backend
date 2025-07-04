@@ -122,6 +122,33 @@ namespace OstaFandy.PL.Controllers
                         Data = null,
                         StatusCode = StatusCodes.Status401Unauthorized
                     });
+                }else if(!user.IsActive)
+                {
+                    return Unauthorized(new ResponseDto<string>
+                    {
+                        IsSuccess = false,
+                        Message = "Your account is inactive. Please contact support.",
+                        Data = null,
+                        StatusCode = StatusCodes.Status401Unauthorized
+                    });
+                }else if(user.HandymanStatus == "Pending")
+                {
+                    return Unauthorized(new ResponseDto<string>
+                    {
+                        IsSuccess = false,
+                        Message = "Your handyman application is still under review.",
+                        Data = "Pending",
+                        StatusCode = StatusCodes.Status401Unauthorized
+                    });
+                }else if(user.HandymanStatus == "Rejected")
+                {
+                    return Unauthorized(new ResponseDto<string>
+                    {
+                        IsSuccess = false,
+                        Message = "Your handyman application has been rejected.",
+                        Data = "Rejected",
+                        StatusCode = StatusCodes.Status401Unauthorized
+                    });
                 }
 
                 // Try verifying password
