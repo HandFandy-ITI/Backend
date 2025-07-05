@@ -6,7 +6,7 @@ namespace OstaFandy.PL.BL.IBL
     {
         Task SendNotificationToHandyman(string handymanUserId, string message);
         Task SendNotificationToClient(string clientUserId, int jobId, string status);
-        Task SendQuoteResponse(string userId, int quoteId, string action);
+        Task SendQuoteResponse(int userId, int quoteId, string action);
  
 
         // NEW: Methods for handyman notifications

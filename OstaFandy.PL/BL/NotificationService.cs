@@ -53,7 +53,7 @@ namespace OstaFandy.PL.BL
         }
 
 
-        public async Task SendQuoteResponse(string userId, int quoteId, string action)
+        public async Task SendQuoteResponse(int userId, int quoteId, string action)
         {
             var message = action.ToLower() == "accept"
                 ? $"Your quote #{quoteId} has been accepted by the client"
@@ -61,7 +61,7 @@ namespace OstaFandy.PL.BL
 
             _logger.LogInformation($"Sending quote response to user {userId}: {message}");
 
-            if (NotificationHub.TryGetConnectionId(userId, out var connectionId))
+            if (NotificationHub.TryGetConnectionId(userId.ToString(), out var connectionId))
             {
                 await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveQuoteResponse", quoteId, action, message);
                 _logger.LogInformation($"Quote response sent to user {userId} via connection {connectionId}");
