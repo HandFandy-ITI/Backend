@@ -66,7 +66,12 @@ namespace OstaFandy.DAL.Repos
                 .Include(c => c.User)
                 .FirstOrDefaultAsync(c => c.UserId == id);
         }
-
+        public Client? GetByIdSync(int id)
+        {
+            return _db.Clients
+                .Include(c => c.User)
+                .FirstOrDefault(c => c.UserId == id);
+        }
         public async Task<IEnumerable<Client>> GetAll()
         {
             return await _db.Clients
