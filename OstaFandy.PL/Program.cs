@@ -8,6 +8,7 @@ using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.Controllers;
+using OstaFandy.PL.DTOs;
 using OstaFandy.PL.General;
 using OstaFandy.PL.Hubs;
 
@@ -36,6 +37,7 @@ namespace OstaFandy.PL
 
             builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
+            builder.Services.AddScoped<INotificationService, NotificationService>();
 
 
             // Register your services here
@@ -75,6 +77,11 @@ namespace OstaFandy.PL
             builder.Services.AddMemoryCache();
 
             builder.Services.AddHttpClient<IChatBotService, ChatBotService>();
+
+            builder.Services.AddScoped<IEmailService, EmailService>();
+
+            builder.Services.Configure<EmailDto>(builder.Configuration.GetSection("EmailSettings"));
+
 
 
 
@@ -164,6 +171,7 @@ namespace OstaFandy.PL
 
             app.MapControllers();
             app.MapHub<ChatHub>("/chatHub");
+            app.MapHub<NotificationHub>("/notificationHub");
 
             app.Run();
         }

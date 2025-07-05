@@ -46,12 +46,18 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                var data = _unitOfWork.UserRepo.FirstOrDefault(u => u.Email == Email, "UserTypes");
+                var data = _unitOfWork.UserRepo.FirstOrDefault(u => u.Email == Email, "UserTypes,Handyman");
+                var dto= _mapper.Map<UserDto>(data);
                 if (data == null)
                 {
                     return null;
                 }
-                return _mapper.Map<UserDto>(data);
+                else if (data.Handyman != null) 
+                {
+                    dto.HandymanStatus = data.Handyman.Status;
+                }
+
+                return dto;
 
             }
             catch (Exception ex)

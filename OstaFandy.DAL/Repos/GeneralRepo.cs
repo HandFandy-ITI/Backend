@@ -91,6 +91,10 @@ namespace OstaFandy.DAL.Repos
         {
             dbSet.AddRange(entites);
         }
+        public T? GetByIdOrDefault(int id)
+        {
+            return dbSet.Find(id);
+        }
 
         //public T GetById(int id, string? includeProperties = null)
         //{

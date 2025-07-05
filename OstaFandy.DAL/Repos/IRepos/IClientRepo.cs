@@ -15,6 +15,7 @@ namespace OstaFandy.DAL.Repos.IRepos
         Task<Client?> GetClientWithBookingHistory(int clientId);
         Task<Client?> GetClientByUserId(int clientId);
         Task<Client?> GetById(int id);
+        Client? GetByIdSync(int id);
         Task<IEnumerable<Client>> GetAll();
         Task<Client> Add(Client client);
         void Update(Client client);
