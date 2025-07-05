@@ -16,13 +16,15 @@ namespace OstaFandy.PL.BL
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
 
-        public AutoBookingService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration)
+        public AutoBookingService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         //get all
@@ -138,6 +140,10 @@ namespace OstaFandy.PL.BL
             using var trnsaction = await _unitOfWork.BeginTransactionasync();
             try
             {
+                //email
+                var email = new EmailContentDto();
+                //get user
+                var user= _unitOfWork.UserRepo.GetById(bookingdto.ClientId);
                 //booking 
                 var booking = _mapper.Map<Booking>(bookingdto);
                 _unitOfWork.BookingRepo.Insert(booking);
@@ -178,8 +184,51 @@ namespace OstaFandy.PL.BL
                     {
                         payment.ReceiptUrl = charge.ReceiptUrl;
                     }
+
                 }
 
+                email.to = user.Email;
+                email.subject = "Place booking";
+                email.body = $"""
+                        <div style="font-family: Arial, sans-serif; color: #333333; max-width:600px; margin:auto; padding:20px; background-color: #ffffff; border:1px solid #c0c0c0; border-radius:8px;">
+                          <h1 style="color: #004e98; margin-bottom: 10px;">Thank You for Trusting Us!</h1>
+
+                          <p style="font-size:16px; line-height:1.5;">
+                            Hello <strong>{user.FirstName} {user.LastName}</strong>,<br/>
+                            Your booking <strong>#{booking.Id}</strong> is confirmed for <strong>{booking.PreferredDate:dddd, MMM dd, yyyy}</strong>.
+                          </p>
+
+                          <p style="font-size:16px; line-height:1.5;">
+                            <strong>Total Price:</strong> {bookingdto.TotalPrice:C}
+                          </p>
+
+                          {(string.IsNullOrEmpty(payment.ReceiptUrl) ? "" : $"""
+                          <p style="font-size:16px; line-height:1.5;">
+                            You can view your payment receipt by clicking the button below:
+                          </p>
+                          <a href="{payment.ReceiptUrl}" target="_blank"
+                             style="
+                               display: inline-block;
+                               padding: 12px 25px;
+                               background-color: #004e98;
+                               color: #ffffff;
+                               font-weight: bold;
+                               text-decoration: none;
+                               border-radius: 5px;
+                               transition: background-color 0.3s ease;
+                             "
+                             onmouseover="this.style.backgroundColor='#003770'"
+                             onmouseout="this.style.backgroundColor='#004e98'"
+                          >View Payment Receipt</a>
+                          """)}
+
+                          <p style="font-size:14px; color: #777777; margin-top: 30px; line-height:1.4;">
+                            If you have any questions, feel free to contact us anytime.
+                          </p>
+                        </div>
+                        """;
+
+               await _emailService.SendEmailAsync(email);
 
                 _unitOfWork.PaymentRepo.Insert(payment);
 
