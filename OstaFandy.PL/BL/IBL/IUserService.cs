@@ -12,5 +12,9 @@ namespace OstaFandy.PL.BL.IBL
         public UserDto? GetById(int id);
 
         public List<User> GetAlluser();
+
+        public Task<bool> ForgotPassword(UserDto user);
+
+        public int ResetPassword(ResetPasswordDto resetPasswordDto);
     }
 }
