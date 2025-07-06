@@ -8,6 +8,9 @@ using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 using OstaFandy.PL.General;
 using OstaFandy.PL.utils;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.Net.Http.Headers;
+using Microsoft.EntityFrameworkCore;
 
 namespace OstaFandy.PL.BL
 {
@@ -391,8 +394,79 @@ namespace OstaFandy.PL.BL
             }
         }
 
+        public async Task<HandymanProfileDto> GetHandymanProfile(int userId)
+        {
+            try
+            {
+                var handyman = _unitOfWork.HandyManRepo.FirstOrDefault(
+                    h => h.UserId == userId,
+                    includeProperties: "User,Specialization,DefaultAddress"
+                );
 
+                if (handyman == null)
+                {
+                    _logger.LogWarning($"Handyman with ID {userId} not found for profile retrieval.");
+                    return null;
+                }
 
+                return new HandymanProfileDto
+                {
+                    UserId = handyman.UserId,
+                    FirstName = handyman.User?.FirstName,
+                    LastName = handyman.User?.LastName,
+                    Email = handyman.User?.Email,
+                    Phone = handyman.User?.Phone,
+                    ProfilePictureUrl = handyman.Img,
+                    SpecializationName = handyman.Specialization?.Name,
+                    ExperienceYears = handyman.ExperienceYears,
+                    Status = handyman.Status,
+                    DefaultAddress = handyman.DefaultAddress?.Address1,
+                    City = handyman.DefaultAddress?.City,
+                    Latitude = handyman.DefaultAddress?.Latitude ?? 0,
+                    Longitude = handyman.DefaultAddress?.Longitude ?? 0
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while getting handyman profile for UserId: {userId}");
+                throw;
+            }
+        }
+
+        public async Task<bool> UpdateHandymanProfilePhoto(int userId, string profilePhotoUrl)
+        {
+            try
+            {
+                var handyman = _unitOfWork.HandyManRepo.FirstOrDefault(h => h.UserId == userId);
+
+                if (handyman == null)
+                {
+                    _logger.LogWarning($"Handyman with UserId {userId} not found for profile photo update.");
+                    return false;
+                }
+
+                handyman.Img = profilePhotoUrl;
+
+                _unitOfWork.HandyManRepo.Update(handyman);
+                var result = await _unitOfWork.SaveAsync();
+
+                if (result > 0)
+                {
+                    _logger.LogInformation($"Successfully updated profile photo for handyman with UserId {userId}.");
+                    return true;
+                }
+                else
+                {
+                    _logger.LogWarning($"Failed to save profile photo update for handyman with UserId {userId}.");
+                    return false;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating profile photo for handyman with UserId: {userId}");
+                return false;
+            }
+        }
 
     }
 }
