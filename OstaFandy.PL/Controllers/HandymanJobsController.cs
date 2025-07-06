@@ -125,7 +125,6 @@ namespace OstaFandy.PL.Controllers
                     {
                         return NotFound(new { message = "Handyman or quote not found for the given job." });
                     }
-                    _notificationService.SendQuoteResponse(userId, (int)quoteId, "Quote added successfully");
                     // notify the client
                     var job = _unitOfWork.JobAssignmentRepo.GetById(model.JobId);
                     if (job != null)
@@ -133,6 +132,7 @@ namespace OstaFandy.PL.Controllers
                         var client = _unitOfWork.ClientRepo.GetByIdSync(job.Booking.ClientId);
                         if (client?.UserId != null)
                         {
+                            _notificationService.SendQuoteResponse(userId, (int)quoteId, "Quote added successfully");
                             _notificationService.SendNotificationToClient(
                                 client.UserId.ToString(),
                                 model.JobId,
@@ -187,10 +187,9 @@ namespace OstaFandy.PL.Controllers
                         var handyman = _unitOfWork.HandyManRepo.GetById(quoteDetails.HandymanId);
                         if (handyman?.UserId != null)
                         {
-                            await _notificationService.SendQuoteResponse(
-                             handyman.UserId,
-                             model.QuoteId,
-                             model.Action
+                            await _notificationService.SendNotificationToHandyman(
+                                      handyman.UserId.ToString(),
+                                      $"Quote status for Quote {model.QuoteId} has been updated to {model.Action} by client."
                          );
                         }
                         return Ok(new { message = "Quote rejected successfully." });

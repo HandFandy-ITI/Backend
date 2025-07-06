@@ -124,7 +124,7 @@ namespace OstaFandy.PL.Controllers
         [EndpointSummary("Get all notifications for a specific user.")]
         public IActionResult GetNotifications(int userId)
         {
-            var notifications = _unitOfWork.NotificationRepo.GetAll(n => n.UserId == userId);
+            var notifications = _unitOfWork.NotificationRepo.GetAll(n => n.UserId == userId).OrderByDescending(n => n.CreatedAt);
             var notificationDtos = notifications.Select(n => new
             {
                 n.Id,
@@ -170,7 +170,7 @@ namespace OstaFandy.PL.Controllers
             {
                 bool result = _clientPageService.ApproveQuoteStatusChange(jobId, approvedStatus, clientUserId);
 
-                if (!result) // Fixed: was checking if (result == null) but result is bool
+                if (!result)
                 {
                     return BadRequest(new { message = $"Failed to update status for job {jobId}. Please ensure the transition is valid and the job exists." });
                 }
