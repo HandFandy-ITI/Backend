@@ -4,6 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Storage;
+using OstaFandy.DAL.Entities;
+using OstaFandy.DAL.Repos.IRepos;
+using OstaFandy.DAL.Repos;
+using OstaFandy.PL.Repos.IRepos;
 
 namespace OstaFandy.DAL.Repos.IRepos
 {
@@ -18,10 +22,13 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IAddressRepo AddressRepo { get; }
         public IAnalyticsRepo AnalyticsRepo { get; }
         public IQuoteRepo QuoteRepo{ get; }
+        public IBlockDateRepo BlockDateRepo{ get; }
 
         public IBookingRepo BookingRepo { get; }
 
+        //public IReviewRepo ReviewRepo { get; }
         public IReviewRepo ReviewRepo { get; }
+
         public IJobAssignmentRepo JobAssignmentRepo { get; }
         ICategoryRepo CategoryRepo { get; }
         IServiceRepo ServiceRepo { get; }

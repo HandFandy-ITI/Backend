@@ -9,6 +9,8 @@ using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.General;
 using OstaFandy.PL.Hubs;
+using OstaFandy.PL.Repos.IRepos;
+using OstaFandy.PL.Repos;
 
 namespace OstaFandy.PL
 {
@@ -80,6 +82,11 @@ namespace OstaFandy.PL
 
 
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
+            
+            builder.Services.AddScoped<IReviewService, ReviewService>();
+
+
 
 
 

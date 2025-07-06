@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
+using OstaFandy.PL.Repos;
+using OstaFandy.PL.Repos.IRepos;
 
 namespace OstaFandy.DAL.Repos
 {
@@ -37,6 +39,7 @@ namespace OstaFandy.DAL.Repos
         private IServiceRepo _serviceRepo;
         private INotificationRepo _notificationRepo;
         private IQuoteRepo _quoteRepo;
+        private IBlockDateRepo _blockDataRepo;
  
 
         private IChatRepo _chatRepo;
@@ -52,6 +55,7 @@ namespace OstaFandy.DAL.Repos
         public IPaymentRepo PaymentRepo => _paymentRepo ??= new PaymentRepo(_db);
         public INotificationRepo NotificationRepo=> _notificationRepo ??= new NotificationRepo(_db);
         public IQuoteRepo QuoteRepo=> _quoteRepo ??= new QuoteRepo(_db);
+        public IBlockDateRepo BlockDateRepo=> _blockDataRepo ??= new BlockDateRepo(_db);
 
 
         public IHandyManRepo HandyManRepo => _handymanRepo ??= new HandyManRepo(_db);

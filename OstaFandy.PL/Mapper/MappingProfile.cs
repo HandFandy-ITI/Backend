@@ -9,6 +9,8 @@ namespace OstaFandy.PL.Mapper
     {
         public MappingProfile()
         {
+
+
             #region User
             CreateMap<User, UserDto>().ReverseMap();
             CreateMap<DAL.Entities.UserType, UserTypeDto>().ReverseMap();
@@ -106,7 +108,7 @@ namespace OstaFandy.PL.Mapper
                                 Address1 = src.Client.DefaultAddress.Address1,
                                 City = src.Client.DefaultAddress.City,
                                 Latitude = src.Client.DefaultAddress.Latitude,
-                                Longitude = src.Client.DefaultAddress.Longitude,                             
+                                Longitude = src.Client.DefaultAddress.Longitude,
                                 AddressType = src.Client.DefaultAddress.AddressType,
                                 IsDefault = src.Client.DefaultAddress.IsDefault,
                                 IsActive = src.Client.DefaultAddress.IsActive,
@@ -242,9 +244,9 @@ namespace OstaFandy.PL.Mapper
             CreateMap<Booking, DashboardDTO>()
             .AfterMap((src, dest) =>
             {
-                 dest.Service = src.BookingServices != null && src.BookingServices.Any()
-                    ? string.Join(", ", src.BookingServices.Select(bs => bs.Service.Name))
-                    : string.Empty;
+                dest.Service = src.BookingServices != null && src.BookingServices.Any()
+                   ? string.Join(", ", src.BookingServices.Select(bs => bs.Service.Name))
+                   : string.Empty;
 
                 dest.location = src.Address?.City ?? "";
 
@@ -270,7 +272,7 @@ namespace OstaFandy.PL.Mapper
 
             CreateMap<HandyManApplicationDto, Handyman>()
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(_ => HandymenStatus.Pending))
-                .ForMember(dest => dest.DefaultAddressId, opt => opt.Ignore()); 
+                .ForMember(dest => dest.DefaultAddressId, opt => opt.Ignore());
 
             CreateMap<HandyManApplicationDto, Address>()
                 .ForMember(dest => dest.Address1, opt => opt.MapFrom(src => src.Address))
@@ -281,7 +283,7 @@ namespace OstaFandy.PL.Mapper
                 .ForMember(dest => dest.AddressType, opt => opt.MapFrom(src => src.AddressType))
                 .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(_ => DateTime.UtcNow));
             #endregion
- 
+
 
             #region service catalog
 
@@ -292,7 +294,7 @@ namespace OstaFandy.PL.Mapper
             // Service Mappings
             CreateMap<Service, ServiceDTO>()
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category.Name));
-            CreateMap<ServiceDTO, Service>(); 
+            CreateMap<ServiceDTO, Service>();
             CreateMap<ServiceCreateDTO, Service>();
             CreateMap<ServiceUpdateDTO, Service>();
 
@@ -330,6 +332,11 @@ namespace OstaFandy.PL.Mapper
                     dest.createdAt = src.CreatedAt;
                 })
                 .ReverseMap();
+            #endregion
+
+            #region review
+            CreateMap<Review, ReviewResponseDTO>();
+            CreateMap<CreateReviewDTO, Review>();
             #endregion
         }
     }
