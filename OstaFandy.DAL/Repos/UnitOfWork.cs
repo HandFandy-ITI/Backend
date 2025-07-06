@@ -44,6 +44,8 @@ namespace OstaFandy.DAL.Repos
         private IMessageRepo _messageRepo;
 
         private IBookingServiceRepo _bookingServiceRepo;
+        
+        private IPasswordResetTokenRepo _passwordResetTokenRepo;    
 
 
 
@@ -75,6 +77,7 @@ namespace OstaFandy.DAL.Repos
 
         public IBookingServiceRepo BookingServiceRepo => _bookingServiceRepo ??= new BookingServiceRepo(_db);
 
+        public IPasswordResetTokenRepo PasswordResetTokenRepo=> _passwordResetTokenRepo ??= new PasswordResetTokenRepo(_db);
 
 
 
