@@ -92,6 +92,8 @@ namespace OstaFandy.PL.DTOs
         public int QuoteId { get; set; }
         public int BookingId { get; set; }
         public string HandymanName { get; set; }
+        public int handymanId { get; set; }
+        public int addressId { get; set; }
         public decimal Price { get; set; }
         public string Notes { get; set; }
         public string Status { get; set; }
