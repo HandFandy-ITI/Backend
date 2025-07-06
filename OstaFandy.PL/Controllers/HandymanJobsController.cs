@@ -79,6 +79,7 @@ namespace OstaFandy.PL.Controllers
                     {
                         var client =  _unitOfWork.ClientRepo.GetByIdSync(job.Booking.ClientId);
                         if (client?.UserId != null)
+
                         {
                               _notificationService.SendNotificationToClient(
                                 client.UserId.ToString(),

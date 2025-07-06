@@ -58,7 +58,7 @@ namespace OstaFandy.PL.Controllers
                     IsSuccess = true,
                     Message = "Address Added Succesifilly",
                     Data = null,
-                    StatusCode = StatusCodes.Status400BadRequest
+                    StatusCode = StatusCodes.Status200OK
                 });
             }
         }
