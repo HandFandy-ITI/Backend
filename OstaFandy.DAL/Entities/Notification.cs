@@ -34,6 +34,9 @@ public partial class Notification
 
     public bool IsRead { get; set; }
 
+    public bool IsActive { get; set; }
+
+
     [Column(TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 
