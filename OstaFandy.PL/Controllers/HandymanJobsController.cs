@@ -77,8 +77,9 @@ namespace OstaFandy.PL.Controllers
                     var job = _unitOfWork.JobAssignmentRepo.GetById(jobId);
                     if (job?.Booking?.ClientId != null)
                     {
-                        var client = _unitOfWork.ClientRepo.GetById(job.Booking.ClientId);
-                        if (client?.Id != null)
+                        var client =  _unitOfWork.ClientRepo.GetByIdSync(job.Booking.ClientId);
+                        if (client?.UserId != null)
+
                         {
                               _notificationService.SendNotificationToClient(
                                 client.Id.ToString(),
@@ -117,6 +118,28 @@ namespace OstaFandy.PL.Controllers
                 var result = _handymanJobService.AddQuote(model.JobId, model.Price, model.Notes, model.EstimatedMinutes);
                 if (result)
                 {
+                    var userId = _unitOfWork.HandyManRepo.GetHandymanByJobId(model.JobId).UserId;
+                    var quoteId = _unitOfWork.QuoteRepo.GetQuoteByJobId(model.JobId)?.Id;
+                    // Send notification to the handyman about the new quote
+                    if(userId == null || quoteId == null)
+                    {
+                        return NotFound(new { message = "Handyman or quote not found for the given job." });
+                    }
+                    // notify the client
+                    var job = _unitOfWork.JobAssignmentRepo.GetById(model.JobId);
+                    if (job != null)
+                    {
+                        var client = _unitOfWork.ClientRepo.GetByIdSync(job.Booking.ClientId);
+                        if (client?.UserId != null)
+                        {
+                            _notificationService.SendQuoteResponse(userId, (int)quoteId, "Quote added successfully");
+                            _notificationService.SendNotificationToClient(
+                                client.UserId.ToString(),
+                                model.JobId,
+                                "New quote added by handyman"
+                            );
+                        }
+                    }
                     return Ok(new { message = "Quote added successfully." });
                 }
                 else
@@ -164,10 +187,9 @@ namespace OstaFandy.PL.Controllers
                         var handyman = _unitOfWork.HandyManRepo.GetById(quoteDetails.HandymanId);
                         if (handyman?.UserId != null)
                         {
-                            await _notificationService.SendQuoteResponse(
-                             handyman.UserId.ToString(),
-                             model.QuoteId,
-                             model.Action
+                            await _notificationService.SendNotificationToHandyman(
+                                      handyman.UserId.ToString(),
+                                      $"Quote status for Quote {model.QuoteId} has been updated to {model.Action} by client."
                          );
                         }
                         return Ok(new { message = "Quote rejected successfully." });

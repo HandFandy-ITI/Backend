@@ -239,6 +239,8 @@ namespace OstaFandy.PL.BL
                                     HandymanName = booking.JobAssignment.Handyman?.User != null
                                         ? $"{booking.JobAssignment.Handyman.User.FirstName} {booking.JobAssignment.Handyman.User.LastName}"
                                         : "Unknown",
+                                    handymanId = booking.JobAssignment.HandymanId,
+                                    addressId = booking.AddressId,
                                     Price = quote.Price,
                                     Notes = quote.Notes,
                                     Status = quote.Status,

@@ -27,6 +27,9 @@ public partial class BlockDate
 
     public bool IsActive { get; set; }
 
+    public string Status { get; set; }
+
+
     [Column(TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 

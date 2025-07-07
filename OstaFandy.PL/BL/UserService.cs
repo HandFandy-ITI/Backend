@@ -1,4 +1,5 @@
-﻿using AutoMapper;
+﻿using System.Net.Mail;
+using AutoMapper;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
@@ -13,12 +14,14 @@ namespace OstaFandy.PL.BL
         public readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<UserService> _logger;
         private readonly IMapper _mapper;
+        private readonly IEmailService _emailService;
 
-        public UserService(IUnitOfWork unitOfWork, ILogger<UserService> logger, IMapper mapper)
+        public UserService(IUnitOfWork unitOfWork, ILogger<UserService> logger, IMapper mapper,IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _logger = logger;
             _mapper = mapper;
+            _emailService = emailService;
         }
 
         public List<User> GetAlluser()
@@ -47,12 +50,12 @@ namespace OstaFandy.PL.BL
             try
             {
                 var data = _unitOfWork.UserRepo.FirstOrDefault(u => u.Email == Email, "UserTypes,Handyman");
-                var dto= _mapper.Map<UserDto>(data);
+                var dto = _mapper.Map<UserDto>(data);
                 if (data == null)
                 {
                     return null;
                 }
-                else if (data.Handyman != null) 
+                else if (data.Handyman != null)
                 {
                     dto.HandymanStatus = data.Handyman.Status;
                 }
@@ -129,7 +132,7 @@ namespace OstaFandy.PL.BL
                 {
                     return null; // Invalid ID
                 }
-                var user = _unitOfWork.UserRepo.FirstOrDefault(u=>u.Id==id, "UserTypes");
+                var user = _unitOfWork.UserRepo.FirstOrDefault(u => u.Id == id, "UserTypes");
                 if (user == null)
                 {
                     return null; // User not found
@@ -141,5 +144,101 @@ namespace OstaFandy.PL.BL
                 return null; // Error occurred
             }
         }
+
+        public async Task<bool> ForgotPassword(UserDto user)
+        {
+            try
+            {
+                var res = 0;
+                var otp = new Random().Next(100000, 999999).ToString();
+
+                var passwordReset = new PasswordResetToken
+                {
+                    UserId = user.Id,
+                    Token = otp,
+                    ExpiryDate = DateTime.UtcNow.AddMinutes(15),
+                    IsUsed = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _unitOfWork.PasswordResetTokenRepo.Insert(passwordReset);
+                res = _unitOfWork.Save();
+
+                if (res > 0)
+                {
+                    #region email body
+                    var emailContent = new EmailContentDto
+                    {
+                        to = user.Email,
+                        subject = "Password Reset OTP",
+                        body = $"""
+<div style="font-family: Arial, sans-serif; color: #333333; max-width:600px; margin:auto; padding:20px; background-color: #ffffff; border:1px solid #c0c0c0; border-radius:8px;">
+  <h1 style="color: #004e98; margin-bottom: 10px;">Password Reset Request</h1>
+
+  <p style="font-size:16px; line-height:1.5;">
+    Hello,<br/>
+    We received a request to reset your password.
+  </p>
+
+  <p style="font-size:16px; line-height:1.5;">
+    Please use the following <strong>One-Time Password (OTP)</strong> to reset your password:
+  </p>
+
+  <p style="font-size:24px; font-weight:bold; color:#004e98; text-align:center; margin:20px 0;">
+    {otp}
+  </p>
+
+  <p style="font-size:16px; line-height:1.5;">
+    This OTP is valid for the next <strong>15 minutes</strong>. If you didn't request a password reset, please ignore this email.
+  </p>
+
+  <p style="font-size:14px; color: #777777; margin-top: 30px; line-height:1.4;">
+    If you have any questions or need further assistance, feel free to contact us anytime.
+  </p>
+</div>
+"""
+                    };
+                    #endregion
+
+                    await _emailService.SendEmailAsync(emailContent);
+                    return true;
+                }
+                return false;
+                
+
+            }
+            catch (Exception e)
+            {
+                return false;
+            }
+        }
+
+        public int ResetPassword(ResetPasswordDto resetPasswordDto)
+        {
+            try
+            {
+                var user = _unitOfWork.UserRepo.FirstOrDefault(u => u.Email == resetPasswordDto.Email);
+                if (user == null) { return -1; } //not found 
+
+                var token = _unitOfWork.PasswordResetTokenRepo.FirstOrDefault(t => t.UserId == user.Id && t.Token == resetPasswordDto.Otp && !t.IsUsed && t.ExpiryDate > DateTime.UtcNow);
+
+                if (token == null)
+                {
+                    return 0;// invalid or expired token
+                }
+
+                user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(resetPasswordDto.NewPassword);
+                token.IsUsed = true;
+                _unitOfWork.PasswordResetTokenRepo.Update(token);
+                _unitOfWork.UserRepo.Update(user);
+                return _unitOfWork.Save();
+            }
+
+            catch
+            {
+                return -2;//error
+            }
+
+        }
+
     }
 }
