@@ -122,10 +122,16 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                var availableTimeSlots = await _unitOfWork.BookingRepo
-                    .GetAvailableTimeSlotsAsync(reqdata.CategoryId, reqdata.Day, reqdata.UserLatitude, reqdata.UserLongitude, reqdata.EstimatedMinutes);
+                var (slots, areaNotSupported) = await _unitOfWork.BookingRepo
+                            .GetAvailableTimeSlotsAsync(reqdata.CategoryId, reqdata.Day, reqdata.UserLatitude, reqdata.UserLongitude, reqdata.EstimatedMinutes);
 
-                return availableTimeSlots;
+                if (areaNotSupported)
+                {
+                    return null;
+                }
+               
+                   return slots;
+                
             }
             catch (Exception ex)
             {
