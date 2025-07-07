@@ -17,7 +17,23 @@
         public int ChatId { get; set; }
         public int BookingId { get; set; }
         public string ClientName { get; set; }
+        public string? HandymanName { get; set; } // Optional for clients
         public string? LastMessage { get; set; }
         public DateTime? LastMessageTime { get; set; }
-    } 
+
+        public DateTime BookingDate { get; set; }       
+        public string? CategoryName { get; set; }
+
+    }
+
+
+    public class ChatThreadFilterDTO
+    {
+        public string? Name { get; set; }      // Client or Handyman name
+        public string? Sort { get; set; }      // "newest" or "oldest"
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { get; set; } = 10;
+    }
+
+
 }

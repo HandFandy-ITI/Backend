@@ -2,9 +2,11 @@
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.General;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+
 
 namespace OstaFandy.PL.BL
 {
@@ -32,24 +34,6 @@ namespace OstaFandy.PL.BL
             _unit.Save();
             return newChat.Id;
         }
-
-        //public void SendMessage(MessageDTO dto)
-        //{
-        //    if (!dto.SenderId.HasValue)
-        //        throw new ArgumentException("SenderId is required");
-
-        //    var message = new Message
-        //    {
-        //        ChatId = dto.ChatId,
-        //        SenderId = dto.SenderId.Value,
-        //        Content = dto.Content,
-        //        SentAt = DateTime.UtcNow,
-        //        IsRead = false
-        //    };
-
-        //    _unit.MessageRepo.Insert(message);
-        //    _unit.Save();
-        //}
 
         public void SendMessage(MessageDTO dto)
         {
@@ -90,18 +74,7 @@ namespace OstaFandy.PL.BL
         }
 
 
-        //public IEnumerable<MessageDTO> GetMessages(int chatId)
-        //{
-        //    return _unit.MessageRepo.GetByChatId(chatId)
-        //        .OrderBy(m => m.SentAt)
-        //        .Select(m => new MessageDTO
-        //        {
-        //            ChatId = m.ChatId,
-        //            SenderId = m.SenderId,
-        //            Content = m.Content,
-        //            SentAt = m.SentAt
-        //        });
-        //}
+       
 
 
         public IEnumerable<MessageDTO> GetMessages(int chatId)
@@ -121,52 +94,17 @@ namespace OstaFandy.PL.BL
 
 
 
-        //public IEnumerable<ChatThreadDTO> GetHandymanThreads(int handymanUserId)
-        //{
-        //    var assignments = _unit.JobAssignmentRepo.GetAll(
-        //        j => j.HandymanId == handymanUserId &&
-        //             j.Status == "InProgress" &&
-        //             j.IsActive,
-        //        includeProperties: "Booking.Client.User,Booking.Chats.Messages"
-        //    );
 
-        //    var result = new List<ChatThreadDTO>();
 
-        //    foreach (var job in assignments)
-        //    {
-        //        var booking = job.Booking;
-        //        var clientUser = booking.Client.User;
-        //        var chat = booking.Chats.FirstOrDefault();
 
-        //        if (chat == null)
-        //        {
-        //            int chatId = EnsureChatExists(booking.Id);
-        //            chat = _unit.ChatRepo.GetById(chatId);
-        //        }
-
-        //        var lastMessage = chat.Messages
-        //            .OrderByDescending(m => m.SentAt)
-        //            .FirstOrDefault();
-
-        //        result.Add(new ChatThreadDTO
-        //        {
-        //            ChatId = chat.Id,
-        //            BookingId = booking.Id,
-        //            ClientName = clientUser.FirstName + " " + clientUser.LastName,
-        //            LastMessage = lastMessage?.Content,
-        //            LastMessageTime = lastMessage?.SentAt
-        //        });
-        //    }
-
-        //    return result;
-        //}
-        public IEnumerable<ChatThreadDTO> GetHandymanThreads(int handymanUserId)
+        public PaginatedResult<ChatThreadDTO> GetHandymanThreads(int handymanUserId, ChatThreadFilterDTO filters)
         {
             var assignments = _unit.JobAssignmentRepo.GetAll(
-                j => j.HandymanId == handymanUserId &&
-                     j.Status == "Assigned" &&
-                     j.IsActive,
-                includeProperties: "Booking.Client.User,Booking.Chats.Messages"
+               j => j.HandymanId == handymanUserId &&
+   (j.Status == JobAssignmentsStatus.Assigned || j.Status == JobAssignmentsStatus.InProgress) &&
+     j.IsActive &&
+     j.Booking.IsActive,
+includeProperties: "Booking.Client.User,Booking.Chats.Messages,Booking.BookingServices.Service.Category,Handyman.User"
             );
 
             var result = new List<ChatThreadDTO>();
@@ -174,35 +112,137 @@ namespace OstaFandy.PL.BL
             foreach (var job in assignments)
             {
                 var booking = job.Booking;
-                var clientUser = booking.Client?.User;
-
-                if (clientUser == null) continue; // Defensive check
-
-                // Ensure chat exists
+                var client = booking.Client?.User;
+                var handyman = job.Handyman?.User;
                 var chat = booking.Chats.FirstOrDefault();
+
                 if (chat == null)
                 {
                     int chatId = EnsureChatExists(booking.Id);
-                    chat = _unit.ChatRepo.GetById(chatId);
+                    chat = _unit.ChatRepo.GetById(chatId); // ✅ Load from DB with messages
+                }
+                var lastMessage = chat.Messages?.OrderByDescending(m => m.SentAt).FirstOrDefault();
+                var categoryName = booking.BookingServices
+                                          .FirstOrDefault()?.Service?.Category?.Name;
+
+                if (client != null && handyman != null)
+                {
+                    result.Add(new ChatThreadDTO
+                    {
+                        ChatId = chat.Id,
+                        BookingId = booking.Id,
+                        ClientName = $"{client.FirstName} {client.LastName}",
+                        HandymanName = $"{handyman.FirstName} {handyman.LastName}",
+                        LastMessage = lastMessage?.Content ?? "",
+                        LastMessageTime = lastMessage?.SentAt,
+                        BookingDate = booking.PreferredDate,
+                        CategoryName = categoryName ?? "N/A"
+                    });
+                }
+            }
+
+            // 🔍 Filter by client name
+            if (!string.IsNullOrWhiteSpace(filters.Name))
+            {
+                result = result.Where(t =>
+                    t.ClientName.ToLower().Contains(filters.Name.ToLower())).ToList();
+            }
+
+            // 🔃 Sort
+            result = filters.Sort == "oldest"
+                ? result.OrderBy(t => t.LastMessageTime).ToList()
+                : result.OrderByDescending(t => t.LastMessageTime).ToList();
+
+            // 📄 Paginate
+            var total = result.Count;
+            var items = result.Skip((filters.PageNumber - 1) * filters.PageSize)
+                              .Take(filters.PageSize)
+                              .ToList();
+
+            return new PaginatedResult<ChatThreadDTO>
+            {
+                PageNumber = filters.PageNumber,
+                PageSize = filters.PageSize,
+                TotalItems = total,
+                Items = items
+            };
+        }
+
+        public PaginatedResult<ChatThreadDTO> GetClientThreads(int clientId, ChatThreadFilterDTO filters)
+        {
+            // Step 1: Load from DB
+            var bookings = _unit.BookingRepo.GetAll(
+               b => b.ClientId == clientId &&
+     b.IsActive &&
+     b.JobAssignment != null &&
+   (b.JobAssignment.Status == JobAssignmentsStatus.Assigned ||
+ b.JobAssignment.Status == JobAssignmentsStatus.InProgress) &&
+     b.JobAssignment.IsActive,
+                includeProperties: "Client.User,JobAssignment.Handyman.User,Chats.Messages,BookingServices.Service.Category"
+            );
+
+            // Step 2: Filter in memory
+            if (!string.IsNullOrWhiteSpace(filters.Name))
+            {
+                var lower = filters.Name.ToLower();
+                bookings = bookings
+                    .Where(b => b.JobAssignment.Handyman.User.FirstName.ToLower().Contains(lower)
+                             || b.JobAssignment.Handyman.User.LastName.ToLower().Contains(lower))
+                    .ToList();
+            }
+
+            var threadDtos = new List<ChatThreadDTO>();
+
+            foreach (var booking in bookings)
+            {
+                var handyman = booking.JobAssignment?.Handyman?.User;
+                if (handyman == null) continue;
+
+                var chat = booking.Chats.FirstOrDefault();
+                if (chat == null)
+                {
+                    var chatId = EnsureChatExists(booking.Id);
+                    chat = _unit.ChatRepo.GetById(chatId); // Load full chat with messages
                 }
 
-                // Now safe to access messages
-                var lastMessage = chat?.Messages?
-                    .OrderByDescending(m => m.SentAt)
-                    .FirstOrDefault();
+                var lastMessage = chat?.Messages?.OrderByDescending(m => m.SentAt).FirstOrDefault();
 
-                result.Add(new ChatThreadDTO
+                threadDtos.Add(new ChatThreadDTO
                 {
                     ChatId = chat.Id,
                     BookingId = booking.Id,
-                    ClientName = $"{clientUser.FirstName} {clientUser.LastName}",
+                    ClientName = $"{booking.Client.User.FirstName} {booking.Client.User.LastName}",
+                    HandymanName = $"{handyman.FirstName} {handyman.LastName}",
                     LastMessage = lastMessage?.Content,
-                    LastMessageTime = lastMessage?.SentAt
+                    LastMessageTime = lastMessage?.SentAt,
+                    BookingDate = booking.PreferredDate,
+                    CategoryName = booking.BookingServices.FirstOrDefault()?.Service?.Category?.Name
                 });
             }
 
-            return result;
+            // Step 3: Sort
+            threadDtos = filters.Sort == "oldest"
+                ? threadDtos.OrderBy(t => t.LastMessageTime ?? DateTime.MinValue).ToList()
+                : threadDtos.OrderByDescending(t => t.LastMessageTime ?? DateTime.MinValue).ToList();
+
+            // Step 4: Paginate
+            var total = threadDtos.Count;
+            var paginatedItems = threadDtos
+                .Skip((filters.PageNumber - 1) * filters.PageSize)
+                .Take(filters.PageSize)
+                .ToList();
+
+            return new PaginatedResult<ChatThreadDTO>
+            {
+                PageNumber = filters.PageNumber,
+                PageSize = filters.PageSize,
+                TotalItems = total,
+                Items = paginatedItems
+            };
         }
+
+
+
 
     }
 }

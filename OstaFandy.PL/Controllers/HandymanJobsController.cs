@@ -82,7 +82,7 @@ namespace OstaFandy.PL.Controllers
 
                         {
                               _notificationService.SendNotificationToClient(
-                                client.Id.ToString(),
+                                client.UserId.ToString(),
                                 jobId,
                                 status
                             );

@@ -7,7 +7,9 @@ namespace OstaFandy.PL.BL.IBL
         int EnsureChatExists(int bookingId);
         void SendMessage(MessageDTO dto);
         IEnumerable<MessageDTO> GetMessages(int chatId);
-        IEnumerable<ChatThreadDTO> GetHandymanThreads(int handymanUserId);
+        PaginatedResult<ChatThreadDTO> GetClientThreads(int clientId, ChatThreadFilterDTO filters);
+        PaginatedResult<ChatThreadDTO> GetHandymanThreads(int handymanId, ChatThreadFilterDTO filters);
+
 
 
     }
