@@ -103,22 +103,34 @@ namespace OstaFandy.PL.Controllers
             };
            
             var freeslot = await _autoBookingService.GetAvailableTimeSlotAsync(reqdata);
-            if (freeslot == null || !freeslot.Any())
+            if (freeslot == null)
+            {
                 return BadRequest(new ResponseDto<string>
                 {
                     IsSuccess = false,
                     Data = null,
-                    Message = "No Avliable time please choose another day",
+                    Message = "We’re sorry, but we don’t cover that area yet.",
                     StatusCode = StatusCodes.Status400BadRequest
                 });
+            }
+            else if (!freeslot.Any())
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = " No times are available for this day. Kindly select a different day.",
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+            }
             else
             {
                 return Ok(new ResponseDto<List<AvailableTimeSlot>>
                 {
-                    IsSuccess=true,
-                    Data=freeslot,
-                    Message="",
-                    StatusCode= StatusCodes.Status200OK
+                    IsSuccess = true,
+                    Data = freeslot,
+                    Message = "",
+                    StatusCode = StatusCodes.Status200OK
                 });
             }
         }
