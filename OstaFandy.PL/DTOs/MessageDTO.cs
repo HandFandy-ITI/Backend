@@ -23,6 +23,7 @@
 
         public DateTime BookingDate { get; set; }       
         public string? CategoryName { get; set; }
+        public string? ServiceName { get; set; }
 
     }
 

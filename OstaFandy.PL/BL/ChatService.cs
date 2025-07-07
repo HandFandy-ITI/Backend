@@ -100,11 +100,11 @@ namespace OstaFandy.PL.BL
         public PaginatedResult<ChatThreadDTO> GetHandymanThreads(int handymanUserId, ChatThreadFilterDTO filters)
         {
             var assignments = _unit.JobAssignmentRepo.GetAll(
-               j => j.HandymanId == handymanUserId &&
-   (j.Status == JobAssignmentsStatus.Assigned || j.Status == JobAssignmentsStatus.InProgress) &&
-     j.IsActive &&
-     j.Booking.IsActive,
-includeProperties: "Booking.Client.User,Booking.Chats.Messages,Booking.BookingServices.Service.Category,Handyman.User"
+                j => j.HandymanId == handymanUserId &&
+                     (j.Status == JobAssignmentsStatus.Assigned || j.Status == JobAssignmentsStatus.InProgress) &&
+                     j.IsActive &&
+                     j.Booking.IsActive,
+                includeProperties: "Booking.Client.User,Booking.Chats.Messages,Booking.BookingServices.Service.Category,Handyman.User"
             );
 
             var result = new List<ChatThreadDTO>();
@@ -114,16 +114,18 @@ includeProperties: "Booking.Client.User,Booking.Chats.Messages,Booking.BookingSe
                 var booking = job.Booking;
                 var client = booking.Client?.User;
                 var handyman = job.Handyman?.User;
-                var chat = booking.Chats.FirstOrDefault();
 
+                var chat = booking.Chats.FirstOrDefault();
                 if (chat == null)
                 {
                     int chatId = EnsureChatExists(booking.Id);
                     chat = _unit.ChatRepo.GetById(chatId); // ✅ Load from DB with messages
                 }
+
                 var lastMessage = chat.Messages?.OrderByDescending(m => m.SentAt).FirstOrDefault();
-                var categoryName = booking.BookingServices
-                                          .FirstOrDefault()?.Service?.Category?.Name;
+                var bookingService = booking.BookingServices.FirstOrDefault();
+
+                var serviceName = bookingService?.Service?.Name ?? "N/A";
 
                 if (client != null && handyman != null)
                 {
@@ -136,12 +138,12 @@ includeProperties: "Booking.Client.User,Booking.Chats.Messages,Booking.BookingSe
                         LastMessage = lastMessage?.Content ?? "",
                         LastMessageTime = lastMessage?.SentAt,
                         BookingDate = booking.PreferredDate,
-                        CategoryName = categoryName ?? "N/A"
+                        ServiceName = serviceName
                     });
                 }
             }
 
-            // 🔍 Filter by client name
+            // 🔍 Apply name filter
             if (!string.IsNullOrWhiteSpace(filters.Name))
             {
                 result = result.Where(t =>
@@ -153,11 +155,12 @@ includeProperties: "Booking.Client.User,Booking.Chats.Messages,Booking.BookingSe
                 ? result.OrderBy(t => t.LastMessageTime).ToList()
                 : result.OrderByDescending(t => t.LastMessageTime).ToList();
 
-            // 📄 Paginate
+            // 📄 Pagination
             var total = result.Count;
-            var items = result.Skip((filters.PageNumber - 1) * filters.PageSize)
-                              .Take(filters.PageSize)
-                              .ToList();
+            var items = result
+                .Skip((filters.PageNumber - 1) * filters.PageSize)
+                .Take(filters.PageSize)
+                .ToList();
 
             return new PaginatedResult<ChatThreadDTO>
             {
@@ -170,18 +173,18 @@ includeProperties: "Booking.Client.User,Booking.Chats.Messages,Booking.BookingSe
 
         public PaginatedResult<ChatThreadDTO> GetClientThreads(int clientId, ChatThreadFilterDTO filters)
         {
-            // Step 1: Load from DB
+            // Step 1: Load bookings with active job assignments
             var bookings = _unit.BookingRepo.GetAll(
-               b => b.ClientId == clientId &&
-     b.IsActive &&
-     b.JobAssignment != null &&
-   (b.JobAssignment.Status == JobAssignmentsStatus.Assigned ||
- b.JobAssignment.Status == JobAssignmentsStatus.InProgress) &&
-     b.JobAssignment.IsActive,
+                b => b.ClientId == clientId &&
+                     b.IsActive &&
+                     b.JobAssignment != null &&
+                     (b.JobAssignment.Status == JobAssignmentsStatus.Assigned ||
+                      b.JobAssignment.Status == JobAssignmentsStatus.InProgress) &&
+                     b.JobAssignment.IsActive,
                 includeProperties: "Client.User,JobAssignment.Handyman.User,Chats.Messages,BookingServices.Service.Category"
             );
 
-            // Step 2: Filter in memory
+            // Step 2: Filter by handyman name (if provided)
             if (!string.IsNullOrWhiteSpace(filters.Name))
             {
                 var lower = filters.Name.ToLower();
@@ -202,10 +205,12 @@ includeProperties: "Booking.Client.User,Booking.Chats.Messages,Booking.BookingSe
                 if (chat == null)
                 {
                     var chatId = EnsureChatExists(booking.Id);
-                    chat = _unit.ChatRepo.GetById(chatId); // Load full chat with messages
+                    chat = _unit.ChatRepo.GetById(chatId); // 🔄 Reload with messages
                 }
 
                 var lastMessage = chat?.Messages?.OrderByDescending(m => m.SentAt).FirstOrDefault();
+                var bookingService = booking.BookingServices.FirstOrDefault();
+                var serviceName = bookingService?.Service?.Name ?? "N/A";
 
                 threadDtos.Add(new ChatThreadDTO
                 {
@@ -216,7 +221,7 @@ includeProperties: "Booking.Client.User,Booking.Chats.Messages,Booking.BookingSe
                     LastMessage = lastMessage?.Content,
                     LastMessageTime = lastMessage?.SentAt,
                     BookingDate = booking.PreferredDate,
-                    CategoryName = booking.BookingServices.FirstOrDefault()?.Service?.Category?.Name
+                    ServiceName = serviceName
                 });
             }
 
