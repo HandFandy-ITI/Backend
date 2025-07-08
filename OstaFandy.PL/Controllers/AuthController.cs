@@ -22,16 +22,7 @@ namespace OstaFandy.PL.Controllers
         [HttpPost("register-Customer")]
         public IActionResult RegisterCustomer([FromBody] UserRegesterDto registerCustomerDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new ResponseDto<string>
-                {
-                    IsSuccess = false,
-                    Message = "Invalid input",
-                    Data = null,
-                    StatusCode = StatusCodes.Status400BadRequest
-                });
-            }
+          
             var res = _userService.RegisterUser(registerCustomerDto);
             if (res == 0)
             {
@@ -71,7 +62,7 @@ namespace OstaFandy.PL.Controllers
                 return Ok(new ResponseDto<string>
                 {
                     IsSuccess = true,
-                    Message = "User registered successfully",
+                    Message = "registered successfully",
                     Data = token,
                     StatusCode = StatusCodes.Status201Created
                 });
@@ -81,7 +72,7 @@ namespace OstaFandy.PL.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto<string>
                 {
                     IsSuccess = false,
-                    Message = "An error occurred while registering the user",
+                    Message = "Oops! Something went wrong while creating your account. Please try again.",
                     Data = null,
                     StatusCode = StatusCodes.Status500InternalServerError
                 });
