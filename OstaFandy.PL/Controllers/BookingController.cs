@@ -1,9 +1,11 @@
 ﻿using System.Timers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using OstaFandy.DAL.Entities;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using OstaFandy.PL.Hubs;
 
 namespace OstaFandy.PL.Controllers
 {
@@ -12,10 +14,12 @@ namespace OstaFandy.PL.Controllers
     public class BookingController : ControllerBase
     {
         private readonly IAutoBookingService _autoBookingService;
+        private readonly IHubContext<ChatHub> _hubContext;
 
-        public BookingController(IAutoBookingService autoBookingService)
+        public BookingController(IAutoBookingService autoBookingService, IHubContext<ChatHub> hubContext)
         {
             _autoBookingService = autoBookingService;
+            _hubContext = hubContext;
         }
 
         [HttpGet("GetAllBookings")]
@@ -149,7 +153,11 @@ namespace OstaFandy.PL.Controllers
                     StatusCode = StatusCodes.Status400BadRequest
                 });
             }
+            await _hubContext.Clients.Group($"user-{dto.ClientId}")
+    .SendAsync("NewChatThread");
 
+            await _hubContext.Clients.Group($"user-{dto.HandymanId}")
+                .SendAsync("NewChatThread");
             return StatusCode(StatusCodes.Status201Created, new ResponseDto<object>
             {
                 IsSuccess = true,

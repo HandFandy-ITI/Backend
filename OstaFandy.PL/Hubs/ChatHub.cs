@@ -8,7 +8,7 @@ namespace OstaFandy.PL.Hubs
     {
         public async Task JoinChat(string chatId)
         {
-            Console.WriteLine($"✅ JOIN: {Context.ConnectionId} joined chat-{chatId}");
+            Console.WriteLine($" JOIN: {Context.ConnectionId} joined chat-{chatId}");
             await Groups.AddToGroupAsync(Context.ConnectionId, $"chat-{chatId}");
         }
 
@@ -20,9 +20,35 @@ namespace OstaFandy.PL.Hubs
 
         public async Task SendMessage(MessageDTO message)
         {
-            Console.WriteLine($"📨 Broadcasting message: {message.Content} to chat-{message.ChatId}");
+            Console.WriteLine($" Broadcasting message: {message.Content} to chat-{message.ChatId}");
             await Clients.Group($"chat-{message.ChatId}")
                 .SendAsync("ReceiveMessage", message);
         }
+
+
+        public override async Task OnConnectedAsync()
+        {
+            var userId = Context.User?.FindFirst("NameIdentifier")?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await Groups.AddToGroupAsync(Context.ConnectionId, $"user-{userId}");
+                Console.WriteLine($"👤 Connected user-{userId} added to group");
+            }
+
+            await base.OnConnectedAsync();
+        }
+
+        public override async Task OnDisconnectedAsync(Exception? exception)
+        {
+            var userId = Context.User?.FindFirst("NameIdentifier")?.Value;
+            if (!string.IsNullOrEmpty(userId))
+            {
+                await Groups.RemoveFromGroupAsync(Context.ConnectionId, $"user-{userId}");
+                Console.WriteLine($"👤 Disconnected user-{userId} removed from group");
+            }
+
+            await base.OnDisconnectedAsync(exception);
+        }
+
     }
 }
