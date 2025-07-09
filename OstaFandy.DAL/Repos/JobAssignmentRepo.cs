@@ -27,5 +27,24 @@ namespace OstaFandy.DAL.Repos
                .Select(n => n.RelatedEntityId)
                .FirstOrDefault();
         }
+
+        public List<JobAssignment> GetJobByHandymanId(int handymanId)
+        {
+            var jobs = _db.JobAssignments.Where(a => a.HandymanId == handymanId).ToList();
+            if(jobs == null)
+            {
+                return new List<JobAssignment>();
+            }
+            return jobs;
+        }
+
+
+        public bool CheckJobInSpecificDate(DateOnly startDate, DateOnly endDate)
+        {
+            return _db.JobAssignments.Any(a =>
+                a.IsActive &&
+                DateOnly.FromDateTime(a.Booking.PreferredDate) >= startDate &&
+                DateOnly.FromDateTime(a.Booking.PreferredDate) <= endDate);
+        }
     }
 }

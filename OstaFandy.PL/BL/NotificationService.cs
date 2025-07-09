@@ -32,6 +32,21 @@ namespace OstaFandy.PL.BL
                 await _hubContext.Clients.All.SendAsync("ReceiveNotificationhandyman", handymanUserId, message);
                 _logger.LogWarning($"Handyman {handymanUserId} not found in active connections, sent to all clients");
             }
+            }
+
+        public async Task SendNotificationToAdmin(string AdminUserId, string message)
+        {
+
+            if (NotificationHub.TryGetConnectionId(AdminUserId, out var connectionId))
+            {
+                await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotificationAdmin", message);
+                _logger.LogInformation($"Notification sent to admin {AdminUserId} via connection {connectionId}");
+            }
+            else
+            {
+                 await _hubContext.Clients.All.SendAsync("ReceiveNotificationAdmin", AdminUserId, message);
+                _logger.LogWarning($"amdin {AdminUserId} not found in active connections");
+            }
         }
 
         public async Task SendNotificationToClient(string clientUserId, int jobId, string status)

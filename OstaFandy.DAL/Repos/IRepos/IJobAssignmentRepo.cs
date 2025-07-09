@@ -12,5 +12,9 @@ namespace OstaFandy.DAL.Repos.IRepos
         int gethandymanbyjobid(int id);
 
         int GetJobIdByNotificationId(int notificationId);
+
+        List<JobAssignment> GetJobByHandymanId(int handymanId);
+
+        bool CheckJobInSpecificDate(DateOnly startDate, DateOnly endDate);
     }
 }

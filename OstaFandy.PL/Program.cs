@@ -41,6 +41,7 @@ namespace OstaFandy.PL
 
 
             // Register your services here
+            builder.Services.AddScoped<IBlockDateService, BlockDateService>();
 
 
             #region RegisterServices
