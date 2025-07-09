@@ -122,83 +122,82 @@ namespace OstaFandy.PL.BL
 
 
         #region add quote
-        public bool AddQuote(int jobId, decimal price, string Notes, int EstimatedMinutes)
-        {
-            try
+            public async Task<bool> AddQuote(int jobId, decimal price, string Notes, int EstimatedMinutes)
             {
-                var job = _unitOfWork.JobAssignmentRepo.GetById(jobId);
-                if (job == null)
+                try
                 {
-                    _logger.LogWarning($"Job with ID {jobId} not found.");
-                    return false;
-                }
-                if (price <= 0)
-                {
-                    _logger.LogWarning("Price must be greater than zero.");
-                    return false;
-                }
-                if (EstimatedMinutes <= 0)
-                {
-                    _logger.LogWarning("EstimatedMinutes must be greater than zero.");
-                    return false;
-                }
-                if (string.IsNullOrWhiteSpace(Notes))
-                {
-                    _logger.LogWarning("Notes cannot be empty.");
-                    return false;
-                }
-                var quote = new OstaFandy.DAL.Entities.Quote
-                {
-                    JobAssignmentId = jobId,
-                    Price = price,
-                    Notes = Notes,
-                    EstimatedMinutes = EstimatedMinutes,
-                    Status = "Pending",
-                    CreatedAt = DateTime.UtcNow
-                };
+                    var job = _unitOfWork.JobAssignmentRepo.GetById(jobId);
+                    if (job == null)
+                    {
+                        _logger.LogWarning($"Job with ID {jobId} not found.");
+                        return false;
+                    }
+                    if (price <= 0)
+                    {
+                        _logger.LogWarning("Price must be greater than zero.");
+                        return false;
+                    }
+                    if (EstimatedMinutes <= 0)
+                    {
+                        _logger.LogWarning("EstimatedMinutes must be greater than zero.");
+                        return false;
+                    }
+                    if (string.IsNullOrWhiteSpace(Notes))
+                    {
+                        _logger.LogWarning("Notes cannot be empty.");
+                        return false;
+                    }
+                    var quote = new OstaFandy.DAL.Entities.Quote
+                    {
+                        JobAssignmentId = jobId,
+                        Price = price,
+                        Notes = Notes,
+                        EstimatedMinutes = EstimatedMinutes,
+                        Status = "Pending",
+                        CreatedAt = DateTime.UtcNow
+                    };
 
-                _unitOfWork.QuoteRepo.Insert(quote);
-                _unitOfWork.Save();
-                var quote2 = _db.Quotes
-                    .Where(q => q.JobAssignmentId == jobId && q.Price == price && q.Notes == Notes && q.EstimatedMinutes == EstimatedMinutes)
-                    .OrderByDescending(q => q.CreatedAt)
-                    .FirstOrDefault();
-                var booking = _unitOfWork.BookingRepo.GetById(job.BookingId);
-                if (booking == null)
-                {
-                    _logger.LogWarning($"Booking with ID {job.BookingId} not found.");
-                    return false;
-                }
-                var client = _unitOfWork.ClientRepo.GetByIdSync(booking.ClientId);
-                if (client == null)
-                {
-                    _logger.LogWarning($"Client with ID {booking.ClientId} not found.");
-                    return false;
-                }
-                var user = _unitOfWork.UserRepo.GetById(client.UserId);
-                var notification = new Notification
-                {
-                    UserId = user.Id,
-                    Type = "QuoteApproval",
-                    Title = "New Quote Received",
-                    Message = $"You have received a new quote for job #{jobId}. Price: ${price}. Please review and approve.",
-                    CreatedAt = DateTime.UtcNow,
-                    IsRead = false,
-                    RelatedEntityType = "Quote",
-                    RelatedEntityId = quote2.Id
-                };
+                    _unitOfWork.QuoteRepo.Insert(quote);
+                    _unitOfWork.Save();
+                    var quote2 = _db.Quotes
+                        .Where(q => q.JobAssignmentId == jobId && q.Price == price && q.Notes == Notes && q.EstimatedMinutes == EstimatedMinutes)
+                        .OrderByDescending(q => q.CreatedAt)
+                        .FirstOrDefault();
+                    var booking = _unitOfWork.BookingRepo.GetById(job.BookingId);
+                    if (booking == null)
+                    {
+                        _logger.LogWarning($"Booking with ID {job.BookingId} not found.");
+                        return false;
+                    }
+                    var client = _unitOfWork.ClientRepo.GetByIdSync(booking.ClientId);
+                    if (client == null)
+                    {
+                        _logger.LogWarning($"Client with ID {booking.ClientId} not found.");
+                        return false;
+                    }
+                    var user = _unitOfWork.UserRepo.GetById(client.UserId);
+                    var notification = new Notification
+                    {
+                        UserId = user.Id,
+                        Type = "QuoteApproval",
+                        Title = "New Quote Received",
+                        Message = $"You have received a new quote for job #{jobId}. Price: ${price}. Please review and approve.",
+                        CreatedAt = DateTime.UtcNow,
+                        IsRead = false,
+                        RelatedEntityType = "Quote",
+                        RelatedEntityId = quote2.Id
+                    };
+                    //await _notificationService.SendNotificationToClient(user.Id.ToString(), jobId, "QuoteReceived");
+                    _unitOfWork.NotificationRepo.Insert(notification);
+                    return _unitOfWork.Save() > 0;
 
-                _unitOfWork.NotificationRepo.Insert(notification);
-                return _unitOfWork.Save() > 0;
-
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"Error occurred while adding quote for job ID {jobId}.");
+                    throw new Exception($"An error occurred while adding quote for job ID {jobId}.", ex);
+                }
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, $"Error occurred while adding quote for job ID {jobId}.");
-                throw new Exception($"An error occurred while adding quote for job ID {jobId}.", ex);
-            }
-
-        }
         #endregion
 
         #region process quote response async function
@@ -338,7 +337,6 @@ namespace OstaFandy.PL.BL
         }
         #endregion
 
-
         #region get the origin book this not supposed to be here but it is fine
         public List<BookingServiceDTO> GetOriginalBookingServices(int originalBookingId)
         {
@@ -350,7 +348,7 @@ namespace OstaFandy.PL.BL
                     .Select(bs => new BookingServiceDTO
                     {
                         ServiceId = bs.ServiceId,
-                        Quantity = 1 // Default quantity, adjust as needed
+                        Quantity = 1 
                     })
                     .ToList();
 
@@ -363,7 +361,7 @@ namespace OstaFandy.PL.BL
             }
         }
 
-        // Enhanced GetQuoteDetails method with original booking services
+ 
         public QuoteDetailsDTO GetQuoteDetailsWithServices(int quoteId)
         {
             try
@@ -376,7 +374,7 @@ namespace OstaFandy.PL.BL
                 var handyman = _unitOfWork.HandyManRepo.GetById(jobAssignment.HandymanId);
                 var user = _unitOfWork.UserRepo.GetById(handyman.UserId);
 
-                // Get original booking services
+ 
                 var originalServices = GetOriginalBookingServices(booking.Id);
 
                 return new QuoteDetailsDTO
@@ -433,9 +431,8 @@ namespace OstaFandy.PL.BL
         }
         #endregion
 
-
         #region ask for a vacation
-        public bool ApplyForBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
+        public async Task<bool> ApplyForBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
         {
             try
             {
@@ -478,7 +475,7 @@ namespace OstaFandy.PL.BL
                 };
                 _unitOfWork.BlockDateRepo.Insert(x);
                 _unitOfWork.Save();
-                _notificationService.SendNotificationToHandyman(HandymanId.ToString(), $"you have applied for a days OFF from {StartDate} to {EndDate} waiting for admin to approve");
+                await _notificationService.SendNotificationToHandyman(HandymanId.ToString(), $"you have applied for a days OFF from {StartDate} to {EndDate} waiting for admin to approve");
                 var notification = new Notification
                 {
                     UserId = HandymanId,
@@ -500,7 +497,7 @@ namespace OstaFandy.PL.BL
                         IsRead = false,
                         IsActive = true
                     };
-                    _notificationService.SendNotificationToAdmin(admin.Id.ToString(), $"Handyman with Id {HandymanId} and name {handyman.User.FirstName} {handyman.User.LastName} in specialization {handyman.Specialization.Name} has applied for a days OFF from {StartDate} to {EndDate} waiting for you to approve");
+                   await _notificationService.SendNotificationToAdmin(admin.Id.ToString(), $"Handyman with Id {HandymanId} and name {handyman.User.FirstName} {handyman.User.LastName} in specialization {handyman.Specialization.Name} has applied for a days OFF from {StartDate} to {EndDate} waiting for you to approve");
                     _unitOfWork.NotificationRepo.Insert(notification2);
                 }
                 _unitOfWork.NotificationRepo.Insert(notification);
