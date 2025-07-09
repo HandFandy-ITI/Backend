@@ -480,57 +480,55 @@ namespace OstaFandy.PL.Controllers
         }
         #endregion
 
-        //[HttpPut("MarkAsRead/{notificationId}")]
-        //public IActionResult MarkAsRead(int notificationId)
-        //{
-        //    try
-        //    {
-        //        var notification =  _unitOfWork.NotificationRepo.GetById(notificationId);
-        //        if (notification == null)
-        //        {
-        //            return NotFound(new { message = "Notification not found" });
-        //        }
+        #region apply for vacation 
+        [HttpPost("ApplyForBlockDate")]
+        [EndpointDescription("AdminHandyMan/ApplyForBlockDate")]
+        [EndpointSummary("ask for blockdate for handyman")]
+        public IActionResult ApplyForBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
+        {
+            var result = _handymanJobService.ApplyForBlockDate(HandymanId, Reason, StartDate, EndDate);
+            return result ? Ok("Days OFF asked to create successfully") : BadRequest("failed to create blockdate handyman has a job at this date");
+        }
 
-        //        notification.IsRead = true;
-        //        //notification.CreatedAt = DateTime.UtcNow;
+        #endregion
 
-        //        _unitOfWork.NotificationRepo.Update(notification);
-        //          _unitOfWork.SaveAsync();
-
-        //        return Ok(new { message = "Notification marked as read" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = "Error marking notification as read", error = ex.Message });
-        //    }
-        //}
-
-        //// PUT: api/HandymanPage/MarkAllAsRead/{handymanUserId}
-        //[HttpPut("MarkAllAsRead/{handymanUserId}")]
-        //public IActionResult MarkAllAsRead(int handymanUserId)
-        //{
-        //    try
-        //    {
-        //        var notifications = _unitOfWork.NotificationRepo
-        //            .GetAll(n => n.UserId == handymanUserId && !n.IsRead);
-
-        //        foreach (var notification in notifications)
-        //        {
-        //            notification.IsRead = true;
-        //            //notification.ReadAt = DateTime.UtcNow;
-        //            _unitOfWork.NotificationRepo.Update(notification);
-        //        }
-
-        //        _unitOfWork.SaveAsync();
-
-        //        return Ok(new { message = "All notifications marked as read" });
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, new { message = "Error marking all notifications as read", error = ex.Message });
-        //    }
-        //}
-
-      
+        #region get handyman block dates
+        [HttpGet("GetHandymanBlockDate")]
+        [EndpointDescription("AdminHandyMan/GetHandymanBlockDate")]
+        [EndpointSummary("Get all block dates for handymen")]
+        public IActionResult GetHandymanBlockDate(string searchString = "", int pageNumber = 1, int pageSize = 5, string? status = null, DateTime? Date = null, int? handymanId = null)
+        {
+            try
+            {
+                ;
+                var result = _handymanJobService.GetHandymanBlockDate(pageNumber, pageSize, status, Date, handymanId, searchString);
+                if (result.Data == null || !result.Data.Any())
+                {
+                    return Ok(new
+                    {
+                        message = "There are no block dates found",
+                        data = new List<HandymanBlockDateDTO>(),
+                        currentPage = result.CurrentPage,
+                        totalPages = result.TotalPages,
+                        totalCount = result.TotalCount,
+                        searchString = result.SearchString
+                    });
+                }
+                return Ok(new
+                {
+                    data = result.Data,
+                    currentPage = result.CurrentPage,
+                    totalPages = result.TotalPages,
+                    totalCount = result.TotalCount,
+                    searchString = result.SearchString
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting block dates.", ex.InnerException?.Message ?? ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
+        }
+        #endregion
     }
 }

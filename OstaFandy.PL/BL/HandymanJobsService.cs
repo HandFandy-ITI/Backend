@@ -6,20 +6,23 @@ using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 using OstaFandy.PL.utils;
+using RTools_NTS.Util;
 using Stripe;
 
 namespace OstaFandy.PL.BL
 {
     public class HandymanJobsService : IHandymanJobsService
     {
+        private readonly INotificationService _notificationService;
         private readonly AppDbContext _db;
         private readonly IAutoBookingService _autoBookingService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<HandymanJobsService> _logger;
 
-        public HandymanJobsService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<HandymanJobsService> logger, IAutoBookingService autoBookingService, AppDbContext db)
+        public HandymanJobsService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<HandymanJobsService> logger, IAutoBookingService autoBookingService, AppDbContext db, INotificationService notificationService)
         {
+            _notificationService = notificationService;
             _db = db;
             _autoBookingService = autoBookingService;
             _unitOfWork = unitOfWork;
@@ -428,6 +431,137 @@ namespace OstaFandy.PL.BL
             var mappedQuotes = _mapper.Map<List<AllQuotes>>(validQuotes);
             return PaginationHelper<AllQuotes>.Create(mappedQuotes, pageNumber, pageSize, searchString);
         }
+        #endregion
+
+
+        #region ask for a vacation
+        public bool ApplyForBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
+        {
+            try
+            {
+                var handyman = _unitOfWork.HandyManRepo.FirstOrDefault(h => h.UserId == HandymanId, includeProperties: "User,Specialization");
+                if (handyman == null)
+                {
+                    _logger.LogError("handyman does not exist");
+                    return false;
+                }
+                if (!handyman.User.IsActive)
+                {
+                    _logger.LogError("handyman is NOT active");
+                    return false;
+                }
+                var jobs = _unitOfWork.JobAssignmentRepo.CheckJobInSpecificDate(StartDate, EndDate);
+                if (jobs)
+                {
+                    _logger.LogError("you have jobs in this period");
+                    return false;
+                }
+
+                var existingBlockDates = _unitOfWork.BlockDateRepo.GetAll(a => a.UserId == HandymanId);
+                foreach (var blockDate in existingBlockDates)
+                {
+                    if (AreDatesOverlapping(DateOnly.FromDateTime(blockDate.StartDate), DateOnly.FromDateTime(blockDate.EndDate), StartDate, EndDate))
+                    {
+                        _logger.LogError("you already has a vacation in this period");
+                        return false;
+                    }
+                }
+
+                var x = new BlockDate()
+                {
+                    UserId = HandymanId,
+                    Reason = Reason,
+                    StartDate = StartDate.ToDateTime(TimeOnly.MinValue),
+                    EndDate = EndDate.ToDateTime(TimeOnly.MaxValue),
+                    IsActive = false,
+                    Status = "Pending"
+                };
+                _unitOfWork.BlockDateRepo.Insert(x);
+                _unitOfWork.Save();
+                _notificationService.SendNotificationToHandyman(HandymanId.ToString(), $"you have applied for a days OFF from {StartDate} to {EndDate} waiting for admin to approve");
+                var notification = new Notification
+                {
+                    UserId = HandymanId,
+                    Title = "Days OFF",
+                    Message = $"you have applied for a days OFF from {StartDate} to {EndDate} waiting for admin to approve",
+                    Type = "vacation",
+                    IsRead = false,
+                    IsActive = true
+                };
+                var admins = _unitOfWork.UserRepo.GetAll(a => a.UserTypes.Any(u => u.Id == 2)).ToList();
+                foreach(var admin in admins)
+                {
+                    var notification2 = new Notification
+                    {
+                        UserId = admin.Id,
+                        Title = "Days OFF",
+                        Message = $"handyman with Id {HandymanId} and name {handyman.User.FirstName}{handyman.User.LastName} in specialize {handyman.Specialization.Name} applied for a days OFF from {StartDate} to {EndDate} the reason is {Reason}waiting for your approve",
+                        Type = $"{HandymanId},{Reason},{StartDate},{EndDate}",
+                        IsRead = false,
+                        IsActive = true
+                    };
+                    _notificationService.SendNotificationToAdmin(admin.Id.ToString(), $"Handyman with Id {HandymanId} and name {handyman.User.FirstName} {handyman.User.LastName} in specialization {handyman.Specialization.Name} has applied for a days OFF from {StartDate} to {EndDate} waiting for you to approve");
+                    _unitOfWork.NotificationRepo.Insert(notification2);
+                }
+                _unitOfWork.NotificationRepo.Insert(notification);
+                _unitOfWork.Save();
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "error will adding block date");
+                throw;
+            }
+            return true;
+        }
+        private bool AreDatesOverlapping(DateOnly startDate1, DateOnly endDate1, DateOnly startDate2, DateOnly endDate2)
+        {
+            return !(endDate1 < startDate2 || endDate2 < startDate1);
+        }
+        #endregion
+
+        #region get handyman block date
+
+        public PaginationHelper<HandymanBlockDateDTO> GetHandymanBlockDate(int pageNumber = 1, int pageSize = 5, string? status = null, DateTime? Date = null, int? handymanId = null, string searchString = "")
+        {
+            try
+            {
+                if(handymanId == null)
+                {
+                    _logger.LogError("handymanId does not exist");
+                    return PaginationHelper<HandymanBlockDateDTO>.Create(new List<HandymanBlockDateDTO>(), pageNumber, pageSize, searchString);
+                }
+                var blockDates = _unitOfWork.BlockDateRepo.GetAll(a => a.UserId == handymanId,includeProperties: "User.User").AsQueryable();
+                if (Date != null)
+                {
+                    blockDates = blockDates
+                        .Where(b => b.StartDate.Date == Date || b.EndDate.Date == Date);
+                }
+                if (!string.IsNullOrEmpty(status))
+                {
+                    blockDates = blockDates
+                        .Where(b => b.Status.Equals(status, StringComparison.OrdinalIgnoreCase));
+                }
+                var x = blockDates.Select(b => new HandymanBlockDateDTO
+                {
+                    userId = b.UserId,
+                    Name = $"{b.User.User.FirstName ?? ""} {b.User.User.LastName ?? ""}",
+                    Status = b.Status,
+                    Reason = b.Reason,
+                    StartDate = b.StartDate,
+                    EndDate = b.EndDate
+                });
+                var dtolist = x.ToList();
+                return PaginationHelper<HandymanBlockDateDTO>.Create(x, pageNumber, pageSize);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting block dates.");
+                throw;
+            }
+        }
+
         #endregion
     }
 }
