@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="[https://your-logo-link.png](https://res.cloudinary.com/dy35wrc6z/image/upload/v1752076118/logo_nkqsnx.png)" alt="OstaFandy Logo" width="200"/>
+</p>
+
 # 🛠️ OstaFandy Backend
 
 This is the backend REST API for **OstaFandy**, a home-services booking platform.  
@@ -145,4 +149,4 @@ Below is an example configuration structure (sensitive values should be replaced
 
 Below is the database schema diagram illustrating the main entities and their relationships:
 
-![OstaFandy Database Schema](./docs/schema.png)
+![OstaFandy Database Schema]([./docs/schema.png](https://res.cloudinary.com/dy35wrc6z/image/upload/v1752076110/ERD_xkpruu.png))
