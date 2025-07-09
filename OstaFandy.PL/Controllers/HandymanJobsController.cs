@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
+using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 using OstaFandy.PL.utils;
@@ -16,51 +17,44 @@ namespace OstaFandy.PL.Controllers
     [ApiController]
     public class HandymanJobsController : ControllerBase
     {
+        private readonly INotificationService _notificationService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IHandymanJobsService _handymanJobService;
         private readonly ILogger<HandymanJobsController> _logger;
 
-        public HandymanJobsController(IHandymanJobsService handymanJobsService, ILogger<HandymanJobsController> logger, IUnitOfWork unitOfWork)
+        public HandymanJobsController(INotificationService notificationService, IHandymanJobsService handymanJobsService, ILogger<HandymanJobsController> logger, IUnitOfWork unitOfWork)
         {
+            _notificationService = notificationService;
             _unitOfWork = unitOfWork;
             _handymanJobService = handymanJobsService;
             _logger = logger;
         }
 
-        #region get all jobs
-        [HttpGet]
-        [EndpointDescription("HandymanJobs/GetAllJobs")]
-        [EndpointSummary("return all jobs for specific handyman. you MUST add handyman Id")]
-        public IActionResult GetAllJobs([FromQuery] string searchString = "", [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5, [FromQuery] string? status = null, [FromQuery] int handymanId = -1)
+       
+
+
+        #region get handyman notification
+
+        [HttpGet("GetNotificationsOfHandyman/{handymanUserId}")]
+        [EndpointDescription("HandymanJobs/GetNotificationsOfHandyman")]
+        [EndpointSummary("get all notification for the handyman")]
+        public IActionResult GetNotifications(int handymanUserId)
         {
             try
             {
-                var result = _handymanJobService.GetAll(searchString, pageNumber, pageSize, status, handymanId);
-                if (result.Data == null || !result.Data.Any())
-                {
-                    return Ok(new
-                    {
-                        message = "There are no handyman jobs found.",
-                        data = new List<HandymanJobsDTO>(),
-                        currentPage = result.CurrentPage,
-                        totalPages = result.TotalPages,
-                        totalCount = result.TotalCount,
-                        searchString = result.SearchString
-                    });
-                }
-                return Ok(new
-                {
-                    data = result.Data,
-                    currentPage = result.CurrentPage,
-                    totalPages = result.TotalPages,
-                    totalCount = result.TotalCount,
-                    searchString = result.SearchString
-                });
+                var notifications =   _unitOfWork.NotificationRepo
+                    .GetAll(n => n.UserId == handymanUserId);
+
+                var orderedNotifications = notifications
+                    .OrderByDescending(n => n.CreatedAt)
+                    .Take(50)  
+                    .ToList();
+
+                return Ok(orderedNotifications);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while fetching handyman jobs.");
-                return StatusCode(500, new { message = "An error occurred while fetching handyman jobs.", error = ex.Message });
+                return StatusCode(500, new { message = "Error retrieving notifications", error = ex.Message });
             }
         }
         #endregion
@@ -81,6 +75,21 @@ namespace OstaFandy.PL.Controllers
                 var result = _handymanJobService.SentNotificationToClientToUpdataStatus(jobId, status);
                 if (result)
                 {
+
+                    var job = _unitOfWork.JobAssignmentRepo.GetById(jobId);
+                    if (job?.Booking?.ClientId != null)
+                    {
+                        var client =  _unitOfWork.ClientRepo.GetByIdSync(job.Booking.ClientId);
+                        if (client?.UserId != null)
+
+                        {
+                              _notificationService.SendNotificationToClient(
+                                client.UserId.ToString(),
+                                jobId,
+                                status
+                            );
+                        }
+                    }
                     return Ok(new { message = "Job send to get client approve successfully" });
                 }
                 else
@@ -143,6 +152,28 @@ namespace OstaFandy.PL.Controllers
                 var result = _handymanJobService.AddQuote(model.JobId, model.Price, model.Notes, model.EstimatedMinutes);
                 if (result)
                 {
+                    var userId = _unitOfWork.HandyManRepo.GetHandymanByJobId(model.JobId).UserId;
+                    var quoteId = _unitOfWork.QuoteRepo.GetQuoteByJobId(model.JobId)?.Id;
+                    // Send notification to the handyman about the new quote
+                    if(userId == null || quoteId == null)
+                    {
+                        return NotFound(new { message = "Handyman or quote not found for the given job." });
+                    }
+                    _notificationService.SendQuoteResponse(userId, (int)quoteId, "Quote added successfully");
+                    // notify the client
+                    var job = _unitOfWork.JobAssignmentRepo.GetById(model.JobId);
+                    if (job != null)
+                    {
+                        var client = _unitOfWork.ClientRepo.GetByIdSync(job.Booking.ClientId);
+                        if (client?.UserId != null)
+                        {
+                            _notificationService.SendNotificationToClient(
+                                client.UserId.ToString(),
+                                model.JobId,
+                                "New quote added by handyman"
+                            );
+                        }
+                    }
                     return Ok(new { message = "Quote added successfully." });
                 }
                 else
@@ -188,6 +219,15 @@ namespace OstaFandy.PL.Controllers
                     var result = await _handymanJobService.ProcessQuoteResponseAsync(model.QuoteId, model.Action, model.ClientUserId);
                     if (result)
                     {
+                        var handyman = _unitOfWork.HandyManRepo.GetById(quoteDetails.HandymanId);
+                        if (handyman?.UserId != null)
+                        {
+                            await _notificationService.SendQuoteResponse(
+                             handyman.UserId,
+                             model.QuoteId,
+                             model.Action
+                         );
+                        }
                         return Ok(new { message = "Quote rejected successfully." });
                     }
                     return BadRequest(new { message = "Failed to reject quote." });
@@ -220,6 +260,14 @@ namespace OstaFandy.PL.Controllers
                     var result = await _handymanJobService.ProcessQuoteResponseAsync(model.QuoteId, model.Action, model.ClientUserId, model.BookingData);
                     if (result)
                     {
+                        var handyman = _unitOfWork.HandyManRepo.GetById(quoteDetails.HandymanId);
+                        if (handyman?.UserId != null)
+                        {
+                            await _notificationService.SendNotificationToHandyman(
+                                handyman.UserId.ToString(),
+                                $"Quote with ID {model.QuoteId} has been accepted by the client and booking has been created."
+                            );
+                        }
                         return Ok(new { message = "Quote accepted and booking created successfully." });
                     }
                     return BadRequest(new { message = "Failed to accept quote and create booking." });
@@ -430,5 +478,95 @@ namespace OstaFandy.PL.Controllers
         //}
         #endregion
 
+        #region get all jobs
+        [HttpGet]
+        [EndpointDescription("HandymanJobs/GetAllJobs")]
+        [EndpointSummary("return all jobs for specific handyman. you MUST add handyman Id")]
+        public IActionResult GetAllJobs([FromQuery] string searchString = "", [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5, [FromQuery] string? status = null, [FromQuery] int handymanId = -1)
+        {
+            try
+            {
+                var result = _handymanJobService.GetAll(searchString, pageNumber, pageSize, status, handymanId);
+                if (result.Data == null || !result.Data.Any())
+                {
+                    return Ok(new
+                    {
+                        message = "There are no handyman jobs found.",
+                        data = new List<HandymanJobsDTO>(),
+                        currentPage = result.CurrentPage,
+                        totalPages = result.TotalPages,
+                        totalCount = result.TotalCount,
+                        searchString = result.SearchString
+                    });
+                }
+                return Ok(new
+                {
+                    data = result.Data,
+                    currentPage = result.CurrentPage,
+                    totalPages = result.TotalPages,
+                    totalCount = result.TotalCount,
+                    searchString = result.SearchString
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while fetching handyman jobs.");
+                return StatusCode(500, new { message = "An error occurred while fetching handyman jobs.", error = ex.Message });
+            }
+        }
+        #endregion
+
+        //[HttpPut("MarkAsRead/{notificationId}")]
+        //public IActionResult MarkAsRead(int notificationId)
+        //{
+        //    try
+        //    {
+        //        var notification =  _unitOfWork.NotificationRepo.GetById(notificationId);
+        //        if (notification == null)
+        //        {
+        //            return NotFound(new { message = "Notification not found" });
+        //        }
+
+        //        notification.IsRead = true;
+        //        //notification.CreatedAt = DateTime.UtcNow;
+
+        //        _unitOfWork.NotificationRepo.Update(notification);
+        //          _unitOfWork.SaveAsync();
+
+        //        return Ok(new { message = "Notification marked as read" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Error marking notification as read", error = ex.Message });
+        //    }
+        //}
+
+        //// PUT: api/HandymanPage/MarkAllAsRead/{handymanUserId}
+        //[HttpPut("MarkAllAsRead/{handymanUserId}")]
+        //public IActionResult MarkAllAsRead(int handymanUserId)
+        //{
+        //    try
+        //    {
+        //        var notifications = _unitOfWork.NotificationRepo
+        //            .GetAll(n => n.UserId == handymanUserId && !n.IsRead);
+
+        //        foreach (var notification in notifications)
+        //        {
+        //            notification.IsRead = true;
+        //            //notification.ReadAt = DateTime.UtcNow;
+        //            _unitOfWork.NotificationRepo.Update(notification);
+        //        }
+
+        //        _unitOfWork.SaveAsync();
+
+        //        return Ok(new { message = "All notifications marked as read" });
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, new { message = "Error marking all notifications as read", error = ex.Message });
+        //    }
+        //}
+
+      
     }
 }

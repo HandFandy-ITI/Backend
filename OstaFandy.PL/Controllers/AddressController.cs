@@ -56,9 +56,9 @@ namespace OstaFandy.PL.Controllers
                 return Ok(new ResponseDto<string>
                 {
                     IsSuccess = true,
-                    Message = "Address Added Succesifilly",
+                    Message = "Address Added Successfully",
                     Data = null,
-                    StatusCode = StatusCodes.Status400BadRequest
+                    StatusCode = StatusCodes.Status200OK
                 });
             }
         }

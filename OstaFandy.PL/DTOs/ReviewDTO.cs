@@ -4,8 +4,8 @@ namespace OstaFandy.PL.DTOs
 {
     public class CreateReviewDTO
     {
-        [Required(ErrorMessage = "JobAssignmentId is required")]
-        public int JobAssignmentId { get; set; }
+        [Required(ErrorMessage = "BookingId is required")]
+        public int BookingId { get; set; }
 
         [Required(ErrorMessage = "Rating is required")]
         [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5")]

@@ -16,18 +16,17 @@ namespace OstaFandy.PL.BL
             this.unitOfWork = unitOfWork;
             this.mapper = mapper;
         }
-
         public async Task<ReviewResponseDTO> CreateReviewAsync(CreateReviewDTO createReviewDTO)
         {
-            // Get BookingId from JobAssignment
-            var bookingId = await unitOfWork.ReviewRepo.GetBookingIdByJobAssignmentIdAsync(createReviewDTO.JobAssignmentId);
-            if (bookingId == null)
+            // Check if booking exists
+            var bookingExists = await unitOfWork.ReviewRepo.IsBookingExistsAsync(createReviewDTO.BookingId);
+            if (!bookingExists)
             {
-                throw new ArgumentException("Job assignment not found");
+                throw new ArgumentException("Booking not found");
             }
 
             // Check if user already reviewed this booking
-            var hasAlreadyReviewed = await unitOfWork.ReviewRepo.HasUserAlreadyReviewedAsync(bookingId.Value);
+            var hasAlreadyReviewed = await unitOfWork.ReviewRepo.HasUserAlreadyReviewedAsync(createReviewDTO.BookingId);
             if (hasAlreadyReviewed)
             {
                 throw new InvalidOperationException("You have already reviewed this booking");
@@ -36,7 +35,7 @@ namespace OstaFandy.PL.BL
             // Create new review
             var review = new Review
             {
-                BookingId = bookingId.Value,
+                BookingId = createReviewDTO.BookingId,
                 Rating = createReviewDTO.Rating,
                 Comment = createReviewDTO.Comment ?? string.Empty,
                 CreatedAt = DateTime.Now
@@ -44,11 +43,14 @@ namespace OstaFandy.PL.BL
 
             // Save to database using Unit of Work
             unitOfWork.ReviewRepo.Insert(review);
-            await unitOfWork.SaveAsync(); // استخدام Unit of Work للحفظ
+            await unitOfWork.SaveAsync(); 
 
             // Map to response DTO
             return mapper.Map<ReviewResponseDTO>(review);
         }
-    
-}
+    }
+
+
+
+
 }

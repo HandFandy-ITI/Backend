@@ -28,7 +28,7 @@ namespace OstaFandy.PL.Repos.IRepos
     {
         public decimal GetAverageRating();
 
-        Task<int?> GetBookingIdByJobAssignmentIdAsync(int jobAssignmentId);
+        Task<bool> IsBookingExistsAsync(int bookingId);
         Task<bool> HasUserAlreadyReviewedAsync(int bookingId);
         Task<Review> GetReviewByBookingIdAsync(int bookingId);
     }

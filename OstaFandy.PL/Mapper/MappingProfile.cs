@@ -320,6 +320,79 @@ namespace OstaFandy.PL.Mapper
                 .ReverseMap();
             #endregion
 
+
+            #region ClientProfile
+            
+
+            CreateMap<Client, ClientProfileDTO>()
+                .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserId))
+                .ForMember(dest => dest.FirstName, opt => opt.MapFrom(src => src.User != null ? src.User.FirstName : null))
+                .ForMember(dest => dest.LastName, opt => opt.MapFrom(src => src.User != null ? src.User.LastName : null))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User != null ? src.User.Email : null))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.User != null ? src.User.Phone : null))
+                .ForMember(dest => dest.IsActive, opt => opt.MapFrom(src => src.User != null ? src.User.IsActive : false))
+                .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.User != null ? src.User.CreatedAt : DateTime.MinValue))
+                .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.User != null ? src.User.UpdatedAt : DateTime.MinValue))
+                .ForMember(dest => dest.DefaultAddress, opt => opt.MapFrom(src => src.DefaultAddress));
+
+            CreateMap<Address, ClientDefaultAddressDTO>()
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address1))
+                .ForMember(dest => dest.City, opt => opt.MapFrom(src => src.City))
+                .ForMember(dest => dest.Latitude, opt => opt.MapFrom(src => src.Latitude))
+                .ForMember(dest => dest.Longitude, opt => opt.MapFrom(src => src.Longitude))
+                .ForMember(dest => dest.AddressType, opt => opt.MapFrom(src => src.AddressType));
+
+            CreateMap<Address, ClientAddressDTO>()
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address1))
+                .ForMember(dest => dest.IsDefault, opt => opt.Ignore());
+
+            CreateMap<Booking, ClientOrderDTO>()
+                .ForMember(dest => dest.BookingId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.OrderDate, opt => opt.MapFrom(src => src.CreatedAt))
+                .ForMember(dest => dest.HandymanName, opt => opt.MapFrom(src =>
+                    src.JobAssignment != null && src.JobAssignment.Handyman != null && src.JobAssignment.Handyman.User != null
+                        ? $"{src.JobAssignment.Handyman.User.FirstName} {src.JobAssignment.Handyman.User.LastName}"
+                        : "Not Assigned"))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.Address))
+                .ForMember(dest => dest.Services, opt => opt.MapFrom(src => src.BookingServices))
+                .ForMember(dest => dest.Payment, opt => opt.MapFrom(src => src.Payments.FirstOrDefault()))
+                .ForMember(dest => dest.Review, opt => opt.MapFrom(src => src.Reviews.FirstOrDefault()));
+
+            CreateMap<Address, ClientOrderAddressDTO>()
+                .ForMember(dest => dest.FullAddress, opt => opt.MapFrom(src => src.Address1));
+
+            CreateMap<BookingService, ClientOrderServiceDTO>()
+                .ForMember(dest => dest.ServiceName, opt => opt.MapFrom(src => src.Service.Name))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Service.Category.Name))
+                .ForMember(dest => dest.FixedPrice, opt => opt.MapFrom(src => src.Service.FixedPrice))
+                .ForMember(dest => dest.EstimatedMinutes, opt => opt.MapFrom(src => src.Service.EstimatedMinutes));
+
+            CreateMap<Payment, ClientPaymentDTO>()
+                .ForMember(dest => dest.PaymentDate, opt => opt.MapFrom(src => src.CreatedAt));
+
+            CreateMap<Review, ClientReviewDTO>()
+                .ForMember(dest => dest.ReviewDate, opt => opt.MapFrom(src => src.CreatedAt));
+
+            CreateMap<Quote, ClientQuoteDTO>()
+                .ForMember(dest => dest.QuoteId, opt => opt.MapFrom(src => src.Id))
+                .ForMember(dest => dest.BookingId, opt => opt.MapFrom(src => src.JobAssignment.BookingId))
+                .ForMember(dest => dest.HandymanName, opt => opt.MapFrom(src =>
+                    src.JobAssignment.Handyman != null && src.JobAssignment.Handyman.User != null
+                        ? $"{src.JobAssignment.Handyman.User.FirstName} {src.JobAssignment.Handyman.User.LastName}"
+                        : "Unknown"))
+                .ForMember(dest => dest.BookingDate, opt => opt.MapFrom(src => src.JobAssignment.Booking.PreferredDate))
+                .ForMember(dest => dest.Services, opt => opt.MapFrom(src =>
+                    src.JobAssignment.Booking.BookingServices.Select(bs => bs.Service.Name).ToList()))
+                .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src =>
+                    src.JobAssignment.Booking.BookingServices.FirstOrDefault().Service.Category.Name ?? "Unknown"));
+
+            CreateMap<UpdateClientProfileDTO, User>()
+                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
+
+            #endregion
+
+
             #region made all quotes for handyman
             CreateMap<Quote, AllQuotes>()
                 .AfterMap((src, dest) =>

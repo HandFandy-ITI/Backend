@@ -1,4 +1,6 @@
-﻿using AutoMapper;
+﻿using System.Runtime.Intrinsics.X86;
+using System.Threading.Tasks;
+using AutoMapper;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
@@ -71,13 +73,15 @@ namespace OstaFandy.PL.BL
                     _logger.LogWarning($"Booking with ID {alljob.BookingId} not found.");
                     return false;
                 }
-                var client = _unitOfWork.ClientRepo.GetById(booking.ClientId);
+                var client = _unitOfWork.ClientRepo.GetByIdSync(booking.ClientId);
                 if (client == null)
                 {
                     _logger.LogWarning($"Client with ID {booking.ClientId} not found.");
                     return false;
                 }
+
                 var user = _unitOfWork.UserRepo.GetById(client.UserId);
+
                 //var notification = new Notification
                 //{
                 //    UserId = user.Id,
@@ -89,6 +93,7 @@ namespace OstaFandy.PL.BL
                 //};
                 //_unitOfWork.NotificationRepo.Insert(notification);
                 //_unitOfWork.Save();
+
                 var notification = new Notification
                 {
                     UserId = user.Id,
@@ -164,7 +169,7 @@ namespace OstaFandy.PL.BL
                     _logger.LogWarning($"Booking with ID {job.BookingId} not found.");
                     return false;
                 }
-                var client = _unitOfWork.ClientRepo.GetById(booking.ClientId);
+                var client = _unitOfWork.ClientRepo.GetByIdSync(booking.ClientId);
                 if (client == null)
                 {
                     _logger.LogWarning($"Client with ID {booking.ClientId} not found.");

@@ -59,7 +59,7 @@ namespace OstaFandy.DAL.Repos
         {
            
             T? entity = dbSet.Find(id);
-            return entity ?? throw new InvalidOperationException($"Entity of type {typeof(T).Name} with ID {id} not found.");
+            return entity ;
         }
 
         public void Insert(T entity)
@@ -90,6 +90,10 @@ namespace OstaFandy.DAL.Repos
         public void AddRange(IEnumerable<T> entites)
         {
             dbSet.AddRange(entites);
+        }
+        public T? GetByIdOrDefault(int id)
+        {
+            return dbSet.Find(id);
         }
 
         //public T GetById(int id, string? includeProperties = null)

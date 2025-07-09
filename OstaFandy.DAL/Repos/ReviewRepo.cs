@@ -68,12 +68,9 @@ namespace OstaFandy.PL.Repos
         }
 
 
-        public async Task<int?> GetBookingIdByJobAssignmentIdAsync(int jobAssignmentId)
+        public async Task<bool> IsBookingExistsAsync(int bookingId)
         {
-            var jobAssignment = await _context.Set<JobAssignment>()
-                .FirstOrDefaultAsync(ja => ja.Id == jobAssignmentId);
-
-            return jobAssignment?.BookingId;
+            return await _context.Set<Booking>().AnyAsync(b => b.Id == bookingId);
         }
 
         public async Task<bool> HasUserAlreadyReviewedAsync(int bookingId)

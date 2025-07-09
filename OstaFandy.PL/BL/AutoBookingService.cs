@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 using OstaFandy.PL.General;
+using OstaFandy.PL.utils;
 using Stripe;
 
 
@@ -14,13 +16,15 @@ namespace OstaFandy.PL.BL
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
 
-        public AutoBookingService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration )
+        public AutoBookingService(IUnitOfWork unitOfWork, IMapper mapper, IConfiguration configuration, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         //get all
@@ -28,7 +32,7 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                var bookings = _unitOfWork.BookingRepo.GetAll(null, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
+                var bookings = _unitOfWork.BookingRepo.GetAll(b=>b.Status != BookingStatus.Cancelled, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
 
                 if (bookings == null || !bookings.Any())
                 {
@@ -55,7 +59,7 @@ namespace OstaFandy.PL.BL
                 {
                     throw new ArgumentException("Invalid booking ID.");
                 }
-                var booking = _unitOfWork.BookingRepo.FirstOrDefault(b=>b.Id==id, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
+                var booking = _unitOfWork.BookingRepo.FirstOrDefault(b => b.Id == id, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
                 if (booking == null)
                 {
                     throw new KeyNotFoundException($"Booking with ID {id} not found.");
@@ -63,11 +67,11 @@ namespace OstaFandy.PL.BL
                 var bookingDto = _mapper.Map<BookingViewDto>(booking);
                 return bookingDto;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 throw new ApplicationException("An error occurred while retrieving the booking.", ex);
             }
-        
+
         }
         //get booking by client id
         public List<BookingViewDto> GetBookingsByClientId(int clientId)
@@ -133,9 +137,13 @@ namespace OstaFandy.PL.BL
         {
             if (bookingdto == null) return null;
 
-            using var trnsaction= await _unitOfWork.BeginTransactionasync();
+            using var trnsaction = await _unitOfWork.BeginTransactionasync();
             try
             {
+                //email
+                var email = new EmailContentDto();
+                //get user
+                var user= _unitOfWork.UserRepo.GetById(bookingdto.ClientId);
                 //booking 
                 var booking = _mapper.Map<Booking>(bookingdto);
                 _unitOfWork.BookingRepo.Insert(booking);
@@ -162,9 +170,9 @@ namespace OstaFandy.PL.BL
                 }
 
                 //payment
-                var payment=_mapper.Map<Payment>(bookingdto);
+                var payment = _mapper.Map<Payment>(bookingdto);
                 payment.BookingId = booking.Id;
-                if (bookingdto.Method== "stripe")
+                if (bookingdto.Method == "stripe")
                 {
                     var paymentIntentService = new PaymentIntentService();
                     var paymentIntent = await paymentIntentService.GetAsync(bookingdto.PaymentIntentId);
@@ -176,21 +184,64 @@ namespace OstaFandy.PL.BL
                     {
                         payment.ReceiptUrl = charge.ReceiptUrl;
                     }
+
                 }
-               
-                
+
+                email.to = user.Email;
+                email.subject = "Place booking";
+                email.body = $"""
+                        <div style="font-family: Arial, sans-serif; color: #333333; max-width:600px; margin:auto; padding:20px; background-color: #ffffff; border:1px solid #c0c0c0; border-radius:8px;">
+                          <h1 style="color: #004e98; margin-bottom: 10px;">Thank You for Trusting Us!</h1>
+
+                          <p style="font-size:16px; line-height:1.5;">
+                            Hello <strong>{user.FirstName} {user.LastName}</strong>,<br/>
+                            Your booking <strong>#{booking.Id}</strong> is confirmed for <strong>{booking.PreferredDate:dddd, MMM dd, yyyy}</strong>.
+                          </p>
+
+                          <p style="font-size:16px; line-height:1.5;">
+                            <strong>Total Price:</strong> {bookingdto.TotalPrice:C}
+                          </p>
+
+                          {(string.IsNullOrEmpty(payment.ReceiptUrl) ? "" : $"""
+                          <p style="font-size:16px; line-height:1.5;">
+                            You can view your payment receipt by clicking the button below:
+                          </p>
+                          <a href="{payment.ReceiptUrl}" target="_blank"
+                             style="
+                               display: inline-block;
+                               padding: 12px 25px;
+                               background-color: #004e98;
+                               color: #ffffff;
+                               font-weight: bold;
+                               text-decoration: none;
+                               border-radius: 5px;
+                               transition: background-color 0.3s ease;
+                             "
+                             onmouseover="this.style.backgroundColor='#003770'"
+                             onmouseout="this.style.backgroundColor='#004e98'"
+                          >View Payment Receipt</a>
+                          """)}
+
+                          <p style="font-size:14px; color: #777777; margin-top: 30px; line-height:1.4;">
+                            If you have any questions, feel free to contact us anytime.
+                          </p>
+                        </div>
+                        """;
+
+               await _emailService.SendEmailAsync(email);
+
                 _unitOfWork.PaymentRepo.Insert(payment);
 
-                var res=await _unitOfWork.SaveAsync();
-                if (res > 0) 
+                var res = await _unitOfWork.SaveAsync();
+                if (res > 0)
                 {
                     //await trnsaction.CommitAsync();
                     //return booking.Id;
-                   var chat= new Chat
-                   {
-                       BookingId = booking.Id,
-                       StartedAt = DateTime.UtcNow
-                   };
+                    var chat = new Chat
+                    {
+                        BookingId = booking.Id,
+                        StartedAt = DateTime.UtcNow
+                    };
                     _unitOfWork.ChatRepo.Insert(chat);
 
                     await _unitOfWork.SaveAsync();
@@ -213,7 +264,7 @@ namespace OstaFandy.PL.BL
                 }
 
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 await trnsaction.RollbackAsync();
                 Console.WriteLine(ex.ToString());
@@ -228,9 +279,14 @@ namespace OstaFandy.PL.BL
             {
                 var booking = _unitOfWork.BookingRepo.FirstOrDefault(b => b.Id == bookingId, "JobAssignment,Payments");
 
-                if (booking.Status == BookingStatus.Completed || booking.PreferredDate <= DateTime.Now.AddHours(24))
+                if (booking.Status == BookingStatus.Completed)
                 {
                     return 0;
+                }
+
+                if(booking.PreferredDate <= DateTime.Now.AddHours(24))
+                {
+                    return -1;
                 }
 
                 booking.Status = BookingStatus.Cancelled;
@@ -250,7 +306,7 @@ namespace OstaFandy.PL.BL
 
                 foreach (var payment in booking.Payments)
                 {
-                    if (payment.Method == "stripe") 
+                    if (payment.Method == "stripe")
                     {
                         var charges = chargeService.List(new ChargeListOptions
                         {
@@ -265,18 +321,71 @@ namespace OstaFandy.PL.BL
                             Charge = chargeId
                         };
                         var refund = refundService.Create(refundOptions);
-                        payment.Status= PaymentsStatus.Refunded;
+                        payment.Status = PaymentsStatus.Refunded;
 
+                    }
+                    else
+                    {
+                        payment.Status = PaymentsStatus.Failed;
                     }
                 }
                 _unitOfWork.Save();
 
-                return 1; 
+                return 1;
             }
             catch (Exception ex)
             {
-                return -1; 
+                return -2;
             }
+        }
+
+        //get all booking pagination
+        public PaginatedResult<BookingViewDto> GetBookings(string handymanName = "", string status = "", bool? isActive = null, int pageNumber = 1, int pageSize = 10)
+        {
+            var query = _unitOfWork.BookingRepo.GetAll(null, "Client.User,JobAssignment.Handyman.User,BookingServices.Service.Category,Address");
+
+            if (!string.IsNullOrWhiteSpace(handymanName))
+            {
+                handymanName = handymanName.Trim().ToLower();
+
+                bool isBookingIdNumber = int.TryParse(handymanName, out int bookingIdNum);
+
+                query = query.Where(b =>
+                    b.JobAssignment != null &&
+                    b.JobAssignment.Handyman != null &&
+                    (
+                        (b.JobAssignment.Handyman.User.FirstName + " " + b.JobAssignment.Handyman.User.LastName).ToLower()
+                    ).Contains(handymanName) ||(isBookingIdNumber && b.Id == bookingIdNum)
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                query = query.Where(b => b.Status == status);
+            }
+
+            if (isActive.HasValue)
+            {
+                query = query.Where(b => b.IsActive == isActive.Value);
+            }
+
+            int totalCount = query.Count();
+
+            var data = query
+                .OrderByDescending(b => b.CreatedAt)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var datamapper = _mapper.Map<List<BookingViewDto>>(data);
+
+            return new PaginatedResult<BookingViewDto>
+            {
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalItems = totalCount,
+                Items = datamapper
+            };
         }
 
 

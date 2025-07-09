@@ -7,7 +7,6 @@ namespace OstaFandy.PL.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize] // Remove this if you don't want authentication
     public class ReviewController : ControllerBase
     {
         private readonly IReviewService reviewService;
@@ -46,7 +45,7 @@ namespace OstaFandy.PL.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                return Conflict(new
+                return StatusCode(409, new
                 {
                     success = false,
                     message = ex.Message
