@@ -24,7 +24,7 @@ It powers the system for customers to book services, and handles handyman onboar
 
 
 ## 📂 Project Structure
-
+```
 OstaFandy/
 │
 ├── DAL/ # Data Access Layer
@@ -77,7 +77,7 @@ OstaFandy/
 │ ├── appsettings.Development.json
 │ ├── PL.csproj # Presentation Layer project file
 └── 
-
+```
 
 ## 🛠️ Tech Stack
 
