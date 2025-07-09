@@ -14,8 +14,8 @@ namespace OstaFandy.DAL.Repos.IRepos
     public interface IUnitOfWork
     {
         public IUserRepo UserRepo { get; }
-        IUserTypeRepo UserTypeRepo { get; }
-        IPaymentRepo PaymentRepo { get; }
+        public IUserTypeRepo UserTypeRepo { get; }
+        public IPaymentRepo PaymentRepo { get; }
         public INotificationRepo NotificationRepo { get; }
         public IHandyManRepo HandyManRepo { get; }
         public IClientRepo ClientRepo { get; }
@@ -23,25 +23,23 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IAnalyticsRepo AnalyticsRepo { get; }
         public IQuoteRepo QuoteRepo{ get; }
         public IBlockDateRepo BlockDateRepo{ get; }
-
         public IBookingRepo BookingRepo { get; }
 
         //public IReviewRepo ReviewRepo { get; }
+
         public IReviewRepo ReviewRepo { get; }
 
         public IJobAssignmentRepo JobAssignmentRepo { get; }
-        ICategoryRepo CategoryRepo { get; }
-        IServiceRepo ServiceRepo { get; }
-        IChatRepo ChatRepo { get; }
-        IMessageRepo MessageRepo { get; }
+        public ICategoryRepo CategoryRepo { get; }
+        public IServiceRepo ServiceRepo { get; }
+        public IChatRepo ChatRepo { get; }
+        public IMessageRepo MessageRepo { get; }
+        public IBookingServiceRepo BookingServiceRepo { get; } 
+        public IPasswordResetTokenRepo PasswordResetTokenRepo { get; }
 
-        IBookingServiceRepo BookingServiceRepo { get; } 
         public int Save();
-
         public Task<int> SaveAsync();
         public IDbContextTransaction BeginTransaction();
-
-
         Task<IDbContextTransaction> BeginTransactionasync();
     }
 }

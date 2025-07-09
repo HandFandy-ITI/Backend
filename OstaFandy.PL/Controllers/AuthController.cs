@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using OstaFandy.DAL.Entities;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OstaFandy.PL.Controllers
 {
@@ -21,16 +22,7 @@ namespace OstaFandy.PL.Controllers
         [HttpPost("register-Customer")]
         public IActionResult RegisterCustomer([FromBody] UserRegesterDto registerCustomerDto)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(new ResponseDto<string>
-                {
-                    IsSuccess = false,
-                    Message = "Invalid input",
-                    Data = null,
-                    StatusCode = StatusCodes.Status400BadRequest
-                });
-            }
+          
             var res = _userService.RegisterUser(registerCustomerDto);
             if (res == 0)
             {
@@ -70,7 +62,7 @@ namespace OstaFandy.PL.Controllers
                 return Ok(new ResponseDto<string>
                 {
                     IsSuccess = true,
-                    Message = "User registered successfully",
+                    Message = "registered successfully",
                     Data = token,
                     StatusCode = StatusCodes.Status201Created
                 });
@@ -80,7 +72,7 @@ namespace OstaFandy.PL.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, new ResponseDto<string>
                 {
                     IsSuccess = false,
-                    Message = "An error occurred while registering the user",
+                    Message = "Oops! Something went wrong while creating your account. Please try again.",
                     Data = null,
                     StatusCode = StatusCodes.Status500InternalServerError
                 });
@@ -122,7 +114,8 @@ namespace OstaFandy.PL.Controllers
                         Data = null,
                         StatusCode = StatusCodes.Status401Unauthorized
                     });
-                }else if(!user.IsActive)
+                }
+                else if (!user.IsActive)
                 {
                     return Unauthorized(new ResponseDto<string>
                     {
@@ -131,7 +124,8 @@ namespace OstaFandy.PL.Controllers
                         Data = null,
                         StatusCode = StatusCodes.Status401Unauthorized
                     });
-                }else if(user.HandymanStatus == "Pending")
+                }
+                else if (user.HandymanStatus == "Pending")
                 {
                     return Unauthorized(new ResponseDto<string>
                     {
@@ -140,7 +134,8 @@ namespace OstaFandy.PL.Controllers
                         Data = "Pending",
                         StatusCode = StatusCodes.Status401Unauthorized
                     });
-                }else if(user.HandymanStatus == "Rejected")
+                }
+                else if (user.HandymanStatus == "Rejected")
                 {
                     return Unauthorized(new ResponseDto<string>
                     {
@@ -189,5 +184,89 @@ namespace OstaFandy.PL.Controllers
             }
         }
 
+        [HttpPost("forgot-password")]
+        public async Task<IActionResult> ForgotPassword([FromBody] string emailAddress)
+        {
+            var user = _userService.GetUserByEmail(emailAddress);
+            if (user == null)
+            {
+                return NotFound(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "User not found",
+                    StatusCode = StatusCodes.Status404NotFound
+                });
+            }
+
+            var res = await _userService.ForgotPassword(user);
+            if(!res)
+            {
+                return StatusCode(500, new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "Failed to send OTP, please try again later.",
+                    StatusCode = StatusCodes.Status500InternalServerError
+                });
+            }
+
+            return Ok(new ResponseDto<string>
+            {
+                IsSuccess = true,
+                Data = null,
+                Message = "OTP sent successfully to your email",
+                StatusCode = StatusCodes.Status200OK
+            });
+        }
+
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword([FromBody] ResetPasswordDto dto)
+        {
+            var res = _userService.ResetPassword(dto);
+            if (res == 0)
+            {
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "Invalid OTP",
+                    StatusCode = StatusCodes.Status400BadRequest
+
+                });
+            }
+            else if(res == -1)
+            {
+
+                return NotFound(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "Wronge Email",
+                    StatusCode = StatusCodes.Status404NotFound
+
+                });
+            }
+            else if(res==-2)
+            {
+                return StatusCode(500, new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Data = null,
+                    Message = "Failed to reset password, please try again later.",
+                    StatusCode = StatusCodes.Status500InternalServerError
+                });
+            }
+            else
+            {
+                return Ok(new ResponseDto<string>
+                {
+                    IsSuccess = true,
+                    Data = null,
+                    Message = "Password Reset",
+                    StatusCode = StatusCodes.Status200OK
+                });
+            }
+        }
     }
 }

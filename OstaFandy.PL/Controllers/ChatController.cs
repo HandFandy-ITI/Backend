@@ -68,21 +68,77 @@ namespace OstaFandy.PL.Controllers
 
 
 
+  
+        [HttpGet("client/threads")]
+        [Authorize(AuthenticationSchemes = "myschema")]
+        public IActionResult GetClientThreads([FromQuery] ChatThreadFilterDTO filters)
+        {
+            var userId = User.FindFirst("NameIdentifier")?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var result = _chatService.GetClientThreads(int.Parse(userId), filters);
+            return Ok(result);
+        }
+
         [HttpGet("handyman/threads")]
         [Authorize(AuthenticationSchemes = "myschema")]
-        public IActionResult GetHandymanThreads()
+        public IActionResult GetHandymanThreads([FromQuery] ChatThreadFilterDTO filters)
+        {
+            var userId = User.FindFirst("NameIdentifier")?.Value;
+            if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+            var result = _chatService.GetHandymanThreads(int.Parse(userId), filters);
+            return Ok(result);
+        }
+
+
+
+        [HttpGet("threads")]
+        [Authorize(AuthenticationSchemes = "myschema")]
+        public IActionResult GetClientThreads([FromQuery] string name = "", [FromQuery] string sort = "newest", [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 5)
+        {
+            var userIdClaim = User.FindFirst("NameIdentifier");
+            if (userIdClaim == null) return Unauthorized();
+
+            int clientId = int.Parse(userIdClaim.Value);
+
+            var filters = new ChatThreadFilterDTO
+            {
+                Name = name,
+                Sort = sort,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var threads = _chatService.GetClientThreads(clientId, filters);
+            return Ok(threads);
+        }
+
+
+        [HttpGet("threads/handyman")]
+        [Authorize(AuthenticationSchemes = "myschema")]
+        public IActionResult GetFilteredHandymanThreads(
+    [FromQuery] string name = "",
+    [FromQuery] string sort = "newest",
+    [FromQuery] int pageNumber = 1,
+    [FromQuery] int pageSize = 5)
         {
             var userIdClaim = User.FindFirst("NameIdentifier");
             if (userIdClaim == null) return Unauthorized();
 
             int handymanId = int.Parse(userIdClaim.Value);
-            var threads = _chatService.GetHandymanThreads(handymanId);
+
+            var filters = new ChatThreadFilterDTO
+            {
+                Name = name,
+                Sort = sort,
+                PageNumber = pageNumber,
+                PageSize = pageSize
+            };
+
+            var threads = _chatService.GetHandymanThreads(handymanId, filters);
             return Ok(threads);
         }
-
-
-
-
 
     }
 }

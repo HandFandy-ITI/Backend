@@ -53,7 +53,13 @@ namespace OstaFandy.PL.BL
             }
         }
 
-        
+        public async Task SendNotificationToAdmin(string userId, string message)
+        {
+            if (UserConnections.TryGetValue(userId, out var connectionId))
+            {
+                await Clients.Client(connectionId).SendAsync("ReceiveNotificationAdmin", message);
+            }
+        }
 
     }
 }

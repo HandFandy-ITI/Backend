@@ -380,12 +380,15 @@ namespace OstaFandy.PL.Mapper
                     src.JobAssignment.Handyman != null && src.JobAssignment.Handyman.User != null
                         ? $"{src.JobAssignment.Handyman.User.FirstName} {src.JobAssignment.Handyman.User.LastName}"
                         : "Unknown"))
+                .ForMember(dest => dest.handymanId,
+                         opt => opt.MapFrom(src => src.JobAssignment.HandymanId))
+                .ForMember(dest => dest.addressId,
+                         opt => opt.MapFrom(src => src.JobAssignment.Booking.AddressId))
                 .ForMember(dest => dest.BookingDate, opt => opt.MapFrom(src => src.JobAssignment.Booking.PreferredDate))
                 .ForMember(dest => dest.Services, opt => opt.MapFrom(src =>
                     src.JobAssignment.Booking.BookingServices.Select(bs => bs.Service.Name).ToList()))
                 .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src =>
                     src.JobAssignment.Booking.BookingServices.FirstOrDefault().Service.Category.Name ?? "Unknown"));
-
             CreateMap<UpdateClientProfileDTO, User>()
                  .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 

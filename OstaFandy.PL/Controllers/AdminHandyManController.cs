@@ -13,6 +13,7 @@ using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OstaFandy.PL.Controllers
 {
@@ -21,6 +22,8 @@ namespace OstaFandy.PL.Controllers
     ///
     public class AdminHandyManController : ControllerBase
     {
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IBlockDateService _blockDateService;
         private readonly IMapper _map;
         private readonly IHandyManService _handymanService;
         private readonly IUserService _userservice;
@@ -31,9 +34,10 @@ namespace OstaFandy.PL.Controllers
 
 
 
-        public AdminHandyManController(IHandyManService HandyManService, IUserService userService, IMapper map, ILogger<HandyManService> logger, IJWTService jwtService)
-
+        public AdminHandyManController(IHandyManService HandyManService, IUserService userService, IMapper map, ILogger<HandyManService> logger, IJWTService jwtService, IBlockDateService blockDateService, IUnitOfWork unitOfWork)
         {
+            _unitOfWork = unitOfWork; 
+            _blockDateService = blockDateService;
             _map = map;
             _handymanService = HandyManService;
             _userservice = userService;
@@ -41,6 +45,8 @@ namespace OstaFandy.PL.Controllers
             _logger = logger;
             _jwtService = jwtService;
         }
+
+        #region admin area 
         [HttpGet]
         [EndpointDescription("AdminHandyMan/getall")]
         [EndpointSummary("return all handymen")]
@@ -270,7 +276,7 @@ namespace OstaFandy.PL.Controllers
         [EndpointSummary("add handyman application")]
         public IActionResult HandyManApplication([FromForm] HandyManApplicationDto handymandto)
         {
-            if(!ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 return BadRequest(new ResponseDto<string>
                 {
@@ -314,7 +320,7 @@ namespace OstaFandy.PL.Controllers
             else if (res > 0)
             {
                 var user = _userservice.GetById(res);
-                
+
 
                 var token = _jwtService.GeneratedToken(user);
                 return Ok(new ResponseDto<string>
@@ -339,7 +345,209 @@ namespace OstaFandy.PL.Controllers
             }
         }
 
+        #endregion
 
+        #region admin block date area
+        #region get all block date
+        [HttpGet("blockdates")]
+        [EndpointDescription("AdminHandyMan/GetAllBlockDates")]
+        [EndpointSummary("Get all block dates for handymen")]
+        public IActionResult GetAllBlockDates(string searchString = "", int pageNumber = 1, int pageSize = 5, string? status = null, DateTime? date = null)
+        {
+            try
+            {
+                ;
+                var result = _blockDateService.GetAll(searchString, pageNumber, pageSize, status, date);
+                if (result.Data == null || !result.Data.Any())
+                {
+                    return Ok(new
+                    {
+                        message = "There are no block dates found",
+                        data = new List<BlockDateDTO>(),
+                        currentPage = result.CurrentPage,
+                        totalPages = result.TotalPages,
+                        totalCount = result.TotalCount,
+                        searchString = result.SearchString
+                    });
+                }
+                return Ok(new
+                {
+                    data = result.Data,
+                    currentPage = result.CurrentPage,
+                    totalPages = result.TotalPages,
+                    totalCount = result.TotalCount,
+                    searchString = result.SearchString
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while getting block dates.", ex.InnerException?.Message ?? ex.Message);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Internal server error");
+            }
+        }
+        #endregion
+
+
+        #region category for dropdown
+        [HttpGet("GetCategoriesForDropdown")]
+        [EndpointDescription("AdminHandyMan/GetCategoriesForDropdown")]
+        [EndpointSummary("get all categories to filter with")]
+        public IActionResult GetCategoriesForDropdown()
+        {
+            var categories = _blockDateService.GetAllCategory();
+            return Ok(categories.Select(c => new { Id = c.Id, Name = c.Name }));
+        }
+        #endregion
+
+        #region get all handyman with date
+
+        [HttpGet("GetAllHandymanData")]
+        [EndpointDescription("AdminHandyMan/GetAllHandymanData")]
+        [EndpointSummary("show all handymen")]
+        public IActionResult GetHandymenForDropdown(string searchString = "", int pageNumber = 1, int pageSize = 5, int? categoryId = null)
+        {
+            var result = _blockDateService.GetAllHandymanData(searchString, pageNumber, pageSize, categoryId);
+            return Ok(new
+            {
+                data = result.Data,
+                currentPage = result.CurrentPage,
+                totalPages = result.TotalPages,
+                totalCount = result.TotalCount,
+                searchString = result.SearchString
+            });
+        }
+        #endregion
+
+        #region create block date
+        [HttpPost("AddBlockDate")]
+        [EndpointDescription("AdminHandyMan/AddBlockDate")]
+        [EndpointSummary("create dateblock for handyman")]
+        public IActionResult AddBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
+        {
+            var result = _blockDateService.AddBlockDate(HandymanId, Reason, StartDate, EndDate);
+            return result ? Ok("block date created") : BadRequest("failed to create blockdate handyman has a job at this date or user deleted from system");
+        }
+
+        #endregion
+
+        #region reject handyman ask for vacation
+        [HttpPut("RejectBlockDate")]
+        [EndpointDescription("AdminHandyMan/RejectBlockDate")]
+        [EndpointSummary("Reject handyman request to get vacation")]
+        public IActionResult RejectBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
+        {
+            var result = _blockDateService.RejectBlockDate(HandymanId, Reason, StartDate, EndDate);
+            if (result)
+            {
+                return Ok(new { message = "The vacation has been rejected successfully." });
+            }
+            else
+            {
+                return BadRequest(new { message = "Error occurred while rejecting vacation." });
+            }
+        }
+        #endregion
+        #region Approve handyman ask for vacation
+        [HttpPut("ApproveBlockDate")]
+        [EndpointDescription("AdminHandyMan/ApproveBlockDate")]
+        [EndpointSummary("Reject handyman request to get vacation")]
+        public IActionResult ApproveBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
+        {
+            var result = _blockDateService.ApproveBlockDate(HandymanId, Reason, StartDate, EndDate);
+            if (result)
+            {
+                return Ok(new { message = "The vacation has been approved successfully." });
+            }
+            else
+            {
+                return BadRequest(new { message = "Error occurred while approving vacation." });
+            }
+        }
+        #endregion
+
+        #region get all admin notification
+        [HttpGet("GetNotificationsOfAdmin/{AdminUserId}")]
+        [EndpointDescription("AdminHandyMan/GetNotificationsOfAdmin")]
+        [EndpointSummary("get all notification for the admin")]
+        public IActionResult GetNotifications(int AdminUserId)
+        {
+            //try
+            //{
+            //    var notifications = _unitOfWork.NotificationRepo
+            //        .GetAll(n => n.UserId == AdminUserId);
+
+            //    var orderedNotifications = notifications
+            //        .OrderByDescending(n => n.CreatedAt)
+            //        .Take(50)
+            //        .ToList();
+
+            //    return Ok(orderedNotifications);
+            //}
+            //catch (Exception ex)
+            //{
+            //    return StatusCode(500, new { message = "Error retrieving notifications", error = ex.Message });
+            //}
+            try
+            {
+                var notifications = _unitOfWork.NotificationRepo
+                    .GetAll(n => n.UserId == AdminUserId);
+
+                var orderedNotifications = notifications
+                    .OrderByDescending(n => n.CreatedAt)
+                    .Take(50)
+                    .Select(n => new NotificationDTO
+                    {
+                        Id = n.Id,
+                        UserId = n.UserId,
+                        Title = n.Title,
+                        Message = n.Message,
+                        Type = n.Type,
+                        IsRead = n.IsRead,
+                        IsActive = n.IsActive,
+                        CreatedAt = n.CreatedAt,
+                        ActionStatus = GetActionStatusForNotification(n)
+                    })
+                    .ToList();
+
+                return Ok(orderedNotifications);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Error retrieving notifications", error = ex.Message });
+            }
+        }
+        private string? GetActionStatusForNotification(Notification notification)
+        {
+            if (notification.Type.Contains(",") && notification.Type.Split(',').Length == 4)
+            {
+                var parts = notification.Type.Split(',');
+                if (parts.Length >= 4)
+                {
+                    var handymanId = int.Parse(parts[0]);
+                    var reason = parts[1];
+
+                    var blockDate = _unitOfWork.BlockDateRepo
+                        .GetAll(a => a.UserId == handymanId &&
+                                   a.Reason.ToLower().Trim() == reason.ToLower().Trim())
+                        .OrderByDescending(a => a.Id)
+                        .FirstOrDefault();
+
+                    if (blockDate != null)
+                    {
+                        return blockDate.Status?.ToLower() switch
+                        {
+                            "approved" => "approved",
+                            "denied" => "rejected",
+                            _ => null
+                        };
+                    }
+                }
+            }
+
+            return null;
+        }
+        #endregion
+        #endregion
     }
 }
 

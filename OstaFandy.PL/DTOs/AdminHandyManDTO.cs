@@ -72,4 +72,17 @@ namespace OstaFandy.PL.DTOs
 
         public int CompletedJobs { get; set; }
     }
+    public partial class NotificationDTO
+    {
+        public int Id { get; set; }
+        public int UserId { get; set; }
+        public string Title { get; set; }
+        public string Message { get; set; }
+        public string Type { get; set; }
+        public bool IsRead { get; set; }
+        public bool IsActive { get; set; }
+        public DateTime CreatedAt { get; set; }
+        public string? ActionStatus { get; set; }
+
+    }
 }
