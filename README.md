@@ -1,11 +1,22 @@
 <p align="center">
-  <img src="[https://your-logo-link.png](https://res.cloudinary.com/dy35wrc6z/image/upload/v1752076118/logo_nkqsnx.png)" alt="OstaFandy Logo" width="200"/>
+  <img src="https://res.cloudinary.com/dy35wrc6z/image/upload/v1752076118/logo_nkqsnx.png" alt="OstaFandy Logo" width="200"/>
 </p>
 
-# 🛠️ OstaFandy Backend
+<h1 align="center">🛠️ OstaFandy Backend</h1>
 
-This is the backend REST API for **OstaFandy**, a home-services booking platform.  
-It powers the system for customers to book services, and handles handyman onboarding, booking management, notifications, admin tools, wallet management, and intelligent customer support.
+<p align="center">
+  <b>The REST API for <i>OstaFandy</i> — a modern home-services booking platform</b><br/>
+  Handles customer bookings, handyman onboarding, real-time notifications, admin tools, wallet management & more.
+</p>
+
+<p align="center">
+  <a href="#-key-features">Features</a> •
+  <a href="#-project-structure">Structure</a> •
+  <a href="#-tech-stack">Tech Stack</a> •
+  <a href="#-getting-started">Getting Started</a> •
+  <a href="#️-database-schema">Database Schema</a> •
+  <a href="#-authors">Authors</a>
+</p>
 
 ---
 
@@ -14,18 +25,18 @@ It powers the system for customers to book services, and handles handyman onboar
 - 🔐 **JWT-based authentication & role-based authorization**
 - 👨‍🔧 **Customer & Handyman registration & login**
 - 👨‍💼 **Handyman onboarding** with admin-controlled approval & interview
-- 📝 **Service catalog** with categories, multi-service booking in the same category & optional inspection service
-- 📆 **Admin-managed handyman availability & vacations** (fixed shift: e.g., 10 AM–6 PM)
+- 📝 **Service catalog** with categories, multi-service booking & optional inspection
+- 📆 **Admin-managed handyman availability & vacations** (fixed shifts)
 - 🤖 **Automatic handyman assignment** based on location & availability
-- ✅ **Bookings are auto-confirmed** — no need for handyman to accept
+- ✅ **Auto-confirmed bookings** — no handyman approval required
 - 🪪 **Fixed salary system** for handymen (no commissions)
-- 🔔 **Real-time notifications** (SignalR)
-- 💬 **Real-time chat** with handyman (SignalR)
-- 📷 **Image upload** via Cloudinary
-- 💳 **Stripe integration** for secure post-service payments
-- 🧹 **Admin dashboard** for managing users, services, bookings, and handymen
-- 🤖 **Chatbot** to help customers choose the best service for their problem
+- 🔔 **Real-time notifications & chat** (via SignalR)
+- 📷 **Image uploads** (via Cloudinary)
+- 💳 **Stripe integration** for secure payments
+- 🧹 **Admin dashboard** for managing everything
+- 🤖 **AI-powered chatbot** to guide customers
 
+---
 
 ## 📂 Project Structure
 ```
@@ -149,4 +160,4 @@ Below is an example configuration structure (sensitive values should be replaced
 
 Below is the database schema diagram illustrating the main entities and their relationships:
 
-![OstaFandy Database Schema]([./docs/schema.png](https://res.cloudinary.com/dy35wrc6z/image/upload/v1752076110/ERD_xkpruu.png))
+![OstaFandy Database Schema](https://res.cloudinary.com/dy35wrc6z/image/upload/v1752076110/ERD_xkpruu.png)
