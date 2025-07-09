@@ -7,12 +7,9 @@ using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
-using OstaFandy.PL.Controllers;
 using OstaFandy.PL.DTOs;
-using OstaFandy.PL.General;
 using OstaFandy.PL.Hubs;
-using OstaFandy.PL.Repos.IRepos;
-using OstaFandy.PL.Repos;
+
 
 namespace OstaFandy.PL
 {
@@ -54,21 +51,17 @@ namespace OstaFandy.PL
             //roles
             builder.Services.AddScoped<IHandyManService, HandyManService>();
 
-            builder.Services.AddScoped<IUserService, UserService>();
-
-            builder.Services.AddScoped<IUserService,UserService>();
+            
             builder.Services.AddScoped<IClientService, ClientService>();
 
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
             builder.Services.AddScoped<IAnalyticsRepo, AnalyticsRepo>();
 
-            //builder.Services.AddScoped<IClientService, ClientService>();
 
             builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
 
             builder.Services.AddScoped<IOrderFeedbackService, OrderFeedbackService>();
 
-            builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
 
 
             builder.Services.AddScoped<IDashboardService, DashboardService>();
@@ -76,7 +69,6 @@ namespace OstaFandy.PL
 
 
                         
-            builder.Services.AddScoped<IDashboardService, DashboardService>();
             builder.Services.AddScoped<IClientPageService, ClientPageService>();
 
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
@@ -84,10 +76,8 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IHandymanJobsService, HandymanJobsService>();
 
 
-            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
 
-            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
 
             
             builder.Services.AddScoped<IReviewService, ReviewService>();
@@ -110,7 +100,6 @@ namespace OstaFandy.PL
             #region chat
             // chat services
             builder.Services.AddScoped<IChatService, ChatService>();
-            builder.Services.AddScoped<IHandymanJobsService, HandymanJobsService>();
             builder.Services.AddScoped<IAddressService, AddressService>();
 
  

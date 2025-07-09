@@ -24,9 +24,6 @@ namespace OstaFandy.DAL.Repos.IRepos
         public IQuoteRepo QuoteRepo{ get; }
         public IBlockDateRepo BlockDateRepo{ get; }
         public IBookingRepo BookingRepo { get; }
-
-        //public IReviewRepo ReviewRepo { get; }
-
         public IReviewRepo ReviewRepo { get; }
 
         public IJobAssignmentRepo JobAssignmentRepo { get; }

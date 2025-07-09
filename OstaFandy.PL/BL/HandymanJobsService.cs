@@ -28,7 +28,6 @@ namespace OstaFandy.PL.BL
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
-            _db = db;
 
         }
 
@@ -122,8 +121,6 @@ namespace OstaFandy.PL.BL
         #endregion
 
 
-
-       
         #region add quote
         public bool AddQuote(int jobId, decimal price, string Notes, int EstimatedMinutes)
         {
@@ -408,7 +405,7 @@ namespace OstaFandy.PL.BL
         #endregion
 
         #region get handyman quotes
-        public PaginationHelper<AllQuotes> GetHandymanQuotes(int handymanId, int pageNumber,int pageSize,string searchString)
+        public PaginationHelper<AllQuotes> GetHandymanQuotes(int handymanId, int pageNumber, int pageSize, string searchString)
         {
             if (handymanId <= 0)
             {
@@ -492,7 +489,7 @@ namespace OstaFandy.PL.BL
                     IsActive = true
                 };
                 var admins = _unitOfWork.UserRepo.GetAll(a => a.UserTypes.Any(u => u.Id == 2)).ToList();
-                foreach(var admin in admins)
+                foreach (var admin in admins)
                 {
                     var notification2 = new Notification
                     {
@@ -530,12 +527,12 @@ namespace OstaFandy.PL.BL
         {
             try
             {
-                if(handymanId == null)
+                if (handymanId == null)
                 {
                     _logger.LogError("handymanId does not exist");
                     return PaginationHelper<HandymanBlockDateDTO>.Create(new List<HandymanBlockDateDTO>(), pageNumber, pageSize, searchString);
                 }
-                var blockDates = _unitOfWork.BlockDateRepo.GetAll(a => a.UserId == handymanId,includeProperties: "User.User").AsQueryable();
+                var blockDates = _unitOfWork.BlockDateRepo.GetAll(a => a.UserId == handymanId, includeProperties: "User.User").AsQueryable();
                 if (Date != null)
                 {
                     blockDates = blockDates
