@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
+using System.Security.Claims;
 
 namespace OstaFandy.PL.BL
 {
@@ -20,19 +21,18 @@ namespace OstaFandy.PL.BL
         public async Task SendNotificationToHandyman(string handymanUserId, string message)
         {
             _logger.LogInformation($"Sending notification to handyman {handymanUserId}: {message}");
+            _logger.LogInformation($"Current connections: {string.Join(", ", NotificationHub.GetAllConnections().Select(kv => $"{kv.Key}={kv.Value}"))}");
 
-             if (NotificationHub.TryGetConnectionId(handymanUserId, out var connectionId))
+            if (NotificationHub.TryGetConnectionId(handymanUserId, out var connectionId))
             {
-                 await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotificationhandyman", message);
+                await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotificationhandyman", message);
                 _logger.LogInformation($"Notification sent to handyman {handymanUserId} via connection {connectionId}");
             }
             else
             {
-                // Fallback: Send to all clients with user ID filter (client-side filtering)
-                await _hubContext.Clients.All.SendAsync("ReceiveNotificationhandyman", handymanUserId, message);
-                _logger.LogWarning($"Handyman {handymanUserId} not found in active connections, sent to all clients");
+                _logger.LogWarning($"Handyman {handymanUserId} not found in active connections");
             }
-            }
+        }
 
         public async Task SendNotificationToAdmin(string AdminUserId, string message)
         {
@@ -44,7 +44,6 @@ namespace OstaFandy.PL.BL
             }
             else
             {
-                 await _hubContext.Clients.All.SendAsync("ReceiveNotificationAdmin", AdminUserId, message);
                 _logger.LogWarning($"amdin {AdminUserId} not found in active connections");
             }
         }
@@ -61,13 +60,23 @@ namespace OstaFandy.PL.BL
             }
             else
             {
-                // Fallback: Send to all clients with user ID filter
-                await _hubContext.Clients.All.SendAsync("ReceiveJobStatusUpdate", clientUserId, jobId, status);
                 _logger.LogWarning($"Client {clientUserId} not found in active connections, sent to all clients");
             }
         }
+        public async Task SendQuoteNotificationToClient(string clientUserId, int jobId, string message)
+        {
+            _logger.LogInformation($"Sending quote notification to client {clientUserId} for job {jobId}: {message}");
 
-
+            if (NotificationHub.TryGetConnectionId(clientUserId, out var connectionId))
+            {
+                await _hubContext.Clients.Client(connectionId).SendAsync("ReceiveNotificationClient", message);
+                _logger.LogInformation($"Quote notification sent to client {clientUserId} via connection {connectionId}");
+            }
+            else
+            {
+                _logger.LogWarning($"Client {clientUserId} not found in active connections for quote notification");
+            }
+        }
         public async Task SendQuoteResponse(int userId, int quoteId, string action)
         {
             var message = action.ToLower() == "accept"
@@ -83,7 +92,6 @@ namespace OstaFandy.PL.BL
             }
             else
             {
-                // Fallback: Send to all clients with user ID filter
                 await _hubContext.Clients.All.SendAsync("ReceiveQuoteResponse", userId, quoteId, action, message);
                 _logger.LogWarning($"User {userId} not found in active connections, sent to all clients");
             }

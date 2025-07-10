@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using System.Threading.Tasks;
 using AutoMapper;
 using CloudinaryDotNet.Actions;
 using OstaFandy.DAL.Entities;
@@ -151,7 +152,7 @@ namespace OstaFandy.PL.BL
         }
 
 
-        public bool AddBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
+        public async Task<bool> AddBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
         {
             try
             {
@@ -194,7 +195,7 @@ namespace OstaFandy.PL.BL
                     };
                     _unitOfWork.BlockDateRepo.Insert(x);
                     _unitOfWork.Save();
-                _notificationService.SendNotificationToHandyman(HandymanId.ToString(), $"you have days off start from {StartDate} to {EndDate}");
+               await _notificationService.SendNotificationToHandyman(HandymanId.ToString(), $"you have days off start from {StartDate} to {EndDate}");
                 var notification = new Notification
                 {
                     UserId = HandymanId,
@@ -215,56 +216,12 @@ namespace OstaFandy.PL.BL
                 _logger.LogError(ex, "error will adding block date");
                 throw;
             }
-            return true;
-        }
+         }
         private bool AreDatesOverlapping(DateOnly startDate1, DateOnly endDate1, DateOnly startDate2, DateOnly endDate2)
         {
             return !(endDate1 < startDate2 || endDate2 < startDate1);
         }
 
-        //public bool RejectBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
-        //{
-        //    try
-        //    {
-
-        //        var blockDate = _unitOfWork.BlockDateRepo
-        //            .GetAll(a => a.Reason.ToLower().Trim() == Reason.ToLower().Trim())
-        //            .OrderByDescending(a => a.Id)
-        //            .FirstOrDefault();
-
-        //        if (blockDate == null)
-        //        {
-        //            _logger.LogWarning("BlockDate not found for HandymanId: {HandymanId}, StartDate: {StartDate}, EndDate: {EndDate}, Reason: {Reason}", HandymanId, StartDate, EndDate, Reason);
-        //            return false;
-        //        }
-
-        //        blockDate.Status = "Denied";
-        //        blockDate.IsActive = false;
-        //        _unitOfWork.BlockDateRepo.Update(blockDate);
-
-        //        _notificationService.SendNotificationToHandyman(HandymanId.ToString(), $"your vacation request has been Denied which was asking for vacation from {StartDate} to {EndDate}");
-
-        //        var notification = new Notification
-        //        {
-        //            UserId = HandymanId,
-        //            Title = "Days OFF",
-        //            Message = $"you have days off start from {StartDate} to {EndDate}",
-        //            Type = "vacation",
-        //            IsRead = false,
-        //            IsActive = true
-        //        };
-
-        //        _unitOfWork.NotificationRepo.Insert(notification);
-        //        _unitOfWork.Save();
-
-        //        return true;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "error will adding block date");
-        //        throw;
-        //    }
-        //}
         public bool RejectBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
         {
             try
@@ -284,7 +241,6 @@ namespace OstaFandy.PL.BL
                 blockDate.IsActive = false;
                 _unitOfWork.BlockDateRepo.Update(blockDate);
 
-                // Update the original notification to mark as read
                 var originalNotification = _unitOfWork.NotificationRepo
                     .GetAll(n => n.Type.Contains($"{HandymanId},{Reason}"))
                     .FirstOrDefault();
@@ -317,54 +273,6 @@ namespace OstaFandy.PL.BL
         }
 
 
-        //public bool ApproveBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
-        //    {
-        //        try
-        //        {
-
-        //        //var start = StartDate.ToDateTime(TimeOnly.MinValue).Date;
-        //        //var end = EndDate.ToDateTime(TimeOnly.MinValue).Date;
-
-        //        //var blockDate = _unitOfWork.BlockDateRepo.FirstOrDefault(a =>
-        //        //    a.UserId == HandymanId &&
-        //        //    a.StartDate.Date == start &&
-        //        //    a.EndDate.Date == end &&
-        //        //    a.Reason.ToLower().Trim() == Reason.ToLower().Trim()
-        //        //);
-        //        var blockDate = _unitOfWork.BlockDateRepo
-        //       .GetAll(a => a.Reason.ToLower().Trim() == Reason.ToLower().Trim())
-        //       .OrderByDescending(a => a.Id)
-        //       .FirstOrDefault();
-
-        //        if (blockDate == null)
-        //        {
-        //            _logger.LogWarning("BlockDate not found for HandymanId: {HandymanId}, StartDate: {StartDate}, EndDate: {EndDate}, Reason: {Reason}", HandymanId, StartDate, EndDate, Reason);
-        //            return false;
-        //        }
-        //        blockDate.Status = "Approved";
-        //            blockDate.IsActive = true;
-        //            _unitOfWork.BlockDateRepo.Update(blockDate);
-        //            _notificationService.SendNotificationToHandyman(HandymanId.ToString(), $"your vacation request has been Approved which was asking for vacation from {StartDate} to {EndDate}");
-        //            var notification = new Notification
-        //            {
-        //                UserId = HandymanId,
-        //                Title = "Days OFF",
-        //                Message = $"you have days off start from {StartDate} to {EndDate}",
-        //                Type = "vacation",
-        //                IsRead = false,
-        //                IsActive = true
-        //            };
-        //            _unitOfWork.NotificationRepo.Insert(notification);
-        //            _unitOfWork.Save();
-        //            return true;
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            _logger.LogError(ex, "error will adding block date");
-        //            throw;
-        //        }
-        //        return true;
-        //    }
         public bool ApproveBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
         {
             try
@@ -384,7 +292,6 @@ namespace OstaFandy.PL.BL
                 blockDate.IsActive = true;
                 _unitOfWork.BlockDateRepo.Update(blockDate);
 
-                // Update the original notification to mark as read
                 var originalNotification = _unitOfWork.NotificationRepo
                     .GetAll(n => n.Type.Contains($"{HandymanId},{Reason}"))
                     .FirstOrDefault();

@@ -14,7 +14,7 @@ namespace OstaFandy.PL.BL.IBL
 
         public List<Category> GetAllCategory();
 
-        public bool AddBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate);
+            Task<bool> AddBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate);
         public bool RejectBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate);
         public bool ApproveBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate);
 
