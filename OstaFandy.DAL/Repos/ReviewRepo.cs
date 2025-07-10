@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos;
-using OstaFandy.PL.Repos.IRepos;
+using OstaFandy.DAL.Repos.IRepos;
 
-namespace OstaFandy.PL.Repos
+namespace OstaFandy.DAL.Repos
 {
     public class ReviewRepo : GeneralRepo<Review>, IReviewRepo
     {

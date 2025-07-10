@@ -2,7 +2,7 @@
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.DTOs;
-using OstaFandy.PL.Repos.IRepos;
+
 
 namespace OstaFandy.PL.BL
 {

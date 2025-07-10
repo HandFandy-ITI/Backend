@@ -7,8 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
-using OstaFandy.PL.Repos;
-using OstaFandy.PL.Repos.IRepos;
+
 
 namespace OstaFandy.DAL.Repos
 {
