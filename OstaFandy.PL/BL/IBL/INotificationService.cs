@@ -8,5 +8,6 @@ namespace OstaFandy.PL.BL.IBL
         Task SendNotificationToClient(string clientUserId, int jobId, string status);
         Task SendQuoteResponse(int userId, int quoteId, string action);
         Task SendNotificationToAdmin(string AdminUserId, string message);
+        Task SendQuoteNotificationToClient(string clientUserId, int jobId, string message);
     }
 }

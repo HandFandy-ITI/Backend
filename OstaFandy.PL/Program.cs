@@ -1,5 +1,6 @@
 
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OstaFandy.DAL.Entities;
@@ -9,6 +10,7 @@ using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 using OstaFandy.PL.Hubs;
+using System.Security.Claims;
 
 
 namespace OstaFandy.PL
@@ -130,6 +132,19 @@ namespace OstaFandy.PL
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key["Key"])),
                         ValidateIssuer = false,
                         ValidateAudience = false,
+                    };
+                    option.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
             builder.Services.AddAuthorization();
