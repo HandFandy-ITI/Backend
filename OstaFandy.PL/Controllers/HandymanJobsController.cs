@@ -12,6 +12,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OstaFandy.PL.Controllers
 {
+    
+
     [Route("api/[controller]")]
     [ApiController]
     public class HandymanJobsController : ControllerBase
@@ -104,6 +106,38 @@ namespace OstaFandy.PL.Controllers
         }
         #endregion
 
+
+        //[HttpPost("quote")]
+        //[EndpointDescription("HandymanJobs/AddQuote")]
+        //[EndpointSummary("Add a quote for a specific job. You must provide the jobId, price, and notes in the request body.")]
+        //public IActionResult AddQuote([FromBody] AddQuoteDTO model)
+        //{
+        //    if (model.Price <= 0 || string.IsNullOrEmpty(model.Notes))
+        //    {
+        //        return BadRequest(new { message = "Invalid quote data." });
+        //    }
+        //    try
+        //    {
+        //        var result = _handymanJobService.AddQuote(model.JobId, model.Price, model.Notes);
+        //        if (result)
+        //        {
+        //            return Ok(new { message = "Quote added successfully." });
+        //        }
+        //        else
+        //        {
+        //            return NotFound(new { message = $"Job with ID {model.JobId} not found." });
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "An error occurred while adding a quote.");
+        //        return StatusCode(500, new { message = "An error occurred while adding a quote.", error = ex.Message });
+        //    }
+
+
+
+        //}
+
         #region add quote
         [HttpPost("quote")]
         [EndpointDescription("HandymanJobs/AddQuote")]
@@ -157,6 +191,7 @@ namespace OstaFandy.PL.Controllers
 
 
         }
+
         #endregion
 
         #region process quote response, this when the client make accept or reject

@@ -17,6 +17,7 @@
         public int EstimatedMinutes { get; set; }
 
     }
+
     public class AllQuotes
     {
         public int JobAssignmentId { get; set; }
