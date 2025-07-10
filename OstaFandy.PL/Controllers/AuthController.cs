@@ -19,11 +19,18 @@ namespace OstaFandy.PL.Controllers
             _userService = userService;
         }
 
+        [HttpGet("verify-email")]
+        public async Task<IActionResult> VerifyEmail(int userId)
+        {
+            await _userService.VerifyEmail(userId);
+            return Redirect("http://localhost:4200/login?verified=true");
+        }
+
         [HttpPost("register-Customer")]
-        public IActionResult RegisterCustomer([FromBody] UserRegesterDto registerCustomerDto)
+        public async Task<IActionResult> RegisterCustomer([FromBody] UserRegesterDto registerCustomerDto)
         {
           
-            var res = _userService.RegisterUser(registerCustomerDto);
+            var res = await _userService.RegisterUser(registerCustomerDto);
             if (res == 0)
             {
                 return BadRequest(new ResponseDto<string>
@@ -57,13 +64,13 @@ namespace OstaFandy.PL.Controllers
             else if (res > 0)
             {
                 var user = _userService.GetById(res);
+                await _userService.SendEmailConfirmationAsync(user);
 
-                var token = _jwtService.GeneratedToken(user);
                 return Ok(new ResponseDto<string>
                 {
                     IsSuccess = true,
                     Message = "registered successfully",
-                    Data = token,
+                    Data = user.Email,
                     StatusCode = StatusCodes.Status201Created
                 });
             }
@@ -80,6 +87,31 @@ namespace OstaFandy.PL.Controllers
 
             }
         }
+
+        [HttpPost("resend-verification")]
+        public async Task<IActionResult> ResendVerificationEmail([FromBody] string userEmail)
+        {
+            var user = _userService.GetUserByEmail(userEmail);
+            if (user == null || user.EmailConfirmed)
+                return BadRequest(new ResponseDto<string>
+                {
+                    IsSuccess = false,
+                    Message = "User not found or already confirmed",
+                    Data = null,
+                    StatusCode = StatusCodes.Status400BadRequest
+                });
+
+            await _userService.SendEmailConfirmationAsync(user);
+
+            return Ok(new ResponseDto<string>
+            {
+                IsSuccess=true,
+                Message= "Verification email resent.",
+                Data=null,
+                StatusCode= StatusCodes.Status200OK
+            });
+        }
+
 
         [HttpPost("login")]
         public IActionResult Login([FromBody] UserLoginDto userLoginDto)
@@ -142,6 +174,16 @@ namespace OstaFandy.PL.Controllers
                         IsSuccess = false,
                         Message = "Your handyman application has been rejected.",
                         Data = "Rejected",
+                        StatusCode = StatusCodes.Status401Unauthorized
+                    });
+                }
+                else if (user.EmailConfirmed == false)
+                {
+                    return Unauthorized(new ResponseDto<string>
+                    {
+                        IsSuccess = false,
+                        Message = "Email is not verified. Please check your email and verify your account before logging in.",
+                        Data = null,
                         StatusCode = StatusCodes.Status401Unauthorized
                     });
                 }

@@ -36,6 +36,9 @@ public partial class User
 
     public bool IsActive { get; set; }
 
+    public bool EmailConfirmed { get; set; }
+
+
     [Column(TypeName = "datetime")]
     public DateTime CreatedAt { get; set; }
 

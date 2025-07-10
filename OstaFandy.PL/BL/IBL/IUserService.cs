@@ -7,7 +7,11 @@ namespace OstaFandy.PL.BL.IBL
     {
         public UserDto? GetUserByEmail(string Email);
 
-        public int RegisterUser(UserRegesterDto userDto);
+       Task VerifyEmail(int ID);
+
+        Task SendEmailConfirmationAsync(UserDto user);
+
+        Task<int> RegisterUser(UserRegesterDto userDto);
 
         public UserDto? GetById(int id);
 
