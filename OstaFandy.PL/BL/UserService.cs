@@ -1,5 +1,4 @@
-﻿using System.Net.Mail;
-using AutoMapper;
+﻿using AutoMapper;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL.IBL;
@@ -72,7 +71,24 @@ namespace OstaFandy.PL.BL
             }
         }
 
-        public int RegisterUser(UserRegesterDto userDto)
+        public async Task VerifyEmail(int ID)
+        {
+            try
+            {
+                var user=_unitOfWork.UserRepo.GetById(ID);
+                user.EmailConfirmed= true;
+
+                _unitOfWork.UserRepo.Update(user);
+                 await _unitOfWork.SaveAsync();
+
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine(ex);
+            }
+        }
+
+        public async Task<int> RegisterUser(UserRegesterDto userDto)
         {
             int res = 0;
             try
@@ -123,6 +139,40 @@ namespace OstaFandy.PL.BL
             }
             return res;
         }
+
+        public async Task SendEmailConfirmationAsync(UserDto user)
+        {
+            var verificationLink = $"https://localhost:7187/api/Auth/verify-email?userId={user.Id}";
+            var emailContent = new EmailContentDto
+            {
+                to = user.Email,
+                subject = "Please Verify Your Email",
+                body = $"""
+<div style="font-family: Arial, sans-serif; color: #333333; max-width:600px; margin:auto; padding:20px; background-color: #ffffff; border:1px solid #c0c0c0; border-radius:8px;">
+  <h1 style="color: #004e98; margin-bottom: 10px;">Welcome to Our Platform!</h1>
+
+  <p style="font-size:16px; line-height:1.5;">
+    Hello <b>{user.FirstName}</b>,
+  </p>
+
+  <p style="font-size:16px; line-height:1.5;">
+    Thank you for registering. Please click the link below to verify your email address and activate your account:
+  </p>
+
+  <p style="text-align:center; margin:20px 0;">
+    <a href="{verificationLink}" style="background-color:#004e98; color:#fff; padding:10px 20px; text-decoration:none; border-radius:4px;">Verify Email</a>
+  </p>
+
+  <p style="font-size:14px; color: #777777; margin-top: 30px; line-height:1.4;">
+    If you have any questions or didn’t register, please ignore this email.
+  </p>
+</div>
+"""
+            };
+
+            await _emailService.SendEmailAsync(emailContent);
+        }
+
 
         public UserDto? GetById(int id)
         {
