@@ -23,7 +23,7 @@ namespace OstaFandy.PL.Controllers
         public async Task<IActionResult> VerifyEmail(int userId)
         {
             await _userService.VerifyEmail(userId);
-            return Redirect("http://localhost:4200/login?verified=true");
+            return Redirect("https://ostafandy.runasp.net/login?verified=true");
         }
 
         [HttpPost("register-Customer")]
