@@ -15,10 +15,10 @@
         public string Img { get; set; }
         public int ExperienceYears { get; set; }
         public string Status { get; set; }
-        public string? DefaultAddressPlace { get; set; }
-        public string AddressType { get; set; }
-        public string? DefaultAddressCity { get; set; }
-        public decimal? DefaultAddressLatitude { get; set; }
-        public decimal? DefaultAddressLongitude { get; set; }
+        //public string? DefaultAddressPlace { get; set; }
+        //public string AddressType { get; set; }
+        //public string? DefaultAddressCity { get; set; }
+        //public decimal? DefaultAddressLatitude { get; set; }
+        //public decimal? DefaultAddressLongitude { get; set; }
     }
 }

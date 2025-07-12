@@ -532,5 +532,37 @@ namespace OstaFandy.PL.Controllers
             }
         }
         #endregion
+
+
+        #region mark all as a read
+        [HttpPost("MarkAllNotificationsAsRead/{handymanUserId}")]
+        [EndpointDescription("HandymanJobs/MarkAllNotificationsAsRead")]
+        [EndpointSummary("Mark all notifications as read for a specific handyman")]
+        public IActionResult MarkAllNotificationsAsRead(int handymanUserId)
+        {
+            try
+            {
+                var notifications = _unitOfWork.NotificationRepo.GetAll(n => n.UserId == handymanUserId && !n.IsRead);
+                if (!notifications.Any())
+                {
+                    return Ok(new { message = "No unread notifications found." });
+                }
+                foreach (var notification in notifications)
+                {
+                    notification.IsRead = true;
+                    notification.IsActive = false;
+                    _unitOfWork.NotificationRepo.Update(notification);
+                }
+                _unitOfWork.Save();
+                return Ok(new { message = "All notifications marked as read." });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while marking notifications as read for the handyman.");
+                return StatusCode(500, new { message = "An error occurred while marking notifications as read.", error = ex.Message });
+            }
+        }
+
+        #endregion
     }
 }

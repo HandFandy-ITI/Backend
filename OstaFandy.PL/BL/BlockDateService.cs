@@ -233,7 +233,7 @@ namespace OstaFandy.PL.BL
 
                 if (blockDate == null)
                 {
-                    _logger.LogWarning("BlockDate not found for HandymanId: {HandymanId}, StartDate: {StartDate}, EndDate: {EndDate}, Reason: {Reason}", HandymanId, StartDate, EndDate, Reason);
+                    _logger.LogWarning($"BlockDate not found for HandymanId: {HandymanId}, StartDate: {StartDate}, EndDate: {EndDate}, Reason: {Reason}", HandymanId, StartDate, EndDate, Reason);
                     return false;
                 }
 
@@ -284,7 +284,7 @@ namespace OstaFandy.PL.BL
 
                 if (blockDate == null)
                 {
-                    _logger.LogWarning("BlockDate not found for HandymanId: {HandymanId}, StartDate: {StartDate}, EndDate: {EndDate}, Reason: {Reason}", HandymanId, StartDate, EndDate, Reason);
+                    _logger.LogWarning($"BlockDate not found for HandymanId: {HandymanId}, StartDate: {StartDate}, EndDate: {EndDate}, Reason: {Reason}", HandymanId, StartDate, EndDate, Reason);
                     return false;
                 }
 

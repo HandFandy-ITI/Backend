@@ -30,7 +30,6 @@ namespace OstaFandy.PL.DTOs
 
     public class HandyManApplicationDto
     {
-        //uer part
         public string Email { get; set; } = null!;
 
         public string FirstName { get; set; } = null!;
@@ -43,8 +42,6 @@ namespace OstaFandy.PL.DTOs
 
         public string ConfirmPassword { get; set; } = null!;
 
-
-        //handyman part
         public int SpecializationId { get; set; }
 
         public decimal? Latitude { get; set; }
@@ -57,7 +54,6 @@ namespace OstaFandy.PL.DTOs
 
         public int ExperienceYears { get; set; }
 
-        //address part
         public string Address { get; set; }
         public string City { get; set; }
         public string AddressType { get; set; }
@@ -85,4 +81,9 @@ namespace OstaFandy.PL.DTOs
         public string? ActionStatus { get; set; }
 
     }
+    //public class  caterogyNamesWithId
+    //{
+    //    public int id { get; set; }
+    //    public string category { get; set; }
+    //}
 }

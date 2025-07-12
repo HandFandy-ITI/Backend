@@ -37,8 +37,7 @@ namespace OstaFandy.PL.BL
                         SearchString = searchString
                     };
                 }
-                // Apply search filter if provided
-                if (!string.IsNullOrEmpty(searchString))
+                 if (!string.IsNullOrEmpty(searchString))
                 {
                     reviews = reviews.Where(h =>
                         h.Booking.JobAssignment.Handyman.User.FirstName.Contains(searchString, StringComparison.OrdinalIgnoreCase) ||

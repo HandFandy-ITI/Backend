@@ -17,7 +17,6 @@ namespace OstaFandy.PL.BL
             _mapper = mapper;
         }
 
-        //get address by userId
         public List<AddressDTO> GetAddressByUserId(int userId) {
 
             try

@@ -127,13 +127,12 @@ namespace OstaFandy.PL.Controllers
                 });
             }
 
-            var validStatus = new[] { "Approved", "Rejected" };
+            var validStatus = new[] { "Active", "Inactive", "Approved", "Rejected" };
             if (!validStatus.Contains(statusUpdate.Status))
             {
-                return BadRequest(new { message = "Invalid status. Status must be either 'Approved' or 'Rejected'" });
+                return BadRequest(new { message = "Invalid status. Status must be either 'Active' or 'Inactive'" });
             }
 
-            // Fix: Use the correct instance field `_handymanService` instead of `HandyManService`
             var result = await _handymanService.UpdateHandymanStatusById(userId, statusUpdate.Status);
 
             if (!result)
@@ -245,7 +244,14 @@ namespace OstaFandy.PL.Controllers
                 {
                     return BadRequest("Route ID and payload UserId do not match.");
                 }
-
+                var validStatuses = new[] { "Active", "Inactive", "Approved", "Pending", "Rejected" };
+                if (!string.IsNullOrEmpty(editHandymanDto.Status) && !validStatuses.Contains(editHandymanDto.Status))
+                {
+                    return BadRequest(new
+                    {
+                        message = "Invalid status. Status must be one of: Active, Inactive, Approved, Pending, Rejected"
+                    });
+                }
                 var updatedHandyman = _handymanService.EditHandyman(editHandymanDto);
                 if (updatedHandyman == null)
                 {
@@ -269,7 +275,25 @@ namespace OstaFandy.PL.Controllers
             }
 
         }
-
+ 
+        [HttpGet("specializations")]
+        [EndpointDescription("api/AdminHandyMan/specializations")]
+        [EndpointSummary("get all handyman specializations")]
+        public IActionResult specializations()
+        {
+            try
+            {
+                var specializations = _unitOfWork.CategoryRepo.GetAll()
+                    .Select(c => new { Id = c.Id, category = c.Name })
+                    .ToList();
+                return Ok(specializations);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex, "error while getting all specialization");
+                return StatusCode(500, "an error occur while getting all specialization");
+            }
+        }
 
         [Route("Handyman-register")]
         [HttpPost]
@@ -549,6 +573,38 @@ namespace OstaFandy.PL.Controllers
         }
         #endregion
         #endregion
+
+        #region mark notification as read
+        [HttpPost("MarkNotificationAsRead/{userId}")]
+        [EndpointDescription("AdminHandyMan/MarkNotificationAsRead")]
+        [EndpointSummary("Mark a notification as read")]
+        public IActionResult MarkNotificationAsRead(int userId)
+        {
+            try
+            {
+                var notifications = _unitOfWork.NotificationRepo
+                .GetAll(n => n.UserId == userId && !n.IsRead);
+                if (notifications == null || !notifications.Any())
+                {
+                    return Ok(new { Message = "No unread notifications found for this user." });
+                }
+                foreach (var notification in notifications)
+                {
+                    notification.IsRead = true;
+                    notification.IsActive = false;
+                    _unitOfWork.NotificationRepo.Update(notification);
+                }
+                _unitOfWork.Save();
+                return Ok(new { Message = "All notifications marked as read." });
+            }catch(Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while marking notifications as read for user {UserId}", userId);
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Message = "An error occurred while marking notifications as read.", Error = ex.Message });
+            }
+        }
+        #endregion
+
+
     }
 }
 
