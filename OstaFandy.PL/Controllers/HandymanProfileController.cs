@@ -130,5 +130,43 @@ namespace OstaFandy.PL.Controllers
                 return StatusCode(500, "An error occurred while updating the profile photo.");
             }
         }
+
+        [HttpPatch("{userId}")]
+        public async Task<IActionResult> UpdateHandymanProfile(int userId, [FromBody] UpdateHandymanProfileDto updateDto)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogWarning($"Invalid model state for profile update for UserID {userId}.");
+                    return BadRequest(ModelState);
+                }
+
+                var updatedProfile = await _handyManService.UpdateHandymanProfile(userId, updateDto);
+
+                if (updatedProfile == null)
+                {
+                    _logger.LogWarning($"Handyman profile with UserID {userId} not found for update.");
+                    return NotFound($"Handyman profile with UserID {userId} not found.");
+                }
+
+                _logger.LogInformation($"Successfully updated handyman profile for UserID {userId}.");
+                return Ok(new
+                {
+                    message = "Profile updated successfully",
+                    data = updatedProfile
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, $"Invalid operation while updating profile for UserID {userId}.");
+                return BadRequest(new { error = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating handyman profile for UserID: {userId}");
+                return StatusCode(500, "An error occurred while updating the handyman profile.");
+            }
+        }
     }
 }

@@ -22,6 +22,7 @@ namespace OstaFandy.PL.BL.IBL{
         HandyManStatsDto? GetHandyManStats(int handymanId);
 
         Task<HandymanProfileDto> GetHandymanProfile(int userId);
+        Task<HandymanProfileDto> UpdateHandymanProfile(int userId, UpdateHandymanProfileDto updateDto);
         Task<bool> UpdateHandymanProfilePhoto(int userId, string profilePhotoUrl);
 
 

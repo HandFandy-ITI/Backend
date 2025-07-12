@@ -26,4 +26,21 @@ namespace OstaFandy.PL.DTOs
         [FromForm(Name = "ProfilePhoto")]
         public IFormFile ProfilePhoto { get; set; }
     }
+
+    public class UpdateHandymanProfileDto
+    {
+        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
+        public string? FirstName { get; set; }
+
+        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
+        public string? LastName { get; set; }
+
+        [Phone(ErrorMessage = "Invalid phone number format")]
+        [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters")]
+        public string? Phone { get; set; }
+
+        [Range(0, 50, ErrorMessage = "Experience years must be between 0 and 50")]
+        public int? ExperienceYears { get; set; }
+
+    }
 }
