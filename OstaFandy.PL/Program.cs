@@ -1,5 +1,6 @@
 
 using System.Text;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using OstaFandy.DAL.Entities;
@@ -7,10 +8,10 @@ using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
 using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
-using OstaFandy.PL.Controllers;
 using OstaFandy.PL.DTOs;
-using OstaFandy.PL.General;
 using OstaFandy.PL.Hubs;
+using System.Security.Claims;
+
 
 namespace OstaFandy.PL
 {
@@ -31,7 +32,7 @@ namespace OstaFandy.PL
             builder.Services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
-                    sqlOptions=> sqlOptions.UseNetTopologySuite()
+                    sqlOptions => sqlOptions.UseNetTopologySuite()
                     );
             });
 
@@ -51,28 +52,37 @@ namespace OstaFandy.PL
             builder.Services.AddScoped<IJWTService, JWTService>();
             //roles
             builder.Services.AddScoped<IHandyManService, HandyManService>();
-            builder.Services.AddScoped<IUserService,UserService>();
+
+            
             builder.Services.AddScoped<IClientService, ClientService>();
 
             builder.Services.AddScoped<IAnalyticsService, AnalyticsService>();
             builder.Services.AddScoped<IAnalyticsRepo, AnalyticsRepo>();
 
-            //builder.Services.AddScoped<IClientService, ClientService>();
 
             builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
 
             builder.Services.AddScoped<IOrderFeedbackService, OrderFeedbackService>();
 
-            builder.Services.AddScoped<IAutoBookingService, AutoBookingService>();
-                        
+
+
             builder.Services.AddScoped<IDashboardService, DashboardService>();
+
+
+
+                        
             builder.Services.AddScoped<IClientPageService, ClientPageService>();
 
             builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
  
             builder.Services.AddScoped<IHandymanJobsService, HandymanJobsService>();
 
-            builder.Services.AddScoped<ICloudinaryService, CloudinaryService>();
+
+
+
+
+            
+            builder.Services.AddScoped<IReviewService, ReviewService>();
 
 
             builder.Services.AddMemoryCache();
@@ -92,7 +102,6 @@ namespace OstaFandy.PL
             #region chat
             // chat services
             builder.Services.AddScoped<IChatService, ChatService>();
-            builder.Services.AddScoped<IHandymanJobsService, HandymanJobsService>();
             builder.Services.AddScoped<IAddressService, AddressService>();
 
  
@@ -106,7 +115,7 @@ namespace OstaFandy.PL
             #endregion
 
             #region service catalog
-           
+
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<IServiceService, ServiceService>();
             #endregion
@@ -123,6 +132,19 @@ namespace OstaFandy.PL
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(key["Key"])),
                         ValidateIssuer = false,
                         ValidateAudience = false,
+                    };
+                    option.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context =>
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/notificationHub"))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
             builder.Services.AddAuthorization();

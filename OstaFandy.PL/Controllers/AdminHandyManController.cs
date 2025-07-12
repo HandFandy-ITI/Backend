@@ -14,6 +14,7 @@ using OstaFandy.PL.BL;
 using OstaFandy.PL.BL.IBL;
 using OstaFandy.PL.DTOs;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Security.Claims;
 
 namespace OstaFandy.PL.Controllers
 {
@@ -422,9 +423,9 @@ namespace OstaFandy.PL.Controllers
         [HttpPost("AddBlockDate")]
         [EndpointDescription("AdminHandyMan/AddBlockDate")]
         [EndpointSummary("create dateblock for handyman")]
-        public IActionResult AddBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
+        public async Task<IActionResult> AddBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
         {
-            var result = _blockDateService.AddBlockDate(HandymanId, Reason, StartDate, EndDate);
+            var result = await _blockDateService.AddBlockDate(HandymanId, Reason, StartDate, EndDate);
             return result ? Ok("block date created") : BadRequest("failed to create blockdate handyman has a job at this date or user deleted from system");
         }
 

@@ -316,6 +316,7 @@ namespace OstaFandy.PL.BL
                 user.CreatedAt = DateTime.Now;
                 user.UpdatedAt = DateTime.Now;
                 user.UserTypes.Add(_unitOfWork.UserTypeRepo.FirstOrDefault(s => s.TypeName == General.UserType.Handyman));
+                user.EmailConfirmed = true;
                 _unitOfWork.UserRepo.Insert(user);
                 await _unitOfWork.SaveAsync();
 

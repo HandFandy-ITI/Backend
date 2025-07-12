@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos.IRepos;
@@ -11,6 +12,8 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace OstaFandy.PL.Controllers
 {
+    
+
     [Route("api/[controller]")]
     [ApiController]
     public class HandymanJobsController : ControllerBase
@@ -103,11 +106,43 @@ namespace OstaFandy.PL.Controllers
         }
         #endregion
 
+
+        //[HttpPost("quote")]
+        //[EndpointDescription("HandymanJobs/AddQuote")]
+        //[EndpointSummary("Add a quote for a specific job. You must provide the jobId, price, and notes in the request body.")]
+        //public IActionResult AddQuote([FromBody] AddQuoteDTO model)
+        //{
+        //    if (model.Price <= 0 || string.IsNullOrEmpty(model.Notes))
+        //    {
+        //        return BadRequest(new { message = "Invalid quote data." });
+        //    }
+        //    try
+        //    {
+        //        var result = _handymanJobService.AddQuote(model.JobId, model.Price, model.Notes);
+        //        if (result)
+        //        {
+        //            return Ok(new { message = "Quote added successfully." });
+        //        }
+        //        else
+        //        {
+        //            return NotFound(new { message = $"Job with ID {model.JobId} not found." });
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "An error occurred while adding a quote.");
+        //        return StatusCode(500, new { message = "An error occurred while adding a quote.", error = ex.Message });
+        //    }
+
+
+
+        //}
+
         #region add quote
         [HttpPost("quote")]
         [EndpointDescription("HandymanJobs/AddQuote")]
         [EndpointSummary("Add a quote for a specific job. You must provide the jobId, price, and notes in the request body.")]
-        public IActionResult AddQuote([FromBody] AddQuoteDTO model)
+        public async Task<IActionResult> AddQuote([FromBody] AddQuoteDTO model)
         {
             if (model.Price <= 0 || string.IsNullOrEmpty(model.Notes))
             {
@@ -115,7 +150,7 @@ namespace OstaFandy.PL.Controllers
             }
             try
             {
-                var result = _handymanJobService.AddQuote(model.JobId, model.Price, model.Notes, model.EstimatedMinutes);
+                var result =await _handymanJobService.AddQuote(model.JobId, model.Price, model.Notes, model.EstimatedMinutes);
                 if (result)
                 {
                     var userId = _unitOfWork.HandyManRepo.GetHandymanByJobId(model.JobId).UserId;
@@ -132,12 +167,13 @@ namespace OstaFandy.PL.Controllers
                         var client = _unitOfWork.ClientRepo.GetByIdSync(job.Booking.ClientId);
                         if (client?.UserId != null)
                         {
-                            _notificationService.SendQuoteResponse(userId, (int)quoteId, "Quote added successfully");
-                            _notificationService.SendNotificationToClient(
-                                client.UserId.ToString(),
-                                model.JobId,
-                                "New quote added by handyman"
-                            );
+                            await _notificationService.SendQuoteResponse(userId, (int)quoteId, "Quote added successfully");
+                            //await _notificationService.SendNotificationToClient(
+                            //    client.UserId.ToString(),
+                            //    model.JobId,
+                            //    "New quote added by handyman"
+                            //);
+                            await _notificationService.SendQuoteNotificationToClient(client.UserId.ToString(), model.JobId, "New quote added by handyman");
                         }
                     }
                     return Ok(new { message = "Quote added successfully." });
@@ -155,6 +191,7 @@ namespace OstaFandy.PL.Controllers
 
 
         }
+
         #endregion
 
         #region process quote response, this when the client make accept or reject
@@ -484,9 +521,9 @@ namespace OstaFandy.PL.Controllers
         [HttpPost("ApplyForBlockDate")]
         [EndpointDescription("AdminHandyMan/ApplyForBlockDate")]
         [EndpointSummary("ask for blockdate for handyman")]
-        public IActionResult ApplyForBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
+        public async Task<IActionResult> ApplyForBlockDate(int HandymanId, string Reason, DateOnly StartDate, DateOnly EndDate)
         {
-            var result = _handymanJobService.ApplyForBlockDate(HandymanId, Reason, StartDate, EndDate);
+            var result = await _handymanJobService.ApplyForBlockDate(HandymanId, Reason, StartDate, EndDate);
             return result ? Ok("Days OFF asked to create successfully") : BadRequest("failed to create blockdate handyman has a job at this date");
         }
 
