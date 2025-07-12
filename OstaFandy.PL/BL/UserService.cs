@@ -142,7 +142,7 @@ namespace OstaFandy.PL.BL
 
         public async Task SendEmailConfirmationAsync(UserDto user)
         {
-            var verificationLink = $"https://localhost:7187/api/Auth/verify-email?userId={user.Id}";
+            var verificationLink = $"https://ostafandy.runasp.net/api/Auth/verify-email?userId={user.Id}";
             var emailContent = new EmailContentDto
             {
                 to = user.Email,

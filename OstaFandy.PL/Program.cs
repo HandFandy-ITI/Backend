@@ -167,7 +167,8 @@ namespace OstaFandy.PL
                 options.AddPolicy(name: MyAllowSpecificOrigins,
                     policy =>
                     {
-                        policy.WithOrigins("http://localhost:4200")
+                        policy.WithOrigins("http://localhost:4200",
+        "https://frontend-ten-umber-99.vercel.app")
                               .AllowAnyHeader()
                               .AllowAnyMethod()
                         .AllowCredentials();

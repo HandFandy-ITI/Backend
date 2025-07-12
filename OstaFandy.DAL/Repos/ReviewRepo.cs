@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using OstaFandy.DAL.Entities;
 using OstaFandy.DAL.Repos;
 using OstaFandy.DAL.Repos.IRepos;
@@ -15,9 +16,16 @@ namespace OstaFandy.DAL.Repos
         }
         public decimal GetAverageRating()
         {
-            return _context.Reviews.Where(r => r.Rating > 0).Average(r => (decimal)r.Rating);
-        }
+            var ratings = _context.Reviews
+                         .Where(r => r.Rating > 0)
+                         .Select(r => (decimal)r.Rating) 
+                         .ToList();
 
+            if (!ratings.Any())
+                return 0;
+
+            return ratings.Average();
+        }
 
         public async Task<bool> IsBookingExistsAsync(int bookingId)
         {
@@ -34,7 +42,5 @@ namespace OstaFandy.DAL.Repos
             return await _context.Set<Review>()
                 .FirstOrDefaultAsync(r => r.BookingId == bookingId);
         }
-
-
     }
 }
