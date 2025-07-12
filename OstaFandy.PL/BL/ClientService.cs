@@ -17,12 +17,14 @@ namespace OstaFandy.PL.BL
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
         private readonly ILogger<ClientService> _logger;
+        private readonly IAddressService _addressService;
 
-        public ClientService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ClientService> logger)
+        public ClientService(IUnitOfWork unitOfWork, IMapper mapper, ILogger<ClientService> logger, IAddressService addressService)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _logger = logger;
+            _addressService = addressService;
         }
         public PaginationHelper<AdminDisplayClientDTO> GetAll(string searchString = "", int pageNumber = 1, int pageSize = 5, bool? isActive = null)
         {
@@ -281,6 +283,7 @@ namespace OstaFandy.PL.BL
                 throw new KeyNotFoundException($"User with ID {client.UserId} not found.");
             }
 
+            // Update user profile information
             if (!string.IsNullOrWhiteSpace(updateDto.FirstName))
                 user.FirstName = updateDto.FirstName;
 
@@ -300,16 +303,56 @@ namespace OstaFandy.PL.BL
                 user.Email = updateDto.Email;
             }
 
-            user.UpdatedAt = DateTime.UtcNow;
+            // Handle address update - using AddressService
+            if (!string.IsNullOrWhiteSpace(updateDto.Address1) || !string.IsNullOrWhiteSpace(updateDto.City) ||
+                updateDto.Latitude.HasValue || updateDto.Longitude.HasValue)
+            {
+                // Get all user addresses using AddressService
+                var userAddresses = _addressService.GetAddressByUserId(client.UserId);
 
+                if (userAddresses == null || !userAddresses.Any())
+                {
+                    throw new KeyNotFoundException("No addresses found for this client.");
+                }
+
+                // Find the default address
+                var defaultAddress = userAddresses.FirstOrDefault(a => a.IsDefault == true);
+
+                if (defaultAddress == null)
+                {
+                    throw new KeyNotFoundException("No default address found for this client.");
+                }
+
+                // Get the actual address entity to update
+                var addressEntity = _unitOfWork.AddressRepo.GetAll(a => a.Id == defaultAddress.Id).FirstOrDefault();
+
+                if (addressEntity == null)
+                {
+                    throw new KeyNotFoundException("Address entity not found.");
+                }
+
+                // Update address fields if provided
+                if (!string.IsNullOrWhiteSpace(updateDto.Address1))
+                    addressEntity.Address1 = updateDto.Address1;
+
+                if (!string.IsNullOrWhiteSpace(updateDto.City))
+                    addressEntity.City = updateDto.City;
+
+                if (updateDto.Latitude.HasValue)
+                    addressEntity.Latitude = updateDto.Latitude.Value;
+
+                if (updateDto.Longitude.HasValue)
+                    addressEntity.Longitude = updateDto.Longitude.Value;
+
+                _unitOfWork.AddressRepo.Update(addressEntity);
+            }
+
+            user.UpdatedAt = DateTime.UtcNow;
             _unitOfWork.UserRepo.Update(user);
             var result = await _unitOfWork.SaveAsync();
 
             return result > 0;
         }
-
-        
-
     }
     
 

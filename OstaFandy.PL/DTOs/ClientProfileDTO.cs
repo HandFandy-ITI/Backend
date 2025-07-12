@@ -117,20 +117,54 @@ namespace OstaFandy.PL.DTOs
 
     public class UpdateClientProfileDTO
     {
-        [StringLength(100, ErrorMessage = "First name cannot exceed 100 characters")]
+        [StringLength(50, ErrorMessage = "First name cannot exceed 50 characters")]
         public string? FirstName { get; set; }
 
-        [StringLength(100, ErrorMessage = "Last name cannot exceed 100 characters")]
+        [StringLength(50, ErrorMessage = "Last name cannot exceed 50 characters")]
         public string? LastName { get; set; }
-
-        [EmailAddress(ErrorMessage = "Invalid email format")]
-        [StringLength(255, ErrorMessage = "Email cannot exceed 255 characters")]
-        public string? Email { get; set; }
 
         [Phone(ErrorMessage = "Invalid phone number format")]
         [StringLength(20, ErrorMessage = "Phone number cannot exceed 20 characters")]
         public string? Phone { get; set; }
+
+        [EmailAddress(ErrorMessage = "Invalid email format")]
+        [StringLength(100, ErrorMessage = "Email cannot exceed 100 characters")]
+        public string? Email { get; set; }
+
+        // Address-related properties
+        [StringLength(200, ErrorMessage = "Address cannot exceed 200 characters")]
+        public string? Address1 { get; set; }
+
+        [StringLength(50, ErrorMessage = "City cannot exceed 50 characters")]
+        public string? City { get; set; }
+
+        [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90")]
+        public decimal? Latitude { get; set; }
+
+        [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180")]
+        public decimal? Longitude { get; set; }
+
     }
+
+    public class UpdateClientAddressDTO
+    {
+        [StringLength(500, ErrorMessage = "Address cannot exceed 500 characters")]
+        public string? Address1 { get; set; }
+
+        [StringLength(100, ErrorMessage = "City cannot exceed 100 characters")]
+        public string? City { get; set; }
+
+        [Range(-90, 90, ErrorMessage = "Latitude must be between -90 and 90")]
+        public decimal? Latitude { get; set; }
+
+        [Range(-180, 180, ErrorMessage = "Longitude must be between -180 and 180")]
+        public decimal? Longitude { get; set; }
+
+        [StringLength(50, ErrorMessage = "Address type cannot exceed 50 characters")]
+        public string? AddressType { get; set; }
+    }
+
+
 
 
 }

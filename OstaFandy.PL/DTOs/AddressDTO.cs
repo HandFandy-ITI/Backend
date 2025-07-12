@@ -26,4 +26,14 @@
         public bool IsActive { get; set; }
         public DateTime CreatedAt { get; set; }
     }
+
+    public class DeleteAddressDTO
+    {
+        public int UserId { get; set; }
+    }
+
+    public class SetDefaultAddressDTO
+    {
+        public int UserId { get; set; }
+    }
 }

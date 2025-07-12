@@ -469,6 +469,97 @@ namespace OstaFandy.PL.BL
             }
         }
 
+        public async Task<HandymanProfileDto> UpdateHandymanProfile(int userId, UpdateHandymanProfileDto updateDto)
+        {
+            using var transaction = await _unitOfWork.BeginTransactionasync();
+
+            try
+            {
+                var handyman = _unitOfWork.HandyManRepo.FirstOrDefault(
+                    h => h.UserId == userId,
+                    includeProperties: "User,Specialization,DefaultAddress"
+                );
+
+                if (handyman == null)
+                {
+                    _logger.LogWarning($"Handyman with UserId {userId} not found for profile update.");
+                    return null;
+                }
+
+                // Update User information
+                var user = handyman.User;
+                bool userUpdated = false;
+
+                if (!string.IsNullOrWhiteSpace(updateDto.FirstName) && updateDto.FirstName != user.FirstName)
+                {
+                    user.FirstName = updateDto.FirstName.Trim();
+                    userUpdated = true;
+                }
+
+                if (!string.IsNullOrWhiteSpace(updateDto.LastName) && updateDto.LastName != user.LastName)
+                {
+                    user.LastName = updateDto.LastName.Trim();
+                    userUpdated = true;
+                }
+
+                if (!string.IsNullOrWhiteSpace(updateDto.Phone) && updateDto.Phone != user.Phone)
+                {
+                    // Check if phone number already exists for another user
+                    var existingUserWithPhone = _unitOfWork.UserRepo.FirstOrDefault(u => u.Phone == updateDto.Phone && u.Id != userId);
+                    if (existingUserWithPhone != null)
+                    {
+                        throw new InvalidOperationException("Phone number already exists for another user");
+                    }
+
+                    user.Phone = updateDto.Phone.Trim();
+                    userUpdated = true;
+                }
+
+                if (userUpdated)
+                {
+                    user.UpdatedAt = DateTime.UtcNow;
+                    _unitOfWork.UserRepo.Update(user);
+                }
+
+                // Update Handyman information
+                bool handymanUpdated = false;
+
+                if (updateDto.ExperienceYears.HasValue && updateDto.ExperienceYears != handyman.ExperienceYears)
+                {
+                    handyman.ExperienceYears = updateDto.ExperienceYears.Value;
+                    handymanUpdated = true;
+                }
+
+                if (handymanUpdated)
+                {
+                    _unitOfWork.HandyManRepo.Update(handyman);
+                }
+
+                var result = await _unitOfWork.SaveAsync();
+
+                if (result > 0)
+                {
+                    await transaction.CommitAsync();
+                    _logger.LogInformation($"Successfully updated handyman profile for UserId {userId}.");
+
+                    // Return updated profile
+                    return await GetHandymanProfile(userId);
+                }
+                else
+                {
+                    await transaction.RollbackAsync();
+                    _logger.LogWarning($"No changes made to handyman profile for UserId {userId}.");
+                    return await GetHandymanProfile(userId);
+                }
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, $"Error updating handyman profile for UserId: {userId}");
+                throw;
+            }
+        }
+
     }
 }
 

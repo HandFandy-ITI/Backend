@@ -392,7 +392,12 @@ namespace OstaFandy.PL.Mapper
             CreateMap<UpdateClientProfileDTO, User>()
                  .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
+            CreateMap<UpdateClientProfileDTO, User>()
+                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
+            CreateMap<UpdateClientAddressDTO, Address>()
+                .ForMember(dest => dest.Address1, opt => opt.MapFrom(src => src.Address1))
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
             #endregion
 
 
