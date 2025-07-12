@@ -77,6 +77,8 @@ namespace OstaFandy.PL.Mapper
                 });
 
             CreateMap<EditHandymanDTO, Handyman>()
+                .ForMember(dest => dest.User, opt => opt.Ignore())
+                .ForMember(dest => dest.Status, opt => opt.Ignore())
                 .AfterMap((src, dest) =>
                 {
                     if (dest.User != null)
@@ -85,10 +87,12 @@ namespace OstaFandy.PL.Mapper
                         dest.User.LastName = src.LastName;
                         dest.User.Email = src.Email;
                         dest.User.Phone = src.Phone;
+                        dest.User.IsActive = src.Status == "Active";
                         dest.User.UpdatedAt = DateTime.UtcNow;
                     }
                 })
-                .ReverseMap();
+                .ReverseMap()
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.User.IsActive ? "Active" : "Inactive"));
             #endregion
 
             #region Client

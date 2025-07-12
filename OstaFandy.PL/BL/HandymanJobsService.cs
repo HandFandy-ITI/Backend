@@ -492,12 +492,13 @@ namespace OstaFandy.PL.BL
                     {
                         UserId = admin.Id,
                         Title = "Days OFF",
-                        Message = $"handyman with Id {HandymanId} and name {handyman.User.FirstName}{handyman.User.LastName} in specialize {handyman.Specialization.Name} applied for a days OFF from {StartDate} to {EndDate} the reason is {Reason}waiting for your approve",
+                        Message = $"handyman with Id {HandymanId} and name {handyman.User.FirstName}{handyman.User.LastName} has applied for a days OFF from {StartDate} to {EndDate} the reason is {Reason}waiting for your approve",
                         Type = $"{HandymanId},{Reason},{StartDate},{EndDate}",
                         IsRead = false,
                         IsActive = true
                     };
-                   await _notificationService.SendNotificationToAdmin(admin.Id.ToString(), $"Handyman with Id {HandymanId} and name {handyman.User.FirstName} {handyman.User.LastName} in specialization {handyman.Specialization.Name} has applied for a days OFF from {StartDate} to {EndDate} waiting for you to approve");
+                    //in specialization { handyman.Specialization.Name ?? ""}
+                    await _notificationService.SendNotificationToAdmin(admin.Id.ToString(), $"Handyman with Id {HandymanId} and name {handyman.User.FirstName} {handyman.User.LastName ?? ""} has applied for a days OFF from {StartDate} to {EndDate} waiting for you to approve");
                     _unitOfWork.NotificationRepo.Insert(notification2);
                 }
                 _unitOfWork.NotificationRepo.Insert(notification);

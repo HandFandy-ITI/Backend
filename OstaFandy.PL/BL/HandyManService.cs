@@ -236,6 +236,15 @@ namespace OstaFandy.PL.BL
         {
             try
             {
+                var jobAssignments = _unitOfWork.JobAssignmentRepo.FirstOrDefault(
+                            j => j.Handyman.UserId == id &&
+                                 j.Booking.PreferredDate > DateTime.Now,
+                            includeProperties: "Handyman,Booking,Quotes");
+                if (jobAssignments != null)
+                {
+                    _logger.LogWarning("Cannot delete handyman with active job assignments or bookings.");
+                    return false;
+                }
                 bool success = _unitOfWork.UserRepo.SoftDelete(id);
                 return success;
             }
@@ -261,22 +270,24 @@ namespace OstaFandy.PL.BL
                     );
                     return null;
                 }
-                _mapper.Map(editHandymanDto, handyman);
-                if (!string.IsNullOrEmpty(editHandymanDto.DefaultAddressPlace))
-                {
-                    var defaultAddress = new Address
-                    {
-                        UserId = handyman.UserId,
-                        Address1 = editHandymanDto.DefaultAddressPlace,
-                        City = editHandymanDto.DefaultAddressCity,
-                        Latitude = editHandymanDto.DefaultAddressLatitude ?? 0,
-                        Longitude = editHandymanDto.DefaultAddressLongitude ?? 0,
-                        AddressType = editHandymanDto.AddressType
-                    };
 
-                    _unitOfWork.AddressRepo.Insert(defaultAddress);
-                    _unitOfWork.Save();
-                }
+                _mapper.Map(editHandymanDto, handyman);
+
+                //if (!string.IsNullOrEmpty(editHandymanDto.DefaultAddressPlace))
+                //{
+                //    var defaultAddress = new Address
+                //    {
+                //        UserId = handyman.UserId,
+                //        Address1 = editHandymanDto.DefaultAddressPlace,
+                //        City = editHandymanDto.DefaultAddressCity,
+                //        Latitude = editHandymanDto.DefaultAddressLatitude ?? 0,
+                //        Longitude = editHandymanDto.DefaultAddressLongitude ?? 0,
+                //        AddressType = editHandymanDto.AddressType
+                //    };
+
+                //    _unitOfWork.AddressRepo.Insert(defaultAddress);
+                //    _unitOfWork.Save();
+                //}
                 _unitOfWork.HandyManRepo.Update(handyman);
                 _unitOfWork.Save();
 
@@ -293,6 +304,115 @@ namespace OstaFandy.PL.BL
 
             }
         }
+        //public AdminHandyManDTO EditHandyman(EditHandymanDTO editHandymanDto)
+        //{
+        //    try
+        //    {
+        //        var handyman = _unitOfWork.HandyManRepo.FirstOrDefault(
+        //            a => a.UserId == editHandymanDto.UserId,
+        //            includeProperties: "User,Specialization,DefaultAddress,BlockDates,JobAssignments"
+        //        );
+
+        //        if (handyman == null)
+        //        {
+        //            _logger.LogWarning("EditHandyman: no handyman found with UserId {UserId}", editHandymanDto.UserId);
+        //            return null;
+        //        }
+
+        //        // Update HandyMan properties (excluding Status)
+        //        if (!string.IsNullOrEmpty(editHandymanDto.NationalId))
+        //            handyman.NationalId = editHandymanDto.NationalId;
+
+        //        if (!string.IsNullOrEmpty(editHandymanDto.NationalIdImg))
+        //            handyman.NationalIdImg = editHandymanDto.NationalIdImg;
+
+        //        if (!string.IsNullOrEmpty(editHandymanDto.Img))
+        //            handyman.Img = editHandymanDto.Img;
+
+        //        if (editHandymanDto.ExperienceYears != null)
+        //            handyman.ExperienceYears = editHandymanDto.ExperienceYears;
+
+        //        if (editHandymanDto.SpecializationId != null)
+        //            handyman.SpecializationId = editHandymanDto.SpecializationId;
+
+        //        if (editHandymanDto.Latitude.HasValue)
+        //            handyman.Latitude = editHandymanDto.Latitude.Value;
+
+        //        if (editHandymanDto.Longitude.HasValue)
+        //            handyman.Longitude = editHandymanDto.Longitude.Value;
+
+
+
+        //        handyman.UpdatedAt = DateTime.UtcNow;
+
+        //        // Update User properties ONLY (including IsActive based on Status)
+        //        if (handyman.User != null)
+        //        {
+        //            if (!string.IsNullOrEmpty(editHandymanDto.FirstName))
+        //                handyman.User.FirstName = editHandymanDto.FirstName;
+
+        //            if (!string.IsNullOrEmpty(editHandymanDto.LastName))
+        //                handyman.User.LastName = editHandymanDto.LastName;
+
+        //            if (!string.IsNullOrEmpty(editHandymanDto.Email))
+        //                handyman.User.Email = editHandymanDto.Email;
+
+        //            if (!string.IsNullOrEmpty(editHandymanDto.Phone))
+        //                handyman.User.Phone = editHandymanDto.Phone;
+
+        //            // Map Status to User.IsActive ONLY
+        //            if (!string.IsNullOrEmpty(editHandymanDto.Status))
+        //            {
+        //                handyman.User.IsActive = editHandymanDto.Status == "Active";
+        //            }
+
+        //            handyman.User.UpdatedAt = DateTime.UtcNow;
+        //        }
+
+        //        // DO NOT update handyman.Status - leave it as is
+
+        //        _unitOfWork.HandyManRepo.Update(handyman);
+        //        _unitOfWork.Save();
+
+        //        // Manual mapping for return DTO
+        //        return MapToAdminHandyManDTO(handyman);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred while editing handyman with UserId {UserId}", editHandymanDto.UserId);
+        //        throw;
+        //    }
+        //}
+
+        //// Helper method to manually map to AdminHandyManDTO
+        //private AdminHandyManDTO MapToAdminHandyManDTO(Handyman handyman)
+        //{
+        //    return new AdminHandyManDTO
+        //    {
+        //        UserId = handyman.UserId,
+        //        FirstName = handyman.User?.FirstName,
+        //        LastName = handyman.User?.LastName,
+        //        Email = handyman.User?.Email,
+        //        Phone = handyman.User?.Phone,
+        //        IsActive = handyman.User?.IsActive ?? false,
+
+        //        // Show Status based on User.IsActive, NOT HandyMan.Status
+        //        Status = handyman.User?.IsActive == true ? "Active" : "Inactive",
+
+        //        NationalId = handyman.NationalId,
+        //        NationalIdImg = handyman.NationalIdImg,
+        //        Img = handyman.Img,
+        //        ExperienceYears = handyman.ExperienceYears,
+        //        //SpecializationId = handyman.SpecializationId,
+        //        //SpecializationName = handyman.Specialization?.Name,
+        //        Latitude = handyman.Latitude,
+        //        Longitude = handyman.Longitude,
+        //        //DefaultAddressId = handyman.DefaultAddressId,
+        //        CreatedAt = handyman.CreatedAt,
+        //        UpdatedAt = handyman.UpdatedAt
+        //        // Add other properties as needed
+        //    };
+        //}
 
         public async Task<int> CreateHandyManApplicationAsync(HandyManApplicationDto handymandto)
         {
