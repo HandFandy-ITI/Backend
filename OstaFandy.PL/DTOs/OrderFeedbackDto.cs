@@ -13,17 +13,4 @@
         public DateTime ReviewCreatedAt { get; set; }
         public decimal TotalAmount { get; set; }
     }
-
-    //public class FeedbackStatisticsDto
-    //{
-    //    public int TotalReviews { get; set; }
-    //    public double AverageRating { get; set; }
-    //    public List<RatingDistributionDto> RatingDistribution { get; set; }
-    //}
-
-    //public class RatingDistributionDto
-    //{
-    //    public int Rating { get; set; }
-    //    public int Count { get; set; }
-//}
 }
