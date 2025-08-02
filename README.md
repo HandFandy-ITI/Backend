@@ -1,10 +1,10 @@
 <p align="right">
-  <img src="https://res.cloudinary.com/dy35wrc6z/image/upload/v1752076118/logo_nkqsnx.png" alt="OstaFandy Logo" width="100"/>
+  <img src="https://res.cloudinary.com/dy35wrc6z/image/upload/v1754171064/logo_cps8ky.png" alt="OstaFandy Logo" width="100"/>
 </p>
 
-# 🛠️ OstaFandy Backend
+# 🛠️ HandFandy Backend
 
-This is the backend REST API for **OstaFandy**, a home-services booking platform.  
+This is the backend REST API for **HandFandy**, a home-services booking platform.  
 It powers the system for customers to book services, and handles handyman onboarding, booking management, notifications, admin tools, wallet management, and intelligent customer support.
 
 ---
@@ -149,6 +149,6 @@ Below is an example configuration structure (sensitive values should be replaced
 
 Below is the database schema diagram illustrating the main entities and their relationships:
 
-![OstaFandy Database Schema](https://res.cloudinary.com/dy35wrc6z/image/upload/v1752076110/ERD_xkpruu.png)
+![HandFandy Database Schema](https://res.cloudinary.com/dy35wrc6z/image/upload/v1752076110/ERD_xkpruu.png)
 
 
